@@ -1,0 +1,23 @@
+# while True:
+#     rand = random.randint(0, 10)
+#     message, address = server_socket.recvfrom(1024)
+#     message = message.upper()
+#     if rand >= 4:
+#         server_socket.sendto(message, address)
+# ---------------------------------------------------------------
+# clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# clientSocket.settimeout(1.0)
+# message = b'test'
+
+# addr = ("127.0.0.1", 51200)
+# start = time.time()
+# clientSocket.sendto(message, addr)
+
+# try:
+#     data, server = clientSocket.recvfrom(1024)
+#     end = time.time()
+#     elapsed = end - start
+#     print(f'{data} {elapsed}')
+# except socket.timeout:
+#     print('REQUEST TIMED OUT')
+# clientSocket.close()
