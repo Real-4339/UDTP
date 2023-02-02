@@ -28,9 +28,19 @@ def get_port () -> int:
 
 # Basic information
 PORT = get_port()
+clients = []
+# aliases = []
 
 # Creating socket
 my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 my_socket.bind(('', PORT)) # TODO: add ip handling
+my_socket.listen()
+
+# Function checking new connection
+def check_for_connection():
+    client, address = my_socket.accept()
+    clients.append(client)
+    print(f'Connected with {str(address)}')
+    client.send('You are now connected.'.encode('utf-8'))
 
 # Main loop

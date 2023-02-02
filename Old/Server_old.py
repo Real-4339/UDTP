@@ -47,3 +47,6 @@ def server_listenig():
 if __name__ == '__main__':
     server_listenig()
     
+
+# data, addr = my_socket.recvfrom(1024)
+# print(f'From {addr[0]}:{addr[1]}: {data.decode()}')
