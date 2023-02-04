@@ -10,26 +10,29 @@ import socket
 import asyncio
 
 
-def connected (socket) -> bool: # TODO: recreate using my Packet class and Libuv
+def connected(socket) -> bool:  # TODO: recreate using my Packet class and Libuv
     try:
         socket.send(b'')
     except socket.error:
         return False
     return True
 
-def existing_socket (socket) -> bool:
+
+def existing_socket(socket) -> bool:
     try:
         socket.getsockname()
     except socket.error:
         return False
     return True
 
-def get_port () -> int:
+
+def get_port() -> int:
     port = int(input('Enter port: '))
     if port < 49152 or port > 65535:
         print('Error: port must be in range 49152 - 65535')
         return get_port()
     return port
+
 
 # Basic information
 PORT = get_port()
@@ -38,18 +41,23 @@ clients = []
 
 # Creating socket
 my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-my_socket.bind(('', PORT)) # TODO: add ip handling
-my_socket.listen()
+my_socket.bind(('', PORT))  # TODO: add ip handling
+
 my_socket.setblocking(False)
 
+
 # Function checking new connection # Useless
-def check_for_connection(): # TODO: recreate using my Packet class and Libuv
+
+
+def check_for_connection():  # TODO: recreate using my Packet class and Libuv
     client, address = my_socket.accept()
     clients.append(client)
     print(f'Connected with {str(address)}')
     client.send('You are now connected.'.encode('utf-8'))
 
 # Console loop, use yeild
+
+
 async def console():
     while True:
         cmd = input('Enter command: ')
@@ -65,11 +73,14 @@ async def console():
             print('Unknown command')
 
 # Listener loop, use yeild
+
+
 async def listener():
     loop = asyncio.get_event_loop()
     while True:
         try:
-            data, addr = await loop.sock_recvfrom(my_socket, 1024) # TODO: 1024 is buffer size
+            # TODO: 1024 is buffer size
+            data, addr = await loop.sock_recvfrom(my_socket, 1024)
             print(data, data.decode())
             yield data
             # print(f'From {addr[0]}:{addr[1]}: {data.decode()}')
@@ -93,7 +104,7 @@ async def V8():
             )
             task2.cancel()
             break
-        
+
         if task1.result() == 'new_connection':
             ip, port = input('Enter ip: '), input('Enter port: ')
             main_loop.sock_connect(my_socket, (ip, port))
@@ -102,7 +113,6 @@ async def V8():
 
         if task2.result() != None:
             print(task2.result())
-
 
 
 if __name__ == '__main__':
