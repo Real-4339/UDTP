@@ -7,7 +7,6 @@ socker.recv() returns data
 """
 
 import socket
-import threading
 import asyncio
 
 
@@ -41,6 +40,7 @@ clients = []
 my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 my_socket.bind(('', PORT)) # TODO: add ip handling
 my_socket.listen()
+my_socket.setblocking(False)
 
 # Function checking new connection # Useless
 def check_for_connection(): # TODO: recreate using my Packet class and Libuv
@@ -50,34 +50,60 @@ def check_for_connection(): # TODO: recreate using my Packet class and Libuv
     client.send('You are now connected.'.encode('utf-8'))
 
 # Console loop, use yeild
-def console():
+async def console():
     while True:
         cmd = input('Enter command: ')
         if cmd == 'exit':
-            my_socket.close()
-            exit()
+            yield False
         elif cmd == 'list':
             print(clients)
         elif cmd == 'help':
             print('Commands: list, exit')
+        elif cmd == 'new_connection':
+            yield 'new_connection'
         else:
             print('Unknown command')
 
 # Listener loop, use yeild
-def listener():
+async def listener():
+    loop = asyncio.get_event_loop()
     while True:
         try:
-            data, addr = my_socket.recvfrom(1024) # TODO: 1024 is buffer size
+            data, addr = await loop.sock_recvfrom(my_socket, 1024) # TODO: 1024 is buffer size
             print(data, data.decode())
+            yield data
             # print(f'From {addr[0]}:{addr[1]}: {data.decode()}')
         except:
-            pass
+            yield None
 
 # Main loop
-def V8():
+async def V8():
     print('Server started')
+    main_loop = asyncio.get_event_loop()
     while True:
-        ...
+        task1 = main_loop.create_task(console())
+        task2 = main_loop.create_task(listener())
+
+        await task1
+        await task2
+
+        if task1.result() == False:
+            task1.cancel(
+                my_socket.close()
+            )
+            task2.cancel()
+            break
+        
+        if task1.result() == 'new_connection':
+            ip, port = input('Enter ip: '), input('Enter port: ')
+            main_loop.sock_connect(my_socket, (ip, port))
+            print('Connected')
+            main_loop.sock_sendall(my_socket, b'Hello, world!')
+
+        if task2.result() != None:
+            print(task2.result())
+
+
 
 if __name__ == '__main__':
-    V8()
+    asyncio.run(V8())
