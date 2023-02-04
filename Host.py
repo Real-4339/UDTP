@@ -8,6 +8,7 @@ socker.recv() returns data
 
 import socket
 import asyncio
+from Packet import Packet
 
 
 def connected(socket) -> bool:  # TODO: recreate using my Packet class and Libuv
@@ -81,9 +82,9 @@ async def listener():
         try:
             # TODO: 1024 is buffer size
             data, addr = await loop.sock_recvfrom(my_socket, 1024)
-            print(data, data.decode())
-            yield data
-            # print(f'From {addr[0]}:{addr[1]}: {data.decode()}')
+            packet = Packet(data, addr)
+            yield packet.create_packet(data, addr)
+            
         except:
             yield None
 
