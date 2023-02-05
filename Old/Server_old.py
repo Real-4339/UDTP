@@ -10,9 +10,6 @@ Alse that first thread need to send configs between server and clients and read 
 
 """
 import socket
-import sys
-import threading
-import time
 
 COUNT_OF_CLIENTS_TO_CONNECT = 2
 

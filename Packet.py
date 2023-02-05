@@ -6,7 +6,8 @@ class Packet:
         self.address = address
 
     def create_packet(self, data: bytes, address: tuple):
-        return Packet(data, address)
+        print("in create_packet", "data:", data, "address:", address)
+        return
     
     def undo_packet(self, packet: 'Packet'):
         return packet.data, packet.address
