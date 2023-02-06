@@ -1,5 +1,4 @@
 
-
 class Packet:
     def __init__(self, data: bytes, address: tuple):
         self.data = data
@@ -10,7 +9,7 @@ class Packet:
         return
     
     def undo_packet(self, packet: 'Packet'):
-        return packet.data, packet.address
+        ...
 
     def __str__(self):
         return f'Packet(data={self.data}, address={self.address})'

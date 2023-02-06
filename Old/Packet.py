@@ -1,13 +1,14 @@
 
 class Packet:
-    def __init__(self, data: bytes, address: tuple):
+    def __init__(self, data: bytes, flags: list):
+        self.flags = flags
+        self.seq = 0
+        self.crc_16 = 0
         self.data = data
-        self.address = address
+        return self.create_packet(self, data, flags)
 
-    def create_packet(self, data: bytes, address: tuple):
-        print(getHex(data))
-        print(gethex(data))
-        print("in create_packet,", "data:", data, ", address:", address)
+    def create_packet(self, data: bytes, flags: list):
+        
         return
     
     def undo_packet(self, packet: 'Packet'):
