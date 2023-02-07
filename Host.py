@@ -47,18 +47,7 @@ my_socket.bind(('', PORT))  # TODO: add ip handling
 my_socket.setblocking(False)
 
 
-# Function checking new connection # Useless
-
-
-def check_for_connection():  # TODO: recreate using my Packet class and Libuv
-    client, address = my_socket.accept()
-    clients.append(client)
-    print(f'Connected with {str(address)}')
-    client.send('You are now connected.'.encode('utf-8'))
-
 # Console loop, use yeild
-
-
 async def console():
     while True:
         cmd = input('Enter command: ')
@@ -74,8 +63,6 @@ async def console():
             print('Unknown command')
 
 # Listener loop, use yeild
-
-
 async def listener():
     loop = asyncio.get_event_loop()
     while True:

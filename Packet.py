@@ -1,11 +1,29 @@
+from enum import IntFlag
+
+
+class Flags(IntFlag):
+    SYN   = 0b00000001
+    ACK   = 0b00000010 
+    SACK  = 0b00000100 
+    MSG   = 0b00001000
+    INIT  = 0b00010000
+    KA    = 0b00100000
+    WM    = 0b01000000
+    FIN   = 0b10000000
+
 
 class Packet:
-    def __init__(self, data: bytes, address: tuple):
-        self.data = data
-        self.address = address
+    def __init__(self, data: bytes, flags: Flags = None, seq: int = 0):
+        if flags is None:
+            flags = Flags(0)
+        self.__seq = seq
+        self.__crc_16 = 0
+        self.__flags = flags
+        self.__data = data
+        return self.create_packet(data, flags, seq)
 
-    def create_packet(self, data: bytes, address: tuple):
-        print("in create_packet", "data:", data, "address:", address)
+    def create_packet(self, data: bytes, flags: Flags = None, seq: int = 0):
+        
         return
     
     def undo_packet(self, packet: 'Packet'):
