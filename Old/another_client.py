@@ -12,7 +12,7 @@ for pings in range(10):
     start = time.time()
     client_socket.sendto(message, addr)
     try:
-        data, server = client_socket.recvfrom(1024)
+        data, server = client_socket.recvfrom(1)
         end = time.time()
         elapsed = end - start
         data = data.decode("utf-8")
