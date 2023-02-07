@@ -75,6 +75,17 @@ async def listener():
         except:
             yield None
 
+# Creating new connection
+def create_connection():
+    print('Creating new connection')
+    ip = input('Enter ip: ')
+    port = input('Enter port: ')
+    payload = input('Enter payload: ')
+    packet = Packet(payload.encode(), ['0', '1', '', '', '', '', '', '1'])
+    
+
+
+
 # Main loop
 async def V8():
     print('Server started')
@@ -91,15 +102,14 @@ async def V8():
                 my_socket.close()
             )
             task2.cancel()
+            main_loop.stop()
+            main_loop.close()
             break
 
         if task1.result() == 'new_connection':
-            ip, port = input('Enter ip: '), input('Enter port: ')
-            main_loop.sock_connect(my_socket, (ip, port))
-            print('Connected')
-            main_loop.sock_sendall(my_socket, b'Hello, world!')
+            create_connection()
 
-        if task2.result() != None:
+        if task2.result() != None: # TODO: add packet handling
             print(task2.result())
 
 

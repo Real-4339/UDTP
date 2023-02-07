@@ -8,7 +8,7 @@ class Packet:
         return self.create_packet(self, data, flags)
 
     def create_packet(self, data: bytes, flags: list):
-        
+        header = bytearray()
         return
     
     def undo_packet(self, packet: 'Packet'):

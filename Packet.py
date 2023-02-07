@@ -1,15 +1,16 @@
+import struct
 from enum import IntFlag
 
 
 class Flags(IntFlag):
-    SYN   = 0b00000001
-    ACK   = 0b00000010 
-    SACK  = 0b00000100 
-    MSG   = 0b00001000
-    INIT  = 0b00010000
-    KA    = 0b00100000
-    WM    = 0b01000000
-    FIN   = 0b10000000
+    SYN  = 0b00000001 # 1
+    ACK  = 0b00000010 # 2
+    SACK = 0b00000100 # 4
+    MSG  = 0b00001000 # 8
+    INIT = 0b00010000 # 16
+    KA   = 0b00100000 # 32
+    WM   = 0b01000000 # 64
+    FIN  = 0b10000000 # 128
 
 
 class Packet:
@@ -23,7 +24,7 @@ class Packet:
         return self.create_packet(data, flags, seq)
 
     def create_packet(self, data: bytes, flags: Flags = None, seq: int = 0):
-        
+        upd_header = struct.pack('!BB', flags)
         return
     
     def undo_packet(self, packet: 'Packet'):
