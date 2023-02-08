@@ -52,6 +52,22 @@ class Packet:
     def header(self) -> bytes:
         return self.__header
 
+    @property
+    def flags(self) -> Flags:
+        return self.__flags
+    
+    @flags.setter
+    def flags(self, flags: Flags):
+        self.__flags = flags
+
+    @property
+    def crc_16(self) -> int:
+        return self.__crc_16
+
+    @crc_16.setter
+    def crc_16(self, crc_16: int):
+        self.__crc_16 = crc_16
+
     def __str__(self):
         return f'Packet(data={self.data}, address={self.address})'
 
