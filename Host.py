@@ -8,7 +8,8 @@ socker.recv() returns data
 
 import socket
 import asyncio
-from Packet import Packet
+from sys import stdin, stdout
+from Packet import Packet, Flags
 
 
 def connected(socket) -> bool:  # TODO: recreate using my Packet class and Libuv
@@ -18,7 +19,6 @@ def connected(socket) -> bool:  # TODO: recreate using my Packet class and Libuv
         return False
     return True
 
-
 def existing_socket(socket) -> bool:
     try:
         socket.getsockname()
@@ -26,19 +26,25 @@ def existing_socket(socket) -> bool:
         return False
     return True
 
-
-def get_port() -> int:
-    port = int(input('Enter port: '))
+async def get_port() -> int:
+    port = int(await ainput('Enter port: '))
     if port < 49152 or port > 65535:
         print('Error: port must be in range 49152 - 65535')
         return get_port()
     return port
+
+async def ainput(string: str) -> str:
+    await asyncio.get_event_loop().run_in_executor(
+            None, lambda s=string: stdout.write(s+' '))
+    return await asyncio.get_event_loop().run_in_executor(
+            None, stdin.readline)
 
 
 # Basic information
 PORT = get_port()
 clients = []
 # aliases = []
+
 
 # Creating socket
 my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -50,7 +56,7 @@ my_socket.setblocking(False)
 # Console loop, use yeild
 async def console():
     while True:
-        cmd = input('Enter command: ')
+        cmd = await ainput('Enter command: ')
         if cmd == 'exit':
             yield False
         elif cmd == 'list':
@@ -76,13 +82,20 @@ async def listener():
             yield None
 
 # Creating new connection
-def create_connection():
+async def create_connection():
     print('Creating new connection')
-    ip = input('Enter ip: ')
-    port = input('Enter port: ')
-    payload = input('Enter payload: ')
-    packet = Packet(payload.encode(), ['0', '1', '', '', '', '', '', '1'])
-    
+    ip = await ainput('Enter ip: ')
+    port = await ainput('Enter port: ')
+    try:
+        payload = await ainput('Enter payload, max is 1488, min is 1: ')
+        if payload < 1 or payload > 1488:
+            print('Error: payload must be in range 1 - 1488, im taking you back, you moron')
+            raise ValueError
+    except ValueError:
+        return False
+    packet = Packet(payload.encode(), Flags(65))
+    f_packet = packet.header + packet.data
+    return f_packet
 
 
 
@@ -97,7 +110,7 @@ async def V8():
         await task1
         await task2
 
-        if task1.result() == False:
+        if task1.result() == False: # end of program
             task1.cancel(
                 my_socket.close()
             )
@@ -107,7 +120,11 @@ async def V8():
             break
 
         if task1.result() == 'new_connection':
-            create_connection()
+            packet = await create_connection()
+            if packet != False:
+                ...
+            else:
+                ...
 
         if task2.result() != None: # TODO: add packet handling
             print(task2.result())
