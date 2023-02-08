@@ -21,14 +21,36 @@ class Packet:
         self.__crc_16 = 0
         self.__flags = flags
         self.__data = data
-        return self.create_packet(data, flags, seq)
+        self.__header = self.create_packet()
 
-    def create_packet(self, data: bytes, flags: Flags = None, seq: int = 0):
-        upd_header = struct.pack('!BB', flags)
-        return
+    # protected
+    def _create_header(self, flags: Flags = None, seq: int = 0):
+        upd_header = struct.pack('!BB', flags, seq)
+        return upd_header
     
-    def undo_packet(self, packet: 'Packet'):
+    # protected
+    def _undo_packet(self, packet: 'Packet'):
         ...
+
+    @property
+    def data(self) -> bytes:
+        return self.__data
+    
+    @data.setter
+    def data(self, data: bytes):
+        self.__data = data
+
+    @property
+    def seq(self) -> int:
+        return self.__seq
+    
+    @seq.setter
+    def seq(self, seq: int):
+        self.__seq = seq
+
+    @property
+    def header(self) -> bytes:
+        return self.__header
 
     def __str__(self):
         return f'Packet(data={self.data}, address={self.address})'
