@@ -5,14 +5,15 @@
 socket.recvfrom() returns a tuple (data, address)
 socker.recv() returns data
 Need to create an event class or idk events that will handle 3-way handshake with timer and two more events for sending and receiving data
+TODO: im using my_socket, but i need to use asyncio socket
 """
 
-from collections import defaultdict
-import socket
-import asyncio
 from sys import stdin, stdout
 from Packet import Packet, Flags
 from Event import Event
+from collections import defaultdict
+import socket
+import asyncio
 
 
 def connected(socket) -> bool:  # TODO: recreate using my Packet class and Libuv
@@ -107,32 +108,31 @@ async def console_handler(string: str):
         if packet == False:
             return None
         else:
-            clients.append(packet.address)
-            event = Event(who = packet.address, function = "connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
+            event = Event(who = packet.address, function = "create_connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
             events[event.who].append(event)
-            return
+            return event
     
 
 # Listener handler
 async def listener_handler(packet: Packet or None):
     if packet == None:
-        return
+        return None
     if packet.address not in clients:
         clients.append(packet.address)
-        event = Event(who = packet.address, function = "connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
+        event = Event(who = packet.address, function = "receive_connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
         events[event.who].append(event)
-        return
+        return event
     else:
         if events[packet.address] is []: # check what client wants
             return # i will handle this later
         
         if packet.flags & Flags(1) == Flags(1) or packet.flags == Flags(Flags.SACK): # event.connection
-            return # i will handle this later 
+            return # i will handle this later
         
-        if packet.data == b'': # event.send_data
+        if packet.data == b'': # event.send_data (me sending data to client)
             return
         
-        if packet.flags == Flags(0): # event.receive_data
+        if packet.flags == Flags(0): # event.receive_data (client sending data to me)
             return # i will handle this later
 
     
