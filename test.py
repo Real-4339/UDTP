@@ -2,6 +2,27 @@ import sys
 from Packet import Flags
 
 
+class Test:
+    def __init__(self, function) -> None:
+        self.__function = function
+        self.__call__()
+
+    def prints(self):
+        print('Hello Worllld!')
+
+    def __call__(self):
+        if self.__function == 'prints':
+            self.prints()
+        else:
+            print("else")
+            self.__function()
+
+
+
+test = Test(lambda: print('He@llo World'))
+
+test = Test("prints")
+
 flags = Flags(
     Flags.SYN | Flags.WM | Flags.ACK
 )
