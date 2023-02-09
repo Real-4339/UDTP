@@ -14,11 +14,12 @@ class Flags(IntFlag):
 
 
 class Packet:
-    def __init__(self, data: bytes, flags: Flags = None, seq: int = 0):
+    def __init__(self, data: bytes, flags: Flags = None, seq: int = 0, address: tuple = None):
         if flags is None:
             flags = Flags(0)
         self.__seq = seq
         self.__crc_16 = 0
+        self.__address = address
         self.__flags = flags
         self.__data = data
         self.__header = self.create_packet()
@@ -67,6 +68,14 @@ class Packet:
     @crc_16.setter
     def crc_16(self, crc_16: int):
         self.__crc_16 = crc_16
+
+    @property
+    def address(self) -> tuple:
+        return self.__address
+    
+    @address.setter
+    def address(self, address: tuple):
+        self.__address = address
 
     def __str__(self):
         return f'Packet(data={self.data}, address={self.address})'

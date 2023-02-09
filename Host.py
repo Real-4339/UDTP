@@ -69,14 +69,14 @@ async def console():
             print('Unknown command')
 
 # Listener loop, use yeild
-async def listener():
+async def listener(my_payload = 256):
     loop = asyncio.get_event_loop()
     while True:
         try:
             # TODO: 1024 is buffer size
-            data, addr = await loop.sock_recvfrom(my_socket, 1024)
-            packet = Packet(data, addr)
-            yield packet.create_packet(data, addr)
+            data, addr = await loop.sock_recvfrom(my_socket, my_payload)
+            packet = Packet(data = data, address = addr)
+            yield packet
             
         except:
             yield None
@@ -93,11 +93,24 @@ async def create_connection():
             raise ValueError
     except ValueError:
         return False
-    packet = Packet(payload.encode(), Flags(65))
+    packet = Packet(data = payload.encode(), flags = Flags(65), address=(ip, port))
     f_packet = packet.header + packet.data
     return f_packet
 
+# Console handler
+async def console_handler(string: str):
+    if string == "new_connection":
+        packet = await create_connection()
+        if packet == False:
+            ...
+        else:
+            my_socket.sendto(packet, packet.address)
+        return
+    
 
+# Listener handler
+async def listener_handler(packet: Packet or None):
+    ...
 
 # Main loop
 async def V8():
@@ -110,24 +123,23 @@ async def V8():
         await task1
         await task2
 
-        if task1.result() == False: # end of program
+        if task1.result() == False: # end of program, i need to send FIN packet to all clients, rebuild this
             task1.cancel(
-                my_socket.close()
+                    my_socket.close()
             )
             task2.cancel()
             main_loop.stop()
             main_loop.close()
             break
 
-        if task1.result() == 'new_connection':
-            packet = await create_connection()
-            if packet != False:
-                ...
-            else:
-                ...
-
-        if task2.result() != None: # TODO: add packet handling
-            print(task2.result())
+        if task1.result():
+            cons_handler = main_loop.create_task(console_handler(task1.result()))
+            await cons_handler
+            cons_handler.cancel()
+        if task2.result():
+            list_handler = main_loop.create_task(listener_handler(task2.result()))
+            await list_handler
+            list_handler.cancel()
 
 
 if __name__ == '__main__':
