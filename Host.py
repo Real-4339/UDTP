@@ -4,6 +4,7 @@
 """
 socket.recvfrom() returns a tuple (data, address)
 socker.recv() returns data
+Need to create an event class or idk events that will handle 3-way handshake with timer and two more events for sending and receiving data
 """
 
 import socket
@@ -69,11 +70,10 @@ async def console():
             print('Unknown command')
 
 # Listener loop, use yeild
-async def listener(my_payload = 256):
+async def listener(my_payload = 1488):
     loop = asyncio.get_event_loop()
     while True:
         try:
-            # TODO: 1024 is buffer size
             data, addr = await loop.sock_recvfrom(my_socket, my_payload)
             packet = Packet(data = data, address = addr)
             yield packet
@@ -93,9 +93,10 @@ async def create_connection():
             raise ValueError
     except ValueError:
         return False
-    packet = Packet(data = payload.encode(), flags = Flags(65), address=(ip, port))
+    packet = Packet(data = payload.encode(), flags = Flags(65), address=(ip, port), seq= 256)
     f_packet = packet.header + packet.data
     return f_packet
+
 
 # Console handler
 async def console_handler(string: str):
@@ -110,7 +111,34 @@ async def console_handler(string: str):
 
 # Listener handler
 async def listener_handler(packet: Packet or None):
-    ...
+    if packet == None:
+        ...
+    else:
+        # 3-way handshake:
+        if packet.address in clients and (packet.flags == Flags(1)):
+            answer = Packet(data = b'Ty sho durak?', flags = Flags(Flags.ACK))
+            my_socket.sendto(answer.header + answer.data, packet.address)
+        else:
+            if packet.flags == (Flags.SYN | Flags.ACK): # if he doesnt hear me, i will send him again
+                if clients.count(packet.address) > 1:
+                    answer = Packet(data = b'', flags = Flags(Flags.SYN | Flags.ACK), seq = packet.seq)
+                    my_socket.sendto(packet.header + packet.data, packet.address)
+                    return
+                else:
+                    answer = Packet(data = b'', flags = Flags(Flags.ACK), seq = packet.seq)
+                    my_socket.sendto(answer.header + answer.data, packet.address)
+                    return
+        
+            if packet.flags & Flags.SYN == Flags.SYN: # first handshake
+                clients.append(packet.address)
+                if clients.count(packet.address) > 1:
+                    answer = Packet(data = b'', flags = Flags(Flags.SYN | Flags.ACK), seq = packet.seq)
+                    my_socket.sendto(packet.header + packet.data, packet.address)
+                    return
+                else:
+                    answer = Packet(data = b'', flags = Flags(Flags.ACK), seq = packet.seq)
+                    my_socket.sendto(answer.header + answer.data, packet.address)
+                    return
 
 # Main loop
 async def V8():
@@ -132,11 +160,11 @@ async def V8():
             main_loop.close()
             break
 
-        if task1.result():
+        if task1.result(): # two events, one for handshake, second for sending data
             cons_handler = main_loop.create_task(console_handler(task1.result()))
             await cons_handler
             cons_handler.cancel()
-        if task2.result():
+        if task2.result(): # only one event, for receiving data
             list_handler = main_loop.create_task(listener_handler(task2.result()))
             await list_handler
             list_handler.cancel()

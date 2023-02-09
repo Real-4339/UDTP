@@ -2,9 +2,19 @@ import sys
 from Packet import Flags
 
 
-flags = Flags(61)
+flags = Flags(
+    Flags.SYN | Flags.WM | Flags.ACK
+)
+
+if flags & (Flags.SYN | Flags.WM) == (Flags.SYN | Flags.WM):
+    print('SYN and WM and more if there are any')
+
+if flags == (Flags.SYN | Flags.WM):
+    print('SYN and WM only')
+
 print(flags.__sizeof__())
 print(sys.getsizeof(flags))
+
 
 print(flags.to_bytes(1, 'big'))
 print(flags.to_bytes(1, 'big').__sizeof__())
