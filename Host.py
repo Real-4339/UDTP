@@ -11,6 +11,7 @@ import socket
 import asyncio
 from sys import stdin, stdout
 from Packet import Packet, Flags
+from Event import Event
 
 
 def connected(socket) -> bool:  # TODO: recreate using my Packet class and Libuv
@@ -44,7 +45,7 @@ async def ainput(string: str) -> str:
 # Basic information
 PORT = get_port()
 clients = []
-# aliases = []
+events = []
 
 
 # Creating socket
@@ -103,14 +104,15 @@ async def console_handler(string: str):
     if string == "new_connection":
         packet = await create_connection()
         if packet == False:
-            ...
+            return None
         else:
-            my_socket.sendto(packet, packet.address)
-        return
+            # event = Event(who = packet.address, function = "connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
+            # events.append(event)
+            return
     
 
 # Listener handler
-async def listener_handler(packet: Packet or None):
+async def listener_handler(packet: Packet or None): # TODO: sepatate func into two, one for flags, second for sending data
     if packet == None:
         ...
     else:
@@ -141,7 +143,7 @@ async def listener_handler(packet: Packet or None):
                     return
 
 # Main loop
-async def V8():
+async def V6(): # Not as fast as V8 and not as good, but it works
     print('Server started')
     main_loop = asyncio.get_event_loop()
     while True:
@@ -171,4 +173,7 @@ async def V8():
 
 
 if __name__ == '__main__':
-    asyncio.run(V8())
+    asyncio.run(V6())
+
+
+# my_socket.sendto(packet, packet.address)
