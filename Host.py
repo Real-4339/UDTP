@@ -7,6 +7,7 @@ socker.recv() returns data
 Need to create an event class or idk events that will handle 3-way handshake with timer and two more events for sending and receiving data
 """
 
+from collections import defaultdict
 import socket
 import asyncio
 from sys import stdin, stdout
@@ -45,7 +46,7 @@ async def ainput(string: str) -> str:
 # Basic information
 PORT = get_port()
 clients = []
-events = []
+events: dict[tuple[int, int], list[Event]] = defaultdict(list)
 
 
 # Creating socket
@@ -64,8 +65,8 @@ async def console():
         elif cmd == 'list':
             print(clients)
         elif cmd == 'help':
-            print('Commands: list, exit')
-        elif cmd == 'new_connection':
+            print('Commands: list, exit, new connection')
+        elif cmd == 'new connection' or cmd == '3':
             yield 'new_connection'
         else:
             print('Unknown command')
@@ -106,41 +107,35 @@ async def console_handler(string: str):
         if packet == False:
             return None
         else:
-            # event = Event(who = packet.address, function = "connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
-            # events.append(event)
+            clients.append(packet.address)
+            event = Event(who = packet.address, function = "connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
+            events[event.who].append(event)
             return
     
 
 # Listener handler
-async def listener_handler(packet: Packet or None): # TODO: sepatate func into two, one for flags, second for sending data
+async def listener_handler(packet: Packet or None):
     if packet == None:
-        ...
+        return
+    if packet.address not in clients:
+        clients.append(packet.address)
+        event = Event(who = packet.address, function = "connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
+        events[event.who].append(event)
+        return
     else:
-        # 3-way handshake:
-        if packet.address in clients and (packet.flags == Flags(1)):
-            answer = Packet(data = b'Ty sho durak?', flags = Flags(Flags.ACK))
-            my_socket.sendto(answer.header + answer.data, packet.address)
-        else:
-            if packet.flags == (Flags.SYN | Flags.ACK): # if he doesnt hear me, i will send him again
-                if clients.count(packet.address) > 1:
-                    answer = Packet(data = b'', flags = Flags(Flags.SYN | Flags.ACK), seq = packet.seq)
-                    my_socket.sendto(packet.header + packet.data, packet.address)
-                    return
-                else:
-                    answer = Packet(data = b'', flags = Flags(Flags.ACK), seq = packet.seq)
-                    my_socket.sendto(answer.header + answer.data, packet.address)
-                    return
+        if events[packet.address] is []: # check what client wants
+            return # i will handle this later
         
-            if packet.flags & Flags.SYN == Flags.SYN: # first handshake
-                clients.append(packet.address)
-                if clients.count(packet.address) > 1:
-                    answer = Packet(data = b'', flags = Flags(Flags.SYN | Flags.ACK), seq = packet.seq)
-                    my_socket.sendto(packet.header + packet.data, packet.address)
-                    return
-                else:
-                    answer = Packet(data = b'', flags = Flags(Flags.ACK), seq = packet.seq)
-                    my_socket.sendto(answer.header + answer.data, packet.address)
-                    return
+        if packet.flags & Flags(1) == Flags(1) or packet.flags == Flags(Flags.SACK): # event.connection
+            return # i will handle this later 
+        
+        if packet.data == b'': # event.send_data
+            return
+        
+        if packet.flags == Flags(0): # event.receive_data
+            return # i will handle this later
+
+    
 
 # Main loop
 async def V6(): # Not as fast as V8 and not as good, but it works
@@ -177,3 +172,31 @@ if __name__ == '__main__':
 
 
 # my_socket.sendto(packet, packet.address)
+# if packet == None:
+#         ...
+#     else:
+#         # 3-way handshake:
+#         if packet.address in clients and (packet.flags == Flags(1)):
+#             answer = Packet(data = b'Ty sho durak?', flags = Flags(Flags.ACK))
+#             my_socket.sendto(answer.header + answer.data, packet.address)
+#         else:
+#             if packet.flags == (Flags.SYN | Flags.ACK): # if he doesnt hear me, i will send him again
+#                 if clients.count(packet.address) > 1:
+#                     answer = Packet(data = b'', flags = Flags(Flags.SYN | Flags.ACK), seq = packet.seq)
+#                     my_socket.sendto(packet.header + packet.data, packet.address)
+#                     return
+#                 else:
+#                     answer = Packet(data = b'', flags = Flags(Flags.ACK), seq = packet.seq)
+#                     my_socket.sendto(answer.header + answer.data, packet.address)
+#                     return
+        
+#             if packet.flags & Flags.SYN == Flags.SYN: # first handshake
+#                 clients.append(packet.address)
+#                 if clients.count(packet.address) > 1:
+#                     answer = Packet(data = b'', flags = Flags(Flags.SYN | Flags.ACK), seq = packet.seq)
+#                     my_socket.sendto(packet.header + packet.data, packet.address)
+#                     return
+#                 else:
+#                     answer = Packet(data = b'', flags = Flags(Flags.ACK), seq = packet.seq)
+#                     my_socket.sendto(answer.header + answer.data, packet.address)
+#                     return
