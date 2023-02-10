@@ -48,6 +48,8 @@ class Event:
     async def __async__new_connection(self):
         # Setting up timer 
         start = time.time()
+        tick = 0.1
+        stages = ['syn', 'syn_ack', 'sack']
         end_time = int(start) + int(self.__timeout)
         # Decide who is initiator
         if self.__who == self.__packet.address_to:
@@ -68,6 +70,7 @@ class Event:
                 # Get packet from array_of_packets
                 if self.__array_of_packets:
                     packet = self.__array_of_packets.pop(0)
+                    stages.pop(0)
                     if packet.flags == Flags(Flags.SYN | Flags.ACK): # TODO: seq matters, but ill handle it later
                         # Send SACK
                         self.__packet = Packet.pack(data = b'Connection established', flags = Flags(Flags.SACK), seq = packet.seq, address_from = packet.address_to, address_to = packet.address_from)
@@ -76,6 +79,10 @@ class Event:
                         self.loop.stop()
                         self.loop.close()
                         break
+                else:
+                    if stages[0] == 'syn':
+                        self.loop.sock_sendto(self.__socket, self.__packet.create_packet(), self.__packet.address_to)
+
                 
         else: # Client sends SYN
             # Send SYN | ACK
