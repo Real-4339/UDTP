@@ -48,7 +48,7 @@ class Event:
     async def __async__new_connection(self):
         # Timer starts
         start = time.time()
-        end_time = start + int(self.__timeout)
+        end_time = int(start) + int(self.__timeout)
         # Analyze packet, who initiated connection
         
         

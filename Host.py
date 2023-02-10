@@ -101,9 +101,8 @@ async def create_connection():
             raise ValueError
     except ValueError:
         return False
-    packet = Packet.pack(data = payload.encode(), flags = Flags(65), seq = 256, address_to=(ip, port), address_from=(IP, PORT))  
-    f_packet = packet.header + packet.data
-    return f_packet
+    packet = Packet.pack(data = payload.encode(), flags = Flags(65), seq = 256, address_to=(ip, port), address_from=(IP, PORT))
+    return packet
 
 
 # Console handler
@@ -111,15 +110,15 @@ async def console_handler(string: str):
     if string == "new_connection":
         packet = await create_connection()
         if packet == False:
-            return None # TODO: do i need to handle this?
+            return None
         else:
-            event = Event(who = packet.address, function = "connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
+            event = Event(who = packet.address_to, function = "connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
             events[event.who].append(event)
-            return event
-    
+            return 
+
 
 # Listener handler
-async def listener_handler(packet: Packet or None):
+async def listener_handler(packet: Packet or None): # TODO: events !!!
     if packet == None:
         return None
     if packet.address not in clients:
@@ -144,7 +143,7 @@ async def listener_handler(packet: Packet or None):
         if packet.flags == Flags(0): # event.receive_data (client sending data to me)
             return # i will handle this later
 
-    
+
 
 # Main loop
 async def V6(): # Not as fast as V8 and not as good, but it works

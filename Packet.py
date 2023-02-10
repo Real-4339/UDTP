@@ -39,6 +39,10 @@ class Packet:
         udp_header = data[:2]
         flags, seq = struct.unpack('!BB', udp_header)
         self.__init__(data[2:], flags, seq, address_from, address_to)
+    
+    # public, needs for creating real packet with header
+    def create_packet(self) -> bytes:
+        return self.__header + self.__data
 
     @property
     def data(self) -> bytes:
