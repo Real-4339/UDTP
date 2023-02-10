@@ -6,6 +6,8 @@ socket.recvfrom() returns a tuple (data, address)
 socker.recv() returns data
 Need to create an event class or idk events that will handle 3-way handshake with timer and two more events for sending and receiving data
 TODO: im using my_socket, but i need to use asyncio socket
+TODO: reassign all events
+Maybe i should use database for storing clients and maybe events
 """
 
 from sys import stdin, stdout
@@ -14,6 +16,7 @@ from Event import Event
 from collections import defaultdict
 import socket
 import asyncio
+from aioconsole import ainput
 
 
 def connected(socket) -> bool:  # TODO: recreate using my Packet class and Libuv
@@ -34,26 +37,28 @@ async def get_port() -> int:
     port = int(await ainput('Enter port: '))
     if port < 49152 or port > 65535:
         print('Error: port must be in range 49152 - 65535')
-        return get_port()
+        return await get_port()
     return port
 
-async def ainput(string: str) -> str:
-    await asyncio.get_event_loop().run_in_executor(
-            None, lambda s=string: stdout.write(s+' '))
-    return await asyncio.get_event_loop().run_in_executor(
-            None, stdin.readline)
+# Output not working well, behaviar
+# async def ainput(string: str) -> str:
+#     await asyncio.get_event_loop().run_in_executor(
+#             None, lambda s=string: stdout.write(s+' '))
+#     return await asyncio.get_event_loop().run_in_executor(
+#             None, stdin.readline)
 
 
 # Basic information
-PORT = get_port()
+loop = asyncio.get_event_loop()
+PORT = loop.run_until_complete(get_port())
+IP = socket.gethostbyname("localhost")
 clients = []
 events: dict[tuple[int, int], list[Event]] = defaultdict(list)
 
 
 # Creating socket
 my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-my_socket.bind(('', PORT))  # TODO: add ip handling
-
+my_socket.bind((IP, PORT))  # TODO: add ip handling
 my_socket.setblocking(False)
 
 
@@ -78,7 +83,7 @@ async def listener(my_payload = 1488):
     while True:
         try:
             data, addr = await loop.sock_recvfrom(my_socket, my_payload)
-            packet = Packet(data = data, address = addr)
+            packet = Packet.unpack(data = data, address_to = (IP, PORT), address_from = addr)
             yield packet
             
         except:
@@ -96,7 +101,7 @@ async def create_connection():
             raise ValueError
     except ValueError:
         return False
-    packet = Packet(data = payload.encode(), flags = Flags(65), address=(ip, port), seq= 256)
+    packet = Packet.pack(data = payload.encode(), flags = Flags(65), seq = 256, address_to=(ip, port), address_from=(IP, PORT))  
     f_packet = packet.header + packet.data
     return f_packet
 
@@ -106,7 +111,7 @@ async def console_handler(string: str):
     if string == "new_connection":
         packet = await create_connection()
         if packet == False:
-            return None
+            return None # TODO: do i need to handle this?
         else:
             event = Event(who = packet.address, function = "connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
             events[event.who].append(event)
