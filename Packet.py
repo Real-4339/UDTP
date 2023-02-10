@@ -14,24 +14,31 @@ class Flags(IntFlag):
 
 
 class Packet:
-    def __init__(self, data: bytes, flags: Flags = None, seq: int = 0, address: tuple = None):
+    def __init__(self, data: bytes, flags: Flags = None, seq: int = 0, address_from: tuple = None, address_to: tuple = None): # TODO: add crc_16
         if flags is None:
             flags = Flags(0)
         self.__seq = seq
         self.__crc_16 = 0
-        self.__address = address
+        self.__address_from = address_from
+        self.__address_to = address_to
         self.__flags = flags
         self.__data = data
-        self.__header = self.create_packet()
+        self.__header = self._create_header(flags, seq)
 
     # protected
     def _create_header(self, flags: Flags = None, seq: int = 0):
         upd_header = struct.pack('!BB', flags, seq)
         return upd_header
+
+    # public, needs for creating packet
+    def pack(self, data: bytes, flags: Flags = None, seq: int = 0, address_from: tuple = None, address_to: tuple = None) -> 'Packet':
+        self.__init__(data, flags, seq, address_from, address_to)
     
-    # protected
-    def _undo_packet(self, packet: 'Packet'):
-        ...
+    # public, needs for decrypting data to packet
+    def unpack(self, data: bytes, address_to: tuple, address_from: tuple) -> 'Packet': # data = header + data, TODO: add crc_16
+        udp_header = data[:2]
+        flags, seq = struct.unpack('!BB', udp_header)
+        self.__init__(data[2:], flags, seq, address_from, address_to)
 
     @property
     def data(self) -> bytes:
@@ -70,12 +77,20 @@ class Packet:
         self.__crc_16 = crc_16
 
     @property
-    def address(self) -> tuple:
-        return self.__address
+    def address_from(self) -> tuple:
+        return self.__address_from
     
-    @address.setter
-    def address(self, address: tuple):
-        self.__address = address
+    @address_from.setter
+    def address_from(self, address_from: tuple):
+        self.__address_from = address_from
+    
+    @property
+    def address_to(self) -> tuple:
+        return self.__address_to
+    
+    @address_to.setter
+    def address_to(self, address_to: tuple):
+        self.__address_to = address_to
 
     def __str__(self):
         return f'Packet(data={self.data}, address={self.address})'
