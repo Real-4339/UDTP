@@ -13,14 +13,13 @@ class Event:
     :param id: id of the event
     :initiator: who initiated connection, client or server, default is None, client - not me, server - me
     """
-    def __init__(self, who: tuple, function, timeout: str, socket, packet, id) -> None:
+    def __init__(self, who: tuple, function, timeout: str, socket, packet) -> None:
         self.loop = asyncio.get_event_loop()
         self.__who = who
         self.__initiator = None
         self.__timeout = timeout
         self.__socket = socket
         self.__packet = packet
-        self.__id = id
         self.__function = function
         self.__result = None
         self.__array_of_packets = []
