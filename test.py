@@ -16,12 +16,15 @@ class Test:
         else:
             print("else")
             self.__function()
-
+    
+    def __repr__(self) -> str:
+        return self.__function
 
 
 test = Test(lambda: print('He@llo World'))
 
 test = Test("prints")
+print(test, Test("prints"))
 
 flags = Flags(
     Flags.SYN | Flags.WM | Flags.ACK

@@ -108,7 +108,7 @@ async def console_handler(string: str):
         if packet == False:
             return None
         else:
-            event = Event(who = packet.address, function = "create_connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
+            event = Event(who = packet.address, function = "connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
             events[event.who].append(event)
             return event
     
@@ -119,7 +119,7 @@ async def listener_handler(packet: Packet or None):
         return None
     if packet.address not in clients:
         clients.append(packet.address)
-        event = Event(who = packet.address, function = "receive_connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
+        event = Event(who = packet.address, function = "connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
         events[event.who].append(event)
         return event
     else:
@@ -127,7 +127,11 @@ async def listener_handler(packet: Packet or None):
             return # i will handle this later
         
         if packet.flags & Flags(1) == Flags(1) or packet.flags == Flags(Flags.SACK): # event.connection
-            return # i will handle this later
+            if Event(_,"connection", _, _, _, _) in events[packet.address]:
+                index = events[packet.address].index(Event(_,"connection", _, _, _, _))
+                event = events[packet.address][index]
+                event.add_packet(packet)
+            return
         
         if packet.data == b'': # event.send_data (me sending data to client)
             return
@@ -171,7 +175,6 @@ if __name__ == '__main__':
     asyncio.run(V6())
 
 
-# my_socket.sendto(packet, packet.address)
 # if packet == None:
 #         ...
 #     else:

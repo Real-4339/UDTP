@@ -33,7 +33,7 @@ class Event:
     def function(self):
         return self.__function
 
-    def create_connection(self):
+    def connection(self):
         #self.loop.create_task(self.function(self.__packet))
         return self.loop.run_until_complete(self.__async__new_connection())
     
@@ -42,10 +42,10 @@ class Event:
 
     def __call__(self):
         if self.__function == 'create_connection':
-            self.create_connection()
+            self.connection()
     
     async def __repr__(self) -> str:
-        return f"Event(who = {self.who}, function = {self.function}, timeout = {self.__timeout}, what_socket = {self.__socket}, packet = {self.__packet}, id = {self.__id})"
+        return self.__function
 
     
 
