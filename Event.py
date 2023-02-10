@@ -1,6 +1,6 @@
 import asyncio
 import time
-from Packet import Flags
+from Packet import Flags, Packet
 
 class Event:
     """Event class for handling events,
@@ -23,6 +23,7 @@ class Event:
         self.__id = id
         self.__function = function
         self.__result = None
+        self.__array_of_packets = []
         self.__call__()
     
     @property
@@ -30,8 +31,8 @@ class Event:
         return self.__who
     
     @property
-    def id(self) -> int:
-        return self.__id
+    def initiator(self) -> int:
+        return self.__initiator
     
     @property
     def function(self):
@@ -46,12 +47,64 @@ class Event:
         return self.loop.run_until_complete(self.__async__new_connection())
     
     async def __async__new_connection(self):
-        # Timer starts
+        # Setting up timer 
         start = time.time()
         end_time = int(start) + int(self.__timeout)
-        # Analyze packet, who initiated connection
-        
-        
+        # Decide who is initiator
+        if self.__who == self.__packet.address_to:
+            self.__initiator = "server"
+        else:
+            self.__initiator = "client"
+        # Start 3-way handshake
+        if self.__initiator == "server":
+            # Send SYN
+            self.loop.sock_sendto(self.__socket, self.__packet.create_packet(), self.__packet.address_to)
+            # Wait for SYN | ACK
+            while True:
+                if int(time.time()) > end_time:
+                    self.__result = False
+                    self.loop.stop()
+                    self.loop.close()
+                    break
+                # Get packet from array_of_packets
+                if self.__array_of_packets:
+                    packet = self.__array_of_packets.pop(0)
+                    if packet.flags == Flags(Flags.SYN | Flags.ACK): # TODO: seq matters, but ill handle it later
+                        # Send SACK
+                        self.__packet = Packet.pack(data = b'Connection established', flags = Flags(Flags.SACK), seq = packet.seq, address_from = packet.address_to, address_to = packet.address_from)
+                        self.loop.sock_sendto(self.__socket, self.__packet.create_packet(), self.__packet.address_to)
+                        self.__result = True
+                        self.loop.stop()
+                        self.loop.close()
+                        break
+                
+        else: # Client sends SYN
+            # Send SYN | ACK
+            self.__packet = Packet.pack(data = b'', flags = Flags(Flags.SYN | Flags.ACK), seq = self.__packet.seq, address_from = self.__packet.address_to, address_to = self.__packet.address_from)
+            self.loop.sock_sendto(self.__socket, self.__packet.create_packet(), self.__packet.address_to)
+            # Wait for SACK
+            while True:
+                if int(time.time()) > end_time:
+                    self.__result = False
+                    self.loop.stop()
+                    self.loop.close()
+                    break
+                # Get packet from array_of_packets
+                if self.__array_of_packets:
+                    packet = self.__array_of_packets.pop(0)
+                    if packet.flags == Flags(Flags.SACK):
+                        self.__result = True
+                        self.loop.stop()
+                        self.loop.close()
+                        break
+
+    # Function that will be called when packet is received and will be added to the event
+    def add_packet(self, packet):
+        self.__array_of_packets.append(packet)
+        # if packet.flags == Flags(Flags.FIN | Flags.ACK):
+        #     self.__result = True
+        #     self.loop.stop()
+        #     self.loop.close()
 
 
     def __call__(self):
