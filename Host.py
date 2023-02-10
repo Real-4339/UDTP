@@ -112,7 +112,7 @@ async def console_handler(string: str):
         if packet == False:
             return None
         else:
-            event = Event(who = packet.address_to, function = "connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
+            event = Event(who = packet.address_to, function = "connection", timeout = "10", what_socket = my_socket, packet = packet)
             events[event.who].append(event)
             return 
 
@@ -121,11 +121,19 @@ async def console_handler(string: str):
 async def listener_handler(packet: Packet or None): # TODO: events !!!
     if packet == None:
         return None
-    if packet.address not in clients:
-        clients.append(packet.address)
-        event = Event(who = packet.address, function = "connection", timeout = "10", what_socket = my_socket, packet = packet, id = len(events)+1)
-        events[event.who].append(event)
-        return event
+    if packet.address_from not in clients:
+        event = get_event(packet.address_from, "connection")
+        if event is None:
+            event = Event(who = packet.address_from, function = "connection", timeout = "10", what_socket = my_socket, packet = packet)
+            events[event.who].append(event)
+            return
+        else:
+            if packet.flags == Flags(Flags.SYN | Flags.ACK): # when me starting connection and client accepting
+                clients.append(packet.address_from)
+            if packet.flags == Flags(Flags.SACK): # when he starting connection and i accepting
+                clients.append(packet.address_from)
+            event.add_packet(packet)
+            return
     else:
         if events[packet.address] is []: # check what client wants
             return # i will handle this later
@@ -143,6 +151,13 @@ async def listener_handler(packet: Packet or None): # TODO: events !!!
         if packet.flags == Flags(0): # event.receive_data (client sending data to me)
             return # i will handle this later
 
+
+# Function to get event from dict
+def get_event(who: tuple[int, int], function: str) -> Event:
+    for event in events[who]:
+        if event.function == function:
+            return event
+    return None
 
 
 # Main loop
@@ -177,33 +192,3 @@ async def V6(): # Not as fast as V8 and not as good, but it works
 
 if __name__ == '__main__':
     asyncio.run(V6())
-
-
-# if packet == None:
-#         ...
-#     else:
-#         # 3-way handshake:
-#         if packet.address in clients and (packet.flags == Flags(1)):
-#             answer = Packet(data = b'Ty sho durak?', flags = Flags(Flags.ACK))
-#             my_socket.sendto(answer.header + answer.data, packet.address)
-#         else:
-#             if packet.flags == (Flags.SYN | Flags.ACK): # if he doesnt hear me, i will send him again
-#                 if clients.count(packet.address) > 1:
-#                     answer = Packet(data = b'', flags = Flags(Flags.SYN | Flags.ACK), seq = packet.seq)
-#                     my_socket.sendto(packet.header + packet.data, packet.address)
-#                     return
-#                 else:
-#                     answer = Packet(data = b'', flags = Flags(Flags.ACK), seq = packet.seq)
-#                     my_socket.sendto(answer.header + answer.data, packet.address)
-#                     return
-        
-#             if packet.flags & Flags.SYN == Flags.SYN: # first handshake
-#                 clients.append(packet.address)
-#                 if clients.count(packet.address) > 1:
-#                     answer = Packet(data = b'', flags = Flags(Flags.SYN | Flags.ACK), seq = packet.seq)
-#                     my_socket.sendto(packet.header + packet.data, packet.address)
-#                     return
-#                 else:
-#                     answer = Packet(data = b'', flags = Flags(Flags.ACK), seq = packet.seq)
-#                     my_socket.sendto(answer.header + answer.data, packet.address)
-#                     return
