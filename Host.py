@@ -189,6 +189,7 @@ async def resend_SACK(address: tuple[int, int]):
 # 1 Tasks for console Loop
 async def V5(): # Not as fast as V8 and not as good, but it works
     cosl_gen = console()
+    print('Console loop started')
     while True:
         awaitable = anext(cosl_gen)
         res = await awaitable
@@ -207,8 +208,8 @@ async def V5(): # Not as fast as V8 and not as good, but it works
 
 # 2 Task for listener Loop
 async def V6(): # Not as fast as V8 and not as good, but it works
-    print('Server started')
     list_gen = listener()
+    print('Listener loop started')
     while True:
         awaitable = anext(list_gen)
         res = await awaitable
@@ -225,6 +226,7 @@ async def V6(): # Not as fast as V8 and not as good, but it works
 
 # Main loop
 async def V7():
+    print('Server started')
     task1 = asyncio.create_task(V5()) # console loop
     task2 = asyncio.create_task(V6()) # listener loop
 
