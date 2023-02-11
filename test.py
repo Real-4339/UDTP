@@ -68,6 +68,8 @@ async def waiter():
 
 
 async def cook(food: str, time: int):
+    a = '1488'.encode()
+    print(a, a.decode())
     print(f'Cooking {food}, {time} seconds')
     await asyncio.sleep(time)
     print(f'{food} is ready!')

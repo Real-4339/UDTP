@@ -8,6 +8,8 @@ Need to create an event class or idk events that will handle 3-way handshake wit
 TODO: im using my_socket, but i need to use asyncio socket
 TODO: reassign all events
 Maybe i should use database for storing clients and maybe events
+
+:clinets: dictionary of ip and port with list of payload and window size of the client
 """
 
 from builtins import anext
@@ -54,7 +56,7 @@ async def get_port() -> int:
 loop = asyncio.get_event_loop()
 PORT = loop.run_until_complete(get_port())
 IP = socket.gethostbyname("localhost")
-clients = []
+clients = dict[tuple[int, int], list[int, int]] = defaultdict(list)
 events: dict[tuple[int, int], list[Event]] = defaultdict(list)
 
 
@@ -103,7 +105,7 @@ async def create_connection():
             raise ValueError
     except ValueError:
         return False
-    packet = Packet.pack(data = payload.encode(), flags = Flags(65), seq = 256, address_to=(ip, port), address_from=(IP, PORT))
+    packet = Packet.pack(data = payload.encode(), flags = Flags(65), seq = 255, address_to=(ip, port), address_from=(IP, PORT))
     return packet
 
 
@@ -120,7 +122,7 @@ async def console_handler(string: str):
 
 
 # Listener handler
-async def listener_handler(packet: Packet or None): # TODO: events !!!
+async def listener_handler(packet: Packet or None):
     if packet == None:
         return None
     if packet.address_from not in clients: # only connection event
@@ -136,9 +138,7 @@ async def listener_handler(packet: Packet or None): # TODO: events !!!
         if events[packet.address] is []: # check what client wants
             # First case: packet.flags == Flags(Flags.SYN | Flags.ACK)
             if packet.flags == Flags(Flags.SYN | Flags.ACK):
-                ...
-                # send_message(packet, message = '')
-            return 
+                return "resend_SACK"
         
         # if packet.flags & Flags(1) == Flags(1) or packet.flags == Flags(Flags.SACK): # event.connection
         #     if Event(_,"connection", _, _, _, _) in events[packet.address]:
@@ -164,7 +164,7 @@ def get_event(who: tuple[int, int], function: str) -> Event:
 def event_handler(event: Event):
     if event.function == "connection":
         if event.result == True:
-            clients.append(event.who)
+            clients[event.who].append((event.payload, event.window_size))
             events[event.who].remove(event)
             print(f'New client connected: {event.who}')
         elif event.result == False:
@@ -178,40 +178,64 @@ def event_handler(event: Event):
     else:
         pass
 
-# Main loop
-async def V6(): # Not as fast as V8 and not as good, but it works
-    print('Server started')
+
+async def resend_SACK(address: tuple[int, int]):
+    w_s = clients.get(address)[1]
+    packet = Packet.pack(data = b'Connection established', flags = Flags(Flags.SACK), seq = w_s, address_to = address, address_from = (IP, PORT))
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(loop.sock_sendto(my_socket, packet.create_packet(), address))
+
+
+# 1 Tasks for console Loop
+async def V5(): # Not as fast as V8 and not as good, but it works
     cosl_gen = console()
-    list_gen = listener()
-    # task1 = asyncio.create_task(console())
-    # task2 = asyncio.create_task(listener())
-    # await task1
-    # await task2
-
-    # res2 = await asyncio.wait_for(awaitable_2, timeout = 0.1)
     while True:
-        awaitable_2 = anext(list_gen)
-        awaitable_1 = anext(cosl_gen)
+        awaitable = anext(cosl_gen)
+        res = await awaitable
 
-        res_1 = await awaitable_1
-        res_2 = await awaitable_2
-
-        if res_1 == False: # end of program, i need to send FIN packet to all clients, rebuild this
+        if res == False: # end of program, i need to send FIN packet to all clients, rebuild this
             my_socket.close()
             break
-
-        if res_1: # two events, one for handshake, second for sending data
-            cons_handler = asyncio.create_task(console_handler(res_1))
+        
+        if res: # two events, one for handshake, second for sending data
+            cons_handler = asyncio.create_task(console_handler(res))
             event_result = await cons_handler
             cons_handler.cancel()
-            event_result.Roman.add_done_callback(functools.partial(event_handler, event_result))
+            if event_result:
+                event_result.Roman.add_done_callback(functools.partial(event_handler, event_result))
 
-        if res_2: # only one event, for receiving data
-            list_handler = asyncio.create_task(listener_handler(res_2))
+
+# 2 Task for listener Loop
+async def V6(): # Not as fast as V8 and not as good, but it works
+    print('Server started')
+    list_gen = listener()
+    while True:
+        awaitable = anext(list_gen)
+        res = await awaitable
+
+        if res: # only one event, for receiving data
+            list_handler = asyncio.create_task(listener_handler(res))
             event_result = await list_handler
             list_handler.cancel()
-            event_result.Roman.add_done_callback(functools.partial(event_handler, event_result))
+            if event_result != "resend_SACK" and event_result != None:
+                event_result.Roman.add_done_callback(functools.partial(event_handler, event_result))
+            if event_result == "resend_SACK":
+                resend_SACK(res.address_from)
+
+
+# Main loop
+async def V7():
+    task1 = asyncio.create_task(V5()) # console loop
+    task2 = asyncio.create_task(V6()) # listener loop
+
+    await task1
+    await task2
+
+    if task1.done():
+        task1.cancel()
+        task2.cancel()
+        print('Server stopped')
 
 
 if __name__ == '__main__':
-    asyncio.run(V6())
+    asyncio.run(V7())

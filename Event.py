@@ -16,6 +16,9 @@ class Event:
     def __init__(self, who: tuple, function, timeout: str, socket, packet) -> None:
         self.loop = asyncio.get_event_loop()
         self.__who = who
+        self.__msg = None
+        self.__payload = None
+        self.__window_size = None
         self.__initiator = None
         self.__timeout = timeout
         self.__socket = socket
@@ -42,6 +45,14 @@ class Event:
         return self.__result
 
     @property
+    def payload(self):
+        return self.__payload
+
+    @property
+    def window_size(self):
+        return self.__window_size
+
+    @property
     def Roman(self):
         return self.__Roman
 
@@ -64,6 +75,8 @@ class Event:
         if self.__initiator == "server":
             # Send SYN
             self.loop.sock_sendto(self.__socket, self.__packet.create_packet(), self.__packet.address_to)
+            # Me sending him my payload
+            self.__payload = int(self.__packet.data.decode('utf-8'))
             # Wait for SYN | ACK
             while True:
                 if int(time.time()) > end_time:
@@ -75,7 +88,9 @@ class Event:
                 if self.__array_of_packets:
                     packet = self.__array_of_packets.pop(0)
                     stages.pop(0)
-                    if packet.flags == Flags(Flags.SYN | Flags.ACK): # TODO: seq matters, but ill handle it later
+                    if packet.flags == Flags(Flags.SYN | Flags.ACK):
+                        # Get window size from packet
+                        self.__window_size = packet.seq
                         # Send SACK
                         self.__packet = Packet.pack(data = b'Connection established', flags = Flags(Flags.SACK), seq = packet.seq, address_from = packet.address_to, address_to = packet.address_from)
                         self.loop.sock_sendto(self.__socket, self.__packet.create_packet(), self.__packet.address_to)
@@ -91,6 +106,8 @@ class Event:
                 
         else: # Client sends SYN
             # Answer with SYN | ACK
+            self.__payload = int(self.__packet.data.decode('utf-8'))
+            self.__window_size = self.__packet.seq
             self.__packet = Packet.pack(data = b'', flags = Flags(Flags.SYN | Flags.ACK), seq = self.__packet.seq, address_from = self.__packet.address_to, address_to = self.__packet.address_from)
             self.loop.sock_sendto(self.__socket, self.__packet.create_packet(), self.__packet.address_to)
             # Wait for SACK
@@ -105,6 +122,7 @@ class Event:
                     packet = self.__array_of_packets.pop(0)
                     if packet.flags == Flags(Flags.SACK):
                         self.__result = True
+                        self.__msg = packet.data.decode('utf-8')
                         self.loop.stop()
                         self.loop.close()
                         break
