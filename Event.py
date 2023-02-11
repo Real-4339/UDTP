@@ -80,12 +80,13 @@ class Event:
                         self.loop.close()
                         break
                 else:
-                    if stages[0] == 'syn':
+                    if stages[0] == 'syn' and int(time.time()) > start + tick:
+                        tick += 0.1
                         self.loop.sock_sendto(self.__socket, self.__packet.create_packet(), self.__packet.address_to)
 
                 
         else: # Client sends SYN
-            # Send SYN | ACK
+            # Answer with SYN | ACK
             self.__packet = Packet.pack(data = b'', flags = Flags(Flags.SYN | Flags.ACK), seq = self.__packet.seq, address_from = self.__packet.address_to, address_to = self.__packet.address_from)
             self.loop.sock_sendto(self.__socket, self.__packet.create_packet(), self.__packet.address_to)
             # Wait for SACK
@@ -103,6 +104,12 @@ class Event:
                         self.loop.stop()
                         self.loop.close()
                         break
+                    else: # if he still sending SYN
+                        self.loop.sock_sendto(self.__socket, self.__packet.create_packet(), self.__packet.address_to)
+                else:
+                    if int(time.time()) > start + tick:
+                        tick += 0.1
+                        self.loop.sock_sendto(self.__socket, self.__packet.create_packet(), self.__packet.address_to)
 
     # Function that will be called when packet is received and will be added to the event
     def add_packet(self, packet):
