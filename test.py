@@ -1,5 +1,6 @@
 import asyncio
 import sys
+import time
 from Packet import Flags
 
 
@@ -67,11 +68,9 @@ async def waiter():
     print(f'All food is ready: {food1}, {food2}, {food3}')
 
 
-async def cook(food: str, time: int):
-    a = '1488'.encode()
-    print(a, a.decode())
-    print(f'Cooking {food}, {time} seconds')
-    await asyncio.sleep(time)
+async def cook(food: str, timer: int):
+    print(f'Cooking {food}, {timer} seconds')
+    await asyncio.sleep(timer)
     print(f'{food} is ready!')
     return food
 

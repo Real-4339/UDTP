@@ -12,6 +12,7 @@ Maybe i should use database for storing clients and maybe events
 :clinets: dictionary of ip and port with list of payload and window size of the client
 """
 
+import argparse
 from builtins import anext
 import functools
 from sys import stdin, stdout
@@ -20,8 +21,15 @@ from Event import Event
 from collections import defaultdict
 import socket
 import asyncio
-from aioconsole import ainput
+from aioconsole import ainput, AsynchronousCli
 
+
+# Output not working well, behaviar
+# async def ainput(string: str) -> str:
+#     await asyncio.get_event_loop().run_in_executor(
+#             None, lambda s=string: stdout.write(s+' '))
+#     return await asyncio.get_event_loop().run_in_executor(
+#             None, stdin.readline)
 
 def connected(socket) -> bool:  # TODO: recreate using my Packet class and Libuv
     try:
@@ -44,14 +52,6 @@ async def get_port() -> int:
         return await get_port()
     return port
 
-# Output not working well, behaviar
-# async def ainput(string: str) -> str:
-#     await asyncio.get_event_loop().run_in_executor(
-#             None, lambda s=string: stdout.write(s+' '))
-#     return await asyncio.get_event_loop().run_in_executor(
-#             None, stdin.readline)
-
-
 # Basic information
 loop = asyncio.get_event_loop()
 PORT = loop.run_until_complete(get_port())
@@ -68,8 +68,12 @@ my_socket.setblocking(False)
 
 # Console loop, use yeild
 async def console():
+    print('a4535345')
     while True:
+        print('poooo')
         cmd = await ainput('Enter command: ')
+        print(cmd)
+        print('adad')
         if cmd == 'exit':
             yield False
         elif cmd == 'list':
@@ -80,6 +84,7 @@ async def console():
             yield 'new_connection'
         else:
             print('Unknown command')
+
 
 # Listener loop, use yeild
 async def listener(my_payload = 1488):
@@ -112,7 +117,7 @@ async def create_connection():
 # Console handler
 async def console_handler(string: str):
     if string == "new_connection":
-        packet = await create_connection()
+        packet = await create_connection() # returns packet
         if packet == False:
             return None
         else:
@@ -178,7 +183,6 @@ def event_handler(event: Event):
     else:
         pass
 
-
 async def resend_SACK(address: tuple[int, int]):
     w_s = clients.get(address)[1]
     packet = Packet.pack(data = b'Connection established', flags = Flags(Flags.SACK), seq = w_s, address_to = address, address_from = (IP, PORT))
@@ -225,13 +229,23 @@ async def V6(): # Not as fast as V8 and not as good, but it works
 
 
 # Main loop
-async def V7():
+async def V7(): # Need to do in tread
     print('Server started')
+    # parser = argparse.ArgumentParser()
+    # cli = AsynchronousCli({"new_connection": (console_handler, parser)}, prog="Pososi")
+
+    # task1 = cli.interact()
+
     task1 = asyncio.create_task(V5()) # console loop
     task2 = asyncio.create_task(V6()) # listener loop
 
-    await task1
-    await task2
+    # async with trio.open_nursery() as nursery:
+    #     nursery.start_soon(task1)
+    #     nursery.start_soon(task2)
+
+    #await asyncio.gather(task1, task2)
+    #await asyncio.wait([task1, task2])
+    
 
     if task1.done():
         task1.cancel()
@@ -241,3 +255,9 @@ async def V7():
 
 if __name__ == '__main__':
     asyncio.run(V7())
+    # try:
+    #     loop = asyncio.get_event_loop() 
+    #     loop.run_until_complete(asyncio.wait([V5(), V6()]))
+    # except KeyboardInterrupt:
+    #     print('Server stopped')
+    #     my_socket.close()
