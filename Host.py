@@ -56,7 +56,7 @@ async def get_port() -> int:
 loop = asyncio.get_event_loop()
 PORT = loop.run_until_complete(get_port())
 IP = socket.gethostbyname("localhost")
-clients = dict[tuple[int, int], list[int, int]] = defaultdict(list)
+clients: dict[tuple[int, int], list[int]] = defaultdict(list)
 events: dict[tuple[int, int], list[Event]] = defaultdict(list)
 
 
