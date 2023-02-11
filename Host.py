@@ -10,6 +10,7 @@ TODO: reassign all events
 Maybe i should use database for storing clients and maybe events
 """
 
+from builtins import anext
 import functools
 from sys import stdin, stdout
 from Packet import Packet, Flags
@@ -180,31 +181,33 @@ def event_handler(event: Event):
 # Main loop
 async def V6(): # Not as fast as V8 and not as good, but it works
     print('Server started')
-    main_loop = asyncio.get_event_loop()
+    cosl_gen = console()
+    list_gen = listener()
+    # task1 = asyncio.create_task(console())
+    # task2 = asyncio.create_task(listener())
+    # await task1
+    # await task2
+
+    # res2 = await asyncio.wait_for(awaitable_2, timeout = 0.1)
     while True:
-        task1 = main_loop.create_task(console())
-        task2 = main_loop.create_task(listener())
+        awaitable_2 = anext(list_gen)
+        awaitable_1 = anext(cosl_gen)
 
-        await task1
-        await task2
+        res_1 = await awaitable_1
+        res_2 = await awaitable_2
 
-        if task1.result() == False: # end of program, i need to send FIN packet to all clients, rebuild this
-            task1.cancel(
-                    my_socket.close()
-            )
-            task2.cancel()
-            main_loop.stop()
-            main_loop.close()
+        if res_1 == False: # end of program, i need to send FIN packet to all clients, rebuild this
+            my_socket.close()
             break
 
-        if task1.result(): # two events, one for handshake, second for sending data
-            cons_handler = main_loop.create_task(console_handler(task1.result()))
+        if res_1: # two events, one for handshake, second for sending data
+            cons_handler = asyncio.create_task(console_handler(res_1))
             event_result = await cons_handler
             cons_handler.cancel()
             event_result.Roman.add_done_callback(functools.partial(event_handler, event_result))
 
-        if task2.result(): # only one event, for receiving data
-            list_handler = main_loop.create_task(listener_handler(task2.result()))
+        if res_2: # only one event, for receiving data
+            list_handler = asyncio.create_task(listener_handler(res_2))
             event_result = await list_handler
             list_handler.cancel()
             event_result.Roman.add_done_callback(functools.partial(event_handler, event_result))
