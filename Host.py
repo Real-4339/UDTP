@@ -10,6 +10,7 @@ TODO: reassign all events
 Maybe i should use database for storing clients and maybe events
 """
 
+import functools
 from sys import stdin, stdout
 from Packet import Packet, Flags
 from Event import Event
@@ -114,36 +115,36 @@ async def console_handler(string: str):
         else:
             event = Event(who = packet.address_to, function = "connection", timeout = "10", what_socket = my_socket, packet = packet)
             events[event.who].append(event)
-            return 
+            return event
 
 
 # Listener handler
 async def listener_handler(packet: Packet or None): # TODO: events !!!
     if packet == None:
         return None
-    if packet.address_from not in clients:
+    if packet.address_from not in clients: # only connection event
         event = get_event(packet.address_from, "connection")
         if event is None:
             event = Event(who = packet.address_from, function = "connection", timeout = "10", what_socket = my_socket, packet = packet)
             events[event.who].append(event)
-            return
+            return event
         else:
-            if packet.flags == Flags(Flags.SYN | Flags.ACK): # when me starting connection and client accepting
-                clients.append(packet.address_from)
-            if packet.flags == Flags(Flags.SACK): # when he starting connection and i accepting
-                clients.append(packet.address_from)
             event.add_packet(packet)
             return
     else:
         if events[packet.address] is []: # check what client wants
-            return # i will handle this later
+            # First case: packet.flags == Flags(Flags.SYN | Flags.ACK)
+            if packet.flags == Flags(Flags.SYN | Flags.ACK):
+                ...
+                # send_message(packet, message = '')
+            return 
         
-        if packet.flags & Flags(1) == Flags(1) or packet.flags == Flags(Flags.SACK): # event.connection
-            if Event(_,"connection", _, _, _, _) in events[packet.address]:
-                index = events[packet.address].index(Event(_,"connection", _, _, _, _))
-                event = events[packet.address][index]
-                event.add_packet(packet)
-            return
+        # if packet.flags & Flags(1) == Flags(1) or packet.flags == Flags(Flags.SACK): # event.connection
+        #     if Event(_,"connection", _, _, _, _) in events[packet.address]:
+        #         index = events[packet.address].index(Event(_,"connection", _, _, _, _))
+        #         event = events[packet.address][index]
+        #         event.add_packet(packet)
+        #     return
         
         if packet.data == b'': # event.send_data (me sending data to client)
             return
@@ -159,6 +160,22 @@ def get_event(who: tuple[int, int], function: str) -> Event:
             return event
     return None
 
+def event_handler(event: Event):
+    if event.function == "connection":
+        if event.result == True:
+            clients.append(event.who)
+            events[event.who].remove(event)
+            print(f'New client connected: {event.who}')
+        elif event.result == False:
+            events[event.who].remove(event)
+        else:
+            pass
+    elif event.function == "send_data":
+        pass
+    elif event.function == "receive_data":
+        pass
+    else:
+        pass
 
 # Main loop
 async def V6(): # Not as fast as V8 and not as good, but it works
@@ -182,12 +199,15 @@ async def V6(): # Not as fast as V8 and not as good, but it works
 
         if task1.result(): # two events, one for handshake, second for sending data
             cons_handler = main_loop.create_task(console_handler(task1.result()))
-            await cons_handler
+            event_result = await cons_handler
             cons_handler.cancel()
+            event_result.Roman.add_done_callback(functools.partial(event_handler, event_result))
+
         if task2.result(): # only one event, for receiving data
             list_handler = main_loop.create_task(listener_handler(task2.result()))
-            await list_handler
+            event_result = await list_handler
             list_handler.cancel()
+            event_result.Roman.add_done_callback(functools.partial(event_handler, event_result))
 
 
 if __name__ == '__main__':

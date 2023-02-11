@@ -23,7 +23,7 @@ class Event:
         self.__function = function
         self.__result = None
         self.__array_of_packets = []
-        self.__call__()
+        self.__Roman = self.__call__()
     
     @property
     def who(self) -> tuple:
@@ -40,6 +40,10 @@ class Event:
     @property
     def result(self):
         return self.__result
+
+    @property
+    def Roman(self):
+        return self.__Roman
 
     def connection(self):
         #self.loop.create_task(self.function(self.__packet))
@@ -120,10 +124,11 @@ class Event:
         #     self.loop.close()
 
 
-    def __call__(self):
-        if self.__function == 'create_connection':
-            self.connection()
-    
+    async def __call__(self):
+        if self.__function == 'connection':
+            result = self.connection()
+            return result
+
     async def __repr__(self) -> str:
         return self.__function
 
