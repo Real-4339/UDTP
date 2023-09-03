@@ -100,11 +100,11 @@ class Packet:
             end_idx = (i + 1) * fragment_size
             packet_data = data[start_idx:end_idx]
         
-        packet = Packet.construct(packet_data, Flags.NONE, seq_num + i)
-        if packet is None:
-            LOGGER.error("Failed to construct packet")
-            return None
+            packet = Packet.construct(packet_data, Flags.NONE, seq_num + i)
+            if packet is None:
+                LOGGER.error("Failed to construct packet")
+                return None
         
-        packets.append(packet)
+            packets.append(packet)
         
         return packets
