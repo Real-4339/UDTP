@@ -13,7 +13,7 @@ LOGGER = logging.getLogger("Packet")
 
 
 class Packet:
-    def __init__(self, data: bytes, flags: Flags = None, seq_num: int = None):
+    def __init__(self, data: bytes, flags: Flags = None, seq_num: int = 0):
         self.__time_to_live: int = time.time()
         self.__seq_num = seq_num
         self.__flags = flags
@@ -22,6 +22,14 @@ class Packet:
     @property
     def flags(self) -> Flags:
         return self.__flags
+    
+    @property
+    def seq_num(self) -> int:
+        return self.__seq_num
+    
+    @seq_num.setter
+    def seq_num(self, value: int) -> None:
+        self.__seq_num = value
     
     def time_is_valid(self) -> bool:
         ''' Check if packet is still alive '''
