@@ -87,3 +87,24 @@ class Packet:
             return False
         
         return True
+    
+    @staticmethod
+    def devide(data: bytes, seq_num: int, fragment_size: int) -> list['Packet'] | None:
+        ''' Devide data into packets '''
+        packets = []
+        data_size = len(data)
+        packets_num = (data_size + fragment_size - 1) // fragment_size # Number of packets needed
+        
+        for i in range(packets_num):
+            start_idx = i * fragment_size
+            end_idx = (i + 1) * fragment_size
+            packet_data = data[start_idx:end_idx]
+        
+        packet = Packet.construct(packet_data, Flags.NONE, seq_num + i)
+        if packet is None:
+            LOGGER.error("Failed to construct packet")
+            return None
+        
+        packets.append(packet)
+        
+        return packets
