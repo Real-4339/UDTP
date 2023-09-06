@@ -135,8 +135,8 @@ class Host:
                     
             connected_with.vadilate_packet(data)
             
-            return Status.RUNNING
-        return Status.SLEEPING
+            return Status.RUNNING # BUG: processes only one packet per iteration
+        return Status.SLEEPING # HACK
 
     def _v4(self):
         ''' Run all iterators and check results '''
