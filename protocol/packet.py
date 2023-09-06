@@ -100,7 +100,7 @@ class Packet:
         return True
     
     @staticmethod
-    def devide(data: bytes, seq_num: int, fragment_size: int) -> list['Packet'] | None:
+    def devide(data: bytes, seq_num: int, fragment_size: int, flags: Flags) -> list['Packet'] | None:
         ''' Devide data into packets '''
         packets = []
         data_size = len(data)
@@ -114,7 +114,7 @@ class Packet:
             ''' Calculate the seq_num with wrap around '''
             seq_num = (seq_num + i) % (2 ** 16)
         
-            packet = Packet.construct(packet_data, Flags.NONE, seq_num + i)
+            packet = Packet.construct(packet_data, flags, seq_num + i)
             if packet is None:
                 LOGGER.error("Failed to construct packet")
                 return None
