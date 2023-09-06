@@ -19,6 +19,18 @@ def get_name_and_extension(path: str) -> tuple[str, str]:
     return name, ext
 
 
+def file_to_bytes(path: str) -> bytes | None:
+    ''' Read file and return bytes '''
+    
+    if not is_file(path):
+        print(f"File {path} does not exist")
+        return None
+
+    with open(path, "rb") as file:
+        data = file.read()
+
+    return data
+
 class Terminal:
     def __init__(self, host: Host, stop_event: threading.Event):
         self.__host = host
@@ -61,7 +73,6 @@ class Terminal:
                 self.__host.connect(ip, int(port))
             else:
                 print('Invalid address: {}:{}'.format(ip, port))
-            
         
         elif command.startswith('disconnect'):
             ip, port = command.split(' ')[1].split(':')
@@ -88,16 +99,15 @@ class Terminal:
                 print('Missing arguments')
                 return
             
-            if not is_file(file):
-                print('File does not exist: {}'.format(file))
-                return
+            data = file_to_bytes(file)
             
             if self.__host.validate_addr(ip, int(port)):
                 
                 print('Sending file to {}:{}'.format(file, ip, port))
+                
                 name, ext = get_name_and_extension(file)
-            
-                self.__host.send_file(ip, int(port), file, name, ext)
+
+                self.__host.send_file(ip, int(port), data, name, ext)
             else:
                 print('Invalid address: {}:{}'.format(ip, port))
         
