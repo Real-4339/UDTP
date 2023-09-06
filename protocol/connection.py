@@ -1,8 +1,10 @@
 import time
 import logging
 
+from send import Sender
 from go.time import Time
 from packet import Packet
+from recv import Receiver
 from go.flags import Flags
 from typing import Callable
 from go.status import Status
@@ -15,16 +17,22 @@ LOGGER = logging.getLogger("Connection")
 
 class ConnectionWith:
     def __init__(self, addr: AddressInfo, send_func: Callable):
+        
         self._add_iterator = NotImplemented
-        self.__keep_alive = Time.KEEPALIVE
-        self.__packets: list[Packet] = []
-        self.__last_time = time.time()
         self.__send_func = send_func
+
         self.__alive = Status.ALIVE
         self.__connecting = False
         self.__connected = False
         self.__owner = addr
-    
+
+        self.__keep_alive = Time.KEEPALIVE
+        self.__last_time = time.time()
+        self.__last_transfer = Flags.SR
+
+        self.__transfers: dict[Flags: Sender | Receiver] = {}
+        self.__packets: list[Packet] = []
+        
     @property
     def last_time(self) -> float:
         return self.__last_time
@@ -77,6 +85,33 @@ class ConnectionWith:
         self.__connected = False
         self.__connecting = False
         self.__alive = Status.DEAD
+
+    def send_file(self, data: bytes, name: str, ext: str) -> None:
+        ''' Send file to host '''
+
+        ''' Get last transfer '''
+        if self.__last_transfer >= Flags.SR:
+            LOGGER.warning(f"Too many transfers from {self.__owner}")
+            return
+        
+        ''' Update last transfer'''
+        transfer_flag = self.__last_transfer << 1
+        self.__last_transfer = transfer_flag
+
+        ''' Create transfer '''
+        transfer = Sender(self.__send_func, self.__owner, name, ext)
+        transfer.prepare_data(data, (Flags.FILE | transfer_flag))
+
+        ''' Add transfer to the list '''
+        self._add_transfer(transfer)
+
+        ''' Add iterator to the list '''
+        self._add_iterator(transfer._iterator)
+
+    def _add_transfer(self, transfer: Sender | Receiver, transfer_flag: Flags) -> None:
+        ''' Add transfer to the list '''
+        
+        self.__transfers[transfer_flag] = transfer
 
     def _keep_alive(self) -> bool:
         ''' Keep connection alive '''
