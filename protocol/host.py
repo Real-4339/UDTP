@@ -100,14 +100,14 @@ class Host:
 
         LOGGER.info('Disconnected from all hosts')
 
-    def send_file(self, ip: str, port: int, filepath: str, name: str, ext: str):
+    def send_file(self, ip: str, port: int, data: bytes, name: str, ext: str):
         ''' Send file to host '''
         
         addr = AddressInfo(ip, port)
         connection = self.get_connection(addr)
         
         if connection is not None:
-            connection.send_file(filepath, name, ext)
+            connection.send_file(data, name, ext)
         else:
             LOGGER.warning('Connection to {}:{} does not exist'.format(ip, port))
 
