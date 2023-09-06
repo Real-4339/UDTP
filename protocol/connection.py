@@ -92,11 +92,11 @@ class ConnectionWith:
         if self.__alive == Status.DEAD:
             return False
         
-        # if self.__connecting and not self.time_is_valid():
-        #     ''' Resend syn '''
-        #     self.connect()
-        #     self.__last_time = time.time()
-        #     return True
+        if not self.time_is_valid() and self.__connecting:
+            ''' Resend syn '''
+            self.connect()
+            self.__last_time = time.time()
+            return True
 
         if not self.time_is_valid() and self.__connected:
             ''' Send syn | sack '''
