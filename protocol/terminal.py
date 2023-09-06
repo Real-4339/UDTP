@@ -1,7 +1,14 @@
+import os
 import logging
 import threading
 
 from host import Host
+
+
+def is_file(path: str) -> bool:
+    ''' Check if path is a file '''
+    return os.path.isfile(path)
+
 
 class Terminal:
     def __init__(self, host: Host, stop_event: threading.Event):
@@ -63,6 +70,24 @@ class Terminal:
         
         elif command == 'list':
             self.__host.list_connections()
+
+        elif command.startswith('send_f'):
+            try:
+                ip, port = command.split(' ')[1].split(':')
+                file = command.split(' ')[2]
+            except IndexError:
+                print('Missing arguments')
+                return
+            
+            if not is_file(file):
+                print('File does not exist: {}'.format(file))
+                return
+            
+            if self.__host.validate_addr(ip, int(port)):
+                print('Sending file to {}:{}'.format(file, ip, port))
+                self.__host.send_file(ip, int(port), file)
+            else:
+                print('Invalid address: {}:{}'.format(ip, port))
         
         else:
             print('Unknown command: {}'.format(command))
@@ -95,8 +120,8 @@ class Terminal:
         print('  list_available: List available hosts') # TODO: Implement
         print('  detection_time <time>: Set the detection time of available hosts') # IDK if i want this
         print('  send_m <ip>:<port> <message>: Send a message to a host')
-        print('  send_f <ip>:<port> <file>: Send a file to a host') # TODO: Implement
-        print('  change_fragment_size <size>: Change the fragment size')
+        print('  send_f <ip>:<port> <file>: Send a file to a host')
+        print('  change_fragment_size <size>: Change the fragment size') # TODO: Implement
         print('  log_level <level>: Set the log level')
         print('  help: Display this help message')
         print('  exit: Exit the terminal')
