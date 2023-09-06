@@ -76,7 +76,7 @@ class Sender:
             self.__send_func(packet, self.__client)
 
         ''' Update sequence number '''
-        self.__seq_num += len(packets_to_send)
+        self.__seq_num = (self.__seq_num + len(packets_to_send)) % (2 ** 16)
     
     def _iterator(self):
         ''' Handle packets '''
