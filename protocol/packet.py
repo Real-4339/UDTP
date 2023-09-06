@@ -110,6 +110,9 @@ class Packet:
             start_idx = i * fragment_size
             end_idx = (i + 1) * fragment_size
             packet_data = data[start_idx:end_idx]
+
+            ''' Calculate the seq_num with wrap around '''
+            seq_num = (seq_num + i) % (2 ** 16)
         
             packet = Packet.construct(packet_data, Flags.NONE, seq_num + i)
             if packet is None:
