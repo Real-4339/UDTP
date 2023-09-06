@@ -86,14 +86,34 @@ class ConnectionWith:
         self.__connecting = False
         self.alive = Status.DEAD
 
-    def _iterator(self):
-        ''' Analyze packets '''
+    def _keep_alive(self) -> bool:
+        ''' Keep connection alive '''
+        
+        if self.__alive == Status.DEAD:
+            return False
+        
+        if self.__connecting and self.time_is_valid():
+            ''' Resend syn '''
+            self.connect()
+            self.__last_time = time.time()
+            return True
         
         if not self.time_is_valid():
             self.__alive = Status.DEAD
-            return Status.FINISHED
+            return False
+
+        if self.__connected:
+            ''' Send syn | sack '''
+            sack = Packet.construct(data = b"", flags = (Flags.SYN | Flags.SACK))
+
+            self.__send_func(sack, self.__owner)
         
-        if self.__alive == Status.DEAD:
+        return True
+
+    def _iterator(self):
+        ''' Analyze packets '''
+        
+        if not self._keep_alive():
             return Status.FINISHED
         
         for packet in self.__packets.copy():
@@ -103,15 +123,18 @@ class ConnectionWith:
                 self._syn(packet)
             
             elif (
-                packet.flags == (Flags.SYN | Flags.ACK) and 
+                packet.flags == (Flags.SYN | Flags.ACK) and
                 self.__connecting or self.connected
             ):
                 ''' call syn ack function '''
                 self._syn_ack(packet)
 
-            elif packet.flags == Flags.SACK and self.__connecting:
-                ''' call sack function '''
-                self._sack(packet)
+            elif (
+                packet.flags == (Flags.SYN | Flags.SACK) and 
+                self.__connecting or self.connected
+            ):
+                ''' call syn sack function '''
+                self._syn_sack(packet)
 
             else: 
                 ''' call unknown function '''
@@ -155,12 +178,8 @@ class ConnectionWith:
             LOGGER.warning(f"Packet from {self.__owner} is dead")
             return
         
-        ''' Send sack '''
-        ack = Packet.construct(data = b"", flags = Flags.SACK)
-
-        if ack is None:
-            LOGGER.warning(f"Failed to construct ack to {self.__owner}")
-            return
+        ''' Send syn sack '''
+        ack = Packet.construct(data = b"", flags = Flags.SYN | Flags.SACK)
 
         self.__send_func(ack, self.__owner)
 
@@ -173,10 +192,10 @@ class ConnectionWith:
 
         LOGGER.info(f"Connected to {self.__owner}")
 
-    def _sack(self, packet: Packet):
-        ''' Sack function '''
+    def _syn_sack(self, packet: Packet):
+        ''' Syn sack function '''
         
-        LOGGER.info(f"Received sack from {self.__owner}")
+        LOGGER.info(f"Received syn sack from {self.__owner}")
         
         ''' Check ttl of a packet '''
         if not packet.time_is_valid():
