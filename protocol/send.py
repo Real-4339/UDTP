@@ -21,13 +21,14 @@ class Sender:
         Handle sequence numbers.
         Have buffer for packets.
     '''
-    def __init__(self, send_func: Callable, addr: AddressInfo, name: str, extention: str):
+    def __init__(self, send_func: Callable, addr: AddressInfo, name: str, extention: str, own_transfer_flag: Flags):
         self.__seq_num = 1
         self.__client = addr
         self.__send_func = send_func
         self.__name = name
-        self.__extention = extention
+        self.__ext = extention
         self.__started = False
+        self.__own_transfer_flag = own_transfer_flag
 
         self.__window_size = Size.WINDOW_SIZE
         
@@ -37,6 +38,22 @@ class Sender:
         
         self.__alive = Status.ALIVE
         self.__last_time = time.time()
+
+    @property
+    def ext(self) -> str:
+        return self.__ext
+    
+    @property
+    def name(self) -> str:
+        return self.__name
+    
+    @property
+    def own_transfer_flag(self) -> Flags:
+        return self.__own_transfer_flag
+    
+    @property
+    def client(self) -> AddressInfo:
+        return self.__client
 
     def prepare_data(self, data: bytes, flags: Flags) -> None:
         ''' Prepare data for sending '''
@@ -57,6 +74,11 @@ class Sender:
             LOGGER.info(f"Received FIN from {self.__client}")
             self.__alive = Status.FINISHED
             return
+        
+        if packet.flags == Flags.SACK:
+            LOGGER.info(f"Starting sending data to {self.__client}")
+            self.__started = True
+            return
 
         LOGGER.warning(f"Unexpected flags from {self.__client}")
 
@@ -64,10 +86,15 @@ class Sender:
         ''' Check if connection is still alive '''
         
         if time.time() - self.__last_time > Time.KEEPALIVE:
-            LOGGER.warning(f"Connection with {self.__addr} is dead")
+            LOGGER.warning(f"Connection with {self.client} is dead")
             return False
         
         return True
+    
+    def start(self) -> bool:
+        ''' Only for waiting SACK to start sending data '''
+        if not self.__started:
+            self.__send_func(Packet.construct(f"{self.name}.{self.ext}".encode(), self.own_transfer_flag, 0), self.__client)
 
     def _send_restof_data(self, num_to_skip: int) -> None:
         ''' Send rest of data '''
@@ -89,10 +116,6 @@ class Sender:
     def _iterator(self):
         ''' Handle packets '''
         if self.__alive == Status.DEAD:
-            return Status.FINISHED
-
-        if not self.time_is_valid():
-            self.__alive = Status.DEAD
             return Status.FINISHED
         
         ''' Check for acknowledgments and remove acked packets from sent_packets'''
