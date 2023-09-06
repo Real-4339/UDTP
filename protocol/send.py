@@ -21,11 +21,12 @@ class Sender:
         Handle sequence numbers.
         Have buffer for packets.
     '''
-    def __init__(self, send_func: Callable, addr: AddressInfo):
+    def __init__(self, send_func: Callable, addr: AddressInfo, name: str, extention: str):
         self.__seq_num = 0
         self.__client = addr
         self.__send_func = send_func
-        self.__extention = ""
+        self.__name = name
+        self.__extention = extention
         
         self.__window_size = Size.WINDOW_SIZE
         
@@ -35,14 +36,6 @@ class Sender:
         
         self.__alive = Status.ALIVE
         self.__last_time = time.time()
-
-    @property
-    def extention(self) -> str:
-        return self.__extention
-    
-    @extention.setter
-    def extention(self, extention: str) -> None:
-        self.__extention = extention
 
     def prepare_data(self, data: bytes, flags: Flags) -> None:
         ''' Prepare data for sending '''
