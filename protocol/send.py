@@ -22,12 +22,13 @@ class Sender:
         Have buffer for packets.
     '''
     def __init__(self, send_func: Callable, addr: AddressInfo, name: str, extention: str):
-        self.__seq_num = 0
+        self.__seq_num = 1
         self.__client = addr
         self.__send_func = send_func
         self.__name = name
         self.__extention = extention
-        
+        self.__started = False
+
         self.__window_size = Size.WINDOW_SIZE
         
         self.__acks: set[int] = set()
@@ -50,6 +51,11 @@ class Sender:
         if packet.flags & Flags.ACK:
             self.__last_time = time.time()
             self.__acks.add(packet.seq_num)
+            return
+        
+        if packet.flags == Flags.FIN:
+            LOGGER.info(f"Received FIN from {self.__client}")
+            self.__alive = Status.FINISHED
             return
 
         LOGGER.warning(f"Unexpected flags from {self.__client}")
@@ -78,7 +84,7 @@ class Sender:
             self.__send_func(packet, self.__client)
 
         ''' Update sequence number '''
-        self.__seq_num = (self.__seq_num + len(packets_to_send)) % (2 ** 16)
+        self.__seq_num = (self.__seq_num + len(packets_to_send)) % (2 ** 32) # HACK: 32 bits
     
     def _iterator(self):
         ''' Handle packets '''
