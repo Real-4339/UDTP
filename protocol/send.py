@@ -21,7 +21,7 @@ class Sender:
         Handle sequence numbers.
         Have buffer for packets.
     '''
-    def __init__(self, send_func: Callable, addr: AddressInfo): # BUG: Seq_number overflow
+    def __init__(self, send_func: Callable, addr: AddressInfo):
         self.__seq_num = 0
         self.__client = addr
         self.__send_func = send_func
@@ -35,10 +35,10 @@ class Sender:
         self.__alive = Status.ALIVE
         self.__last_time = time.time()
 
-    def prepare_data(self, data: bytes) -> None:
+    def prepare_data(self, data: bytes, flags: Flags) -> None:
         ''' Prepare data for sending '''
         
-        packets = Packet.devide(data, self.__seq_num, packet_size=Size.FRAGMENT_SIZE)
+        packets = Packet.devide(data, self.__seq_num, packet_size=Size.FRAGMENT_SIZE, flags=flags)
         
         self.__all_packets.extend(packets)
 
