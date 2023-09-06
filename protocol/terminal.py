@@ -93,10 +93,11 @@ class Terminal:
                 return
             
             if self.__host.validate_addr(ip, int(port)):
+                
                 print('Sending file to {}:{}'.format(file, ip, port))
                 name, ext = get_name_and_extension(file)
-                print(name, ext)
-                #self.__host.send_file(ip, int(port), file)
+            
+                self.__host.send_file(ip, int(port), file, name, ext)
             else:
                 print('Invalid address: {}:{}'.format(ip, port))
         
