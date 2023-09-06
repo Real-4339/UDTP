@@ -2,6 +2,7 @@ import socket
 import logging
 import threading
 
+from go.size import Size
 from typing import Callable
 from go.status import Status
 from connection import ConnectionWith
@@ -109,6 +110,8 @@ class Host:
 
     def _iterator(self):
         ''' Get packets '''
+
+        breaker = Size.PPT
         
         for key, _ in self.__selector.select(timeout=0.1):
             data, addr = self.__socket.recvfrom(1472)
@@ -135,8 +138,11 @@ class Host:
                     
             connected_with.vadilate_packet(data)
             
-            return Status.RUNNING # BUG: processes only one packet per iteration
-        return Status.SLEEPING # HACK
+            breaker -= 1
+            if breaker == 0:
+                break
+
+        return Status.SLEEPING
 
     def _v4(self):
         ''' Run all iterators and check results '''
