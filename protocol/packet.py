@@ -38,6 +38,17 @@ class Packet:
             return False
         
         return True
+    
+    @staticmethod
+    def packet_to_bytes(packet: 'Packet') -> bytes | None:
+        ''' Convert packet to bytes '''
+        if packet is None:
+            LOGGER.error("Packet is None")
+            return None
+        if not isinstance(packet, Packet):
+            LOGGER.error("Packet is not instance of Packet")
+            return None
+        return Packet.construct(packet.__data, packet.__flags, packet.__seq_num)
 
     @staticmethod
     def construct(data: bytes, flags: Flags, seq_num: int) -> bytes | None:
