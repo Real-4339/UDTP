@@ -2,7 +2,6 @@ import time
 import struct
 import crcmod 
 import logging
-import binascii
 
 from go.time import Time
 from go.flags import Flags
