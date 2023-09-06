@@ -91,7 +91,7 @@ class Sender:
         
         return True
     
-    def start(self) -> bool:
+    def start(self) -> None:
         ''' Only for waiting SACK to start sending data '''
         if not self.__started:
             self.__send_func(Packet.construct(f"{self.name}.{self.ext}".encode(), self.own_transfer_flag, 0), self.__client)
@@ -118,6 +118,9 @@ class Sender:
         if self.__alive == Status.DEAD:
             return Status.FINISHED
         
+        ''' Check if we can start '''
+        self.start()
+
         ''' Check for acknowledgments and remove acked packets from sent_packets'''
         self.__sent_packets = [packet for packet in self.__sent_packets if packet.seq_num not in self.__acks]
 

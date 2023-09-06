@@ -99,14 +99,17 @@ class ConnectionWith:
         self.__last_transfer = transfer_flag
 
         ''' Create transfer '''
-        transfer = Sender(self.__send_func, self.__owner, name, ext)
-        transfer.prepare_data(data, (Flags.FILE | transfer_flag))
+        transfer = Sender(self.__send_func, self.__owner, name, ext, transfer_flag)
+        transfer.prepare_data(data, transfer_flag)
 
         ''' Add transfer to the list '''
         self._add_transfer(transfer)
 
         ''' Add iterator to the list '''
         self._add_iterator(transfer._iterator)
+
+        ''' Send init packet with file name and extension '''
+        init_packet = Packet.construct(data = f"{name}.{ext}".encode(), flags = Flags.FILE, seq_num=0)
 
     def _add_transfer(self, transfer: Sender | Receiver, transfer_flag: Flags) -> None:
         ''' Add transfer to the list '''
