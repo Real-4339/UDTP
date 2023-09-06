@@ -111,7 +111,7 @@ class Packet:
             packet_data = data[start_idx:end_idx]
 
             ''' Calculate the seq_num with wrap around '''
-            seq_num = (seq_num + i) % (2 ** 16)
+            seq_num = (seq_num + i) % (2 ** 32) # HACK: 32 bits
         
             packet = Packet.construct(packet_data, flags, seq_num + i)
             if packet is None:
