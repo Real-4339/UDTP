@@ -10,6 +10,15 @@ def is_file(path: str) -> bool:
     return os.path.isfile(path)
 
 
+def get_name_and_extension(path: str) -> tuple[str, str]:
+    ''' Get name and extension of the file '''
+    
+    path = os.path.basename(path)
+    name, ext = os.path.splitext(path)
+
+    return name, ext
+
+
 class Terminal:
     def __init__(self, host: Host, stop_event: threading.Event):
         self.__host = host
@@ -85,7 +94,9 @@ class Terminal:
             
             if self.__host.validate_addr(ip, int(port)):
                 print('Sending file to {}:{}'.format(file, ip, port))
-                self.__host.send_file(ip, int(port), file)
+                name, ext = get_name_and_extension(file)
+                print(name, ext)
+                #self.__host.send_file(ip, int(port), file)
             else:
                 print('Invalid address: {}:{}'.format(ip, port))
         
