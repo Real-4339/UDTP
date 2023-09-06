@@ -28,7 +28,7 @@ class Sender:
         
         self.__window_size = Size.WINDOW_SIZE
         
-        self.__acks: set[int] = set()        
+        self.__acks: set[int] = set()
         self.__all_packets: list[Packet] = []
         self.__sent_packets: list[Packet] = []
         
