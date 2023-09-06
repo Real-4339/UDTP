@@ -25,6 +25,7 @@ class Sender:
         self.__seq_num = 0
         self.__client = addr
         self.__send_func = send_func
+        self.__extention = ""
         
         self.__window_size = Size.WINDOW_SIZE
         
@@ -34,6 +35,14 @@ class Sender:
         
         self.__alive = Status.ALIVE
         self.__last_time = time.time()
+
+    @property
+    def extention(self) -> str:
+        return self.__extention
+    
+    @extention.setter
+    def extention(self, extention: str) -> None:
+        self.__extention = extention
 
     def prepare_data(self, data: bytes, flags: Flags) -> None:
         ''' Prepare data for sending '''
