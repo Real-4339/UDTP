@@ -119,3 +119,11 @@ class Packet:
             packets.append(packet)
         
         return packets
+    
+    def __hash__(self) -> int:
+        return hash((self.__data, self.__flags, self.__seq_num))
+    
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Packet):
+            return NotImplemented
+        return self.__data == other.__data and self.__flags == other.__flags and self.__seq_num == other.__seq_num
