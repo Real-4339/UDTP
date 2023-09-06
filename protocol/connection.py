@@ -84,7 +84,7 @@ class ConnectionWith:
         
         self.__connected = False
         self.__connecting = False
-        self.alive = Status.DEAD
+        self.__alive = Status.DEAD
 
     def _keep_alive(self) -> bool:
         ''' Keep connection alive '''
@@ -92,21 +92,18 @@ class ConnectionWith:
         if self.__alive == Status.DEAD:
             return False
         
-        if self.__connecting and self.time_is_valid():
-            ''' Resend syn '''
-            self.connect()
-            self.__last_time = time.time()
-            return True
-        
-        if not self.time_is_valid():
-            self.__alive = Status.DEAD
-            return False
+        # if self.__connecting and not self.time_is_valid():
+        #     ''' Resend syn '''
+        #     self.connect()
+        #     self.__last_time = time.time()
+        #     return True
 
-        if self.__connected:
+        if not self.time_is_valid() and self.__connected:
             ''' Send syn | sack '''
+            LOGGER.info(f"Sending syn | sack to")
             sack = Packet.construct(data = b"", flags = (Flags.SYN | Flags.SACK), seq_num=2)
-
             self.__send_func(sack, self.__owner)
+            self.__last_time = time.time()
         
         return True
 
@@ -124,20 +121,21 @@ class ConnectionWith:
             
             elif (
                 packet.flags == (Flags.SYN | Flags.ACK) and
-                self.__connecting or self.connected
+                ( self.__connecting or self.connected )
             ):
                 ''' call syn ack function '''
                 self._syn_ack(packet)
 
             elif (
                 packet.flags == (Flags.SYN | Flags.SACK) and 
-                self.__connecting or self.connected
+                ( self.__connecting or self.connected )
             ):
                 ''' call syn sack function '''
                 self._syn_sack(packet)
 
             else: 
                 ''' call unknown function '''
+                LOGGER.info(f"{packet.flags} is/are unknown")
                 LOGGER.warning(f"Unknown packet from {self.__owner}")
                 self.__packets.remove(packet)
 
