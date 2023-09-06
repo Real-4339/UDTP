@@ -50,10 +50,6 @@ class ConnectionWith:
         LOGGER.info(f"Received packet from {self.__owner}")
 
         packet = Packet.deconstruct(data)
-    
-        if packet is None:
-            LOGGER.warning(f"Failed to deconstruct packet from {self.__owner}")
-            return
 
         self.__packets.append(packet)
         self.__last_time = time.time()
@@ -62,7 +58,7 @@ class ConnectionWith:
         ''' Check if connection is still alive '''
         
         if time.time() - self.__last_time > self.__keep_alive:
-            LOGGER.warning(f"Connection with {self.__owner} is dead")
+            LOGGER.warning(f"Connection with {self.__owner} is almost dead")
             return False
         
         return True
@@ -72,10 +68,6 @@ class ConnectionWith:
         
         syn = Packet.construct(data = b"", flags = Flags.SYN, seq_num=0)
         self.__connecting = True
-
-        if syn is None:
-            LOGGER.warning(f"Failed to construct syn to {self.__owner}")
-            return
 
         self.__send_func(syn, self.__owner)
 
@@ -100,7 +92,6 @@ class ConnectionWith:
 
         if not self.time_is_valid() and self.__connected:
             ''' Send syn | sack '''
-            LOGGER.info(f"Sending syn | sack to")
             sack = Packet.construct(data = b"", flags = (Flags.SYN | Flags.SACK), seq_num=2)
             self.__send_func(sack, self.__owner)
             self.__last_time = time.time()
@@ -144,7 +135,7 @@ class ConnectionWith:
     def _syn(self, packet: Packet):
         ''' Syn function '''
         
-        LOGGER.info(f"Received syn from {self.__owner}")
+        # LOGGER.info(f"Received syn from {self.__owner}")
         
         ''' Check ttl of a packet '''
         if not packet.time_is_valid():
@@ -153,10 +144,6 @@ class ConnectionWith:
         
         ''' Send syn ack '''
         syn_ack = Packet.construct(data = b"", flags = Flags.SYN | Flags.ACK, seq_num=1)
-
-        if syn_ack is None:
-            LOGGER.warning(f"Failed to construct syn ack to {self.__owner}")
-            return
 
         self.__send_func(syn_ack, self.__owner)
 
@@ -169,7 +156,7 @@ class ConnectionWith:
     def _syn_ack(self, packet: Packet):
         ''' Syn ack function '''
         
-        LOGGER.info(f"Received syn ack from {self.__owner}")
+        # LOGGER.info(f"Received syn ack from {self.__owner}")
         
         ''' Check ttl of a packet '''
         if not packet.time_is_valid():
@@ -193,7 +180,7 @@ class ConnectionWith:
     def _syn_sack(self, packet: Packet):
         ''' Syn sack function '''
         
-        LOGGER.info(f"Received syn sack from {self.__owner}")
+        # LOGGER.info(f"Received syn sack from {self.__owner}")
         
         ''' Check ttl of a packet '''
         if not packet.time_is_valid():
