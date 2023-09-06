@@ -7,6 +7,6 @@ class Flags(IntFlag):
     SACK = 0b00000100 # 4 Super ACK
     MSG  = 0b00001000 # 8 Message
     INIT = 0b00010000 # 16 Init file transfer
-    NONE = 0b00100000 # 32 None
+    SR   = 0b00100000 # 32 (Send/Receive) Number of Send/Receive objects at the same time
     WM   = 0b01000000 # 64 Window Multiplier
     FIN  = 0b10000000 # 128
