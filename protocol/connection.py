@@ -70,7 +70,7 @@ class ConnectionWith:
     def connect(self):
         ''' Connect to host '''
         
-        syn = Packet.construct(data = b"", flags = Flags.SYN)
+        syn = Packet.construct(data = b"", flags = Flags.SYN, seq_num=0)
         self.__connecting = True
 
         if syn is None:
@@ -104,7 +104,7 @@ class ConnectionWith:
 
         if self.__connected:
             ''' Send syn | sack '''
-            sack = Packet.construct(data = b"", flags = (Flags.SYN | Flags.SACK))
+            sack = Packet.construct(data = b"", flags = (Flags.SYN | Flags.SACK), seq_num=2)
 
             self.__send_func(sack, self.__owner)
         
@@ -154,7 +154,7 @@ class ConnectionWith:
             return
         
         ''' Send syn ack '''
-        syn_ack = Packet.construct(data = b"", flags = Flags.SYN | Flags.ACK)
+        syn_ack = Packet.construct(data = b"", flags = Flags.SYN | Flags.ACK, seq_num=1)
 
         if syn_ack is None:
             LOGGER.warning(f"Failed to construct syn ack to {self.__owner}")
@@ -179,7 +179,7 @@ class ConnectionWith:
             return
         
         ''' Send syn sack '''
-        ack = Packet.construct(data = b"", flags = Flags.SYN | Flags.SACK)
+        ack = Packet.construct(data = b"", flags = Flags.SYN | Flags.SACK, seq_num=2)
 
         self.__send_func(ack, self.__owner)
 
