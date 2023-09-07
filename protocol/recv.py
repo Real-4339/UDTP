@@ -1,3 +1,4 @@
+import os
 import time
 import logging
 
@@ -121,8 +122,11 @@ class Receiver:
             file_data = Packet.merge(self.__packets)
             file_name = f"{self.__name}_{int(time.time())}.{self.__ext}"
 
+            ''' Construct fpath '''
+            full_file_path = os.path.join("files", file_name)
+
             try:
-                with open(file_name, "wb") as f:
+                with open(full_file_path, "wb") as f:
                     f.write(file_data)
                 LOGGER.info(f"Received file from {self.__client}")
                 LOGGER.info(f"File name: {self.__name}_{int(time.time())}.{self.__ext}")
