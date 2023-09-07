@@ -170,6 +170,16 @@ class ConnectionWith:
             elif packet.flags == Flags.FILE:
                 ...
 
+            elif packet.flags >= Flags.SR and packet.flags < Flags.WM:
+                ''' Handle transfer '''
+                transfer_flag = packet.flags
+                if transfer_flag in self.__transfers:
+                    ''' call transfer function '''
+                    self.__transfers[transfer_flag].receive(packet)
+                else:
+                    LOGGER.warning(f"Received packet from {self.__owner} with unknown transfer_flag")
+                    self.__packets.remove(packet)
+
             elif (
                 packet.flags == Flags.ACK or 
                 packet.flags == Flags.SACK or
