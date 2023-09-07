@@ -125,8 +125,10 @@ class Terminal:
             if self.__host.validate_addr(ip, int(port)):
                 
                 print('Sending message to {}:{}'.format(ip, port))
+
+                message_bytes = message.encode('utf-8')
                 
-                self.__host.send_msg(ip, int(port), message.encode('utf-8'))
+                self.__host.send_msg(ip, int(port), message_bytes)
             else:
                 print('Invalid address: {}:{}'.format(ip, port))
 
