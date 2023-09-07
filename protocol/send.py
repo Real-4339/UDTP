@@ -42,6 +42,10 @@ class Sender:
         self.extended = 2
 
     @property
+    def alive(self) -> Status:
+        return self.__alive
+
+    @property
     def ext(self) -> str:
         return self.__ext
     
