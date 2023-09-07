@@ -26,6 +26,10 @@ class Packet:
     def seq_num(self) -> int:
         return self.__seq_num
     
+    @property
+    def data(self) -> bytes:
+        return self.__data
+    
     @seq_num.setter
     def seq_num(self, value: int) -> None:
         self.__seq_num = value
