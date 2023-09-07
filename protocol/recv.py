@@ -21,7 +21,7 @@ class Receiver:
         Handle sequence numbers.
         Have buffer for packets.
     '''
-    def __init__(self, send_func: Callable, addr: AddressInfo, name: str, extention: str, own_transfer_flag: Flags):
+    def __init__(self, send_func: Callable, addr: AddressInfo, name: str = None, extention: str = None, own_transfer_flag: Flags = None):
         self.__name = name
         self.__client = addr
         self.__ext = extention
@@ -72,7 +72,7 @@ class Receiver:
             self._process_file(packet)
             
         elif packet.flags == Flags.MSG:
-            self._process_msg(packet)
+            return
 
         elif packet.flags == Flags.FIN:
             self._process_fin(packet)
@@ -111,18 +111,24 @@ class Receiver:
 
         self.__alive = Status.DEAD
 
-        ''' Create file from packets and save it '''
-        file_data = Packet.merge(self.__packets)
-        file_name = f"{self.__name}_{int(time.time())}.{self.__ext}"
+        if self.name is not None and self.ext is not None:
+            ''' Create file from packets and save it '''
+            file_data = Packet.merge(self.__packets)
+            file_name = f"{self.__name}_{int(time.time())}.{self.__ext}"
 
-        try:
-            with open(file_name, "wb") as f:
-                f.write(file_data)
-            LOGGER.info(f"Received file from {self.__client}")
-            LOGGER.info(f"File name: {self.__name}_{int(time.time())}.{self.__ext}")
-            LOGGER.info(f"File size: {len(self.__packets) * Size.FRAGMENT_SIZE} bytes")
-        except Exception as e:
-            LOGGER.error(f"Failed to save file: {e}")
+            try:
+                with open(file_name, "wb") as f:
+                    f.write(file_data)
+                LOGGER.info(f"Received file from {self.__client}")
+                LOGGER.info(f"File name: {self.__name}_{int(time.time())}.{self.__ext}")
+                LOGGER.info(f"File size: {len(self.__packets) * Size.FRAGMENT_SIZE} bytes")
+            except Exception as e:
+                LOGGER.error(f"Failed to save file: {e}")
+
+        else:
+            ''' Create message from packets and print it '''
+            message = Packet.merge(self.__packets).decode()
+            LOGGER.info(f"Received message from {self.__client} : {message}")
 
     def _acknowledge_data(self) -> None:
         ''' Acknowledge data '''
