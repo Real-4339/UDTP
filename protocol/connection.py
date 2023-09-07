@@ -28,9 +28,9 @@ class ConnectionWith:
 
         self.__keep_alive = Time.KEEPALIVE
         self.__last_time = time.time()
-        self.__last_transfer = Flags.SR
+        self.__last_transfer = Flags.SR - 1
 
-        self.__transfers: dict[Flags: Sender | Receiver] = {}
+        self.__transfers: dict[int: Sender | Receiver] = {}
         self.__packets: list[Packet] = []
         
     @property
@@ -90,12 +90,12 @@ class ConnectionWith:
         ''' Send file to host '''
 
         ''' Get last transfer '''
-        if self.__last_transfer >= Flags.WM:
+        if self.__last_transfer + 1 >= Flags.WM:
             LOGGER.warning(f"Too many transfers from {self.__owner}")
             return
         
         ''' Update last transfer'''
-        transfer_flag = self.__last_transfer << 1
+        transfer_flag = self.__last_transfer + 1
         self.__last_transfer = transfer_flag
 
         ''' Create transfer '''
@@ -103,7 +103,7 @@ class ConnectionWith:
         transfer.prepare_data(data, transfer_flag)
 
         ''' Add transfer to the list '''
-        self._add_transfer(transfer)
+        self._add_transfer(transfer, transfer_flag)
 
         ''' Add iterator to the list '''
         self._add_iterator(transfer._iterator)
@@ -112,7 +112,7 @@ class ConnectionWith:
         init_packet = Packet.construct(data = f"{name}.{ext}:{transfer_flag}".encode(), flags = Flags.FILE, seq_num=0)
         self.__send_func(init_packet, self.__owner)
 
-    def _add_transfer(self, transfer: Sender | Receiver, transfer_flag: Flags) -> None:
+    def _add_transfer(self, transfer: Sender | Receiver, transfer_flag: int) -> None:
         ''' Add transfer to the list '''
         
         self.__transfers[transfer_flag] = transfer
@@ -162,6 +162,32 @@ class ConnectionWith:
             ):
                 ''' call syn sack function '''
                 self._syn_sack(packet)
+
+            elif not self.connected:
+                LOGGER.warning(f"Unexpected flags from {self.__owner}")
+                self.__packets.remove(packet)
+
+            elif packet.flags == Flags.FILE:
+                ...
+
+            elif (
+                packet.flags == Flags.ACK or 
+                packet.flags == Flags.SACK or
+                packet.flags == Flags.FIN
+            ):
+                transfer_flag = packet.data.decode()
+                if transfer_flag.isdigit():
+
+                    transfer_flag = int(transfer_flag)
+                    if transfer_flag in self.__transfers:
+                        ''' call ack function '''
+                        self.__transfers[transfer_flag].receive(packet)
+                    else:
+                        LOGGER.warning(f"Received ack from {self.__owner} with unknown transfer_flag")
+                        self.__packets.remove(packet)
+                else:
+                    LOGGER.warning(f"Received ack from {self.__owner} with invalid transfer_flag")
+                    self.__packets.remove(packet)
 
             else: 
                 ''' call unknown function '''
