@@ -94,6 +94,11 @@ class Receiver:
             ''' Resend ack '''
             ack = Packet.construct(data=b"", flags=Flags.ACK, seq_num=packet.seq_num)
 
+    def kill(self) -> None:
+        ''' Kill receiver '''
+
+        self.__alive = Status.DEAD
+
     def _process_file(self, packet: Packet) -> None:
         ''' Process file '''
 
