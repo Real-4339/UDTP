@@ -21,7 +21,7 @@ class Sender:
         Handle sequence numbers.
         Have buffer for packets.
     '''
-    def __init__(self, send_func: Callable, addr: AddressInfo, name: str, extention: str, own_transfer_flag: Flags):
+    def __init__(self, send_func: Callable, addr: AddressInfo, name: str = None, extention: str = None, own_transfer_flag: Flags = None):
         self.__seq_num = 1
         self.__name = name
         self.__client = addr
