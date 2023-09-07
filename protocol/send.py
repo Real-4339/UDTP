@@ -80,8 +80,6 @@ class Sender:
             self.__started = True
             return
 
-        LOGGER.warning(f"Unexpected flags from {self.__client}")
-
     def time_is_valid(self) -> bool:
         ''' Check if connection is still alive '''
         
