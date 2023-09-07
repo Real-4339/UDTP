@@ -219,3 +219,6 @@ class Host:
     
     def run(self):
         self._endless_loop()
+
+    def stop(self):
+        self.__binded = False
