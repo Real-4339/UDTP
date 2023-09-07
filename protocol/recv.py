@@ -36,6 +36,9 @@ class Receiver:
         self.__alive = Status.ALIVE
         self.__last_time = time.time()
 
+    @property
+    def alive(self) -> Status:
+        return self.__alive
 
     @property
     def name (self) -> str:
