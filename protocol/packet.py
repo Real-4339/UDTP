@@ -52,6 +52,20 @@ class Packet:
             LOGGER.error("Packet is not instance of Packet")
             return None
         return Packet.construct(packet.__data, packet.__flags, packet.__seq_num)
+    
+    @staticmethod
+    def construct_packet(data: bytes, flags: Flags, seq_num: int) -> 'Packet' | None:
+        ''' Construct packet '''
+        if data is None:
+            LOGGER.error("Data is None")
+            return None
+        if flags is None:
+            LOGGER.error("Flags is None")
+            return None
+        if seq_num is None:
+            LOGGER.error("Seq_num is None")
+            return None
+        return Packet(data, flags, seq_num)
 
     @staticmethod
     def construct(data: bytes, flags: Flags, seq_num: int) -> bytes | None:
@@ -117,10 +131,7 @@ class Packet:
             ''' Calculate the seq_num with wrap around '''
             seq_num = (seq_num + i) % (2 ** 32) # HACK: 32 bits
         
-            packet = Packet.construct(packet_data, flags, seq_num + i)
-            if packet is None:
-                LOGGER.error("Failed to construct packet")
-                return None
+            packet = Packet.construct_packet(packet_data, flags, seq_num + i)
         
             packets.append(packet)
         
@@ -148,7 +159,6 @@ class Packet:
 
         return data
                 
-
     def __hash__(self) -> int:
         return hash((self.__data, self.__flags, self.__seq_num))
     
