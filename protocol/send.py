@@ -23,15 +23,15 @@ class Sender:
     '''
     def __init__(self, send_func: Callable, addr: AddressInfo, name: str, extention: str, own_transfer_flag: Flags):
         self.__seq_num = 1
-        self.__client = addr
-        self.__send_func = send_func
         self.__name = name
+        self.__client = addr
         self.__ext = extention
-        self.__started = False
+        self.__send_func = send_func
         self.__own_transfer_flag = own_transfer_flag
 
         self.__window_size = Size.WINDOW_SIZE
-        
+        self.__started = False
+
         self.__acks: set[int] = set()
         self.__all_packets: list[Packet] = []
         self.__sent_packets: list[Packet] = []
