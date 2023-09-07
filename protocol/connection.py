@@ -185,6 +185,12 @@ class ConnectionWith:
         if not self._keep_alive():
             return Status.FINISHED
         
+        ''' Check for dead transfers '''
+        for transfer_flag, transfer in self.__transfers.copy().items():
+            if transfer.alive == Status.DEAD:
+                self.__transfers.pop(transfer_flag)
+
+        ''' Go through all packets '''
         for packet in self.__packets.copy():
 
             if packet.flags == Flags.SYN and not self.connected:
