@@ -60,7 +60,7 @@ class Packet:
         crc16 = crc16_func(data)
 
         try:
-            header = struct.pack('!BHB', flags.value, crc16, seq_num)
+            header = struct.pack('!BHB', flags, crc16, seq_num)
         except struct.error as e:
             LOGGER.error("Failed to pack header: %s", e)
             return None
