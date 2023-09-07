@@ -112,8 +112,34 @@ class ConnectionWith:
         init_packet = Packet.construct(data = f"{name}.{ext}:{transfer_flag}".encode(), flags = Flags.FILE, seq_num=0)
         self.__send_func(init_packet, self.__owner)
 
-    def _add_transfer(self, transfer: Sender | Receiver, transfer_flag: int) -> None:
+    def send_msg(self, message: bytes) -> None:
+        ''' Send message to host '''
+
+        ''' Get last transfer '''
+        if self.__last_transfer + 1 >= Flags.WM:
+            LOGGER.warning(f"Too many transfers from {self.__owner}")
+            return
+        
+        ''' Update last transfer'''
+        transfer_flag = self.__last_transfer + 1
+        self.__last_transfer = transfer_flag
+
+        ''' Create transfer '''
+        transfer = Sender(self.__send_func, self.__owner, transfer_flag=transfer_flag)
+        transfer.prepare_data(message, transfer_flag)
+
         ''' Add transfer to the list '''
+        self._add_transfer(transfer, transfer_flag)
+
+        ''' Add iterator to the list '''
+        self._add_iterator(transfer._iterator)
+
+        ''' Send init packet with transfer flag number '''
+        init_packet = Packet.construct(data = f"{transfer_flag}".encode(), flags = Flags.MSG, seq_num=0)
+        self.__send_func(init_packet, self.__owner)
+
+    def _add_transfer(self, transfer: Sender | Receiver, transfer_flag: int) -> None:
+        ''' Add transfer to the dict '''
         
         self.__transfers[transfer_flag] = transfer
 
@@ -167,6 +193,43 @@ class ConnectionWith:
                 LOGGER.warning(f"Unexpected flags from {self.__owner}")
                 self.__packets.remove(packet)
 
+            elif packet.flags == Flags.FILE:
+                ''' Create transfer '''
+
+                data = packet.data.decode().split(":")
+
+                if len(data) != 2:
+                    LOGGER.warning(f"Received packet from {self.__owner} with invalid data")
+                    self.__packets.remove(packet)
+                    continue
+
+                name_ext, flag = data[0], int(data[1])
+                name, ext = name_ext.split(".")
+
+                transfer = Receiver(self.__send_func, self.__owner, name, ext, flag)
+                self._add_transfer(transfer, flag)
+
+                ''' call transfer function '''
+                transfer.receive(packet)
+
+            elif packet.flags == Flags.MSG:
+                ''' Create transfer '''
+
+                data = packet.data.decode()
+
+                if not data.isdigit():
+                    LOGGER.warning(f"Received packet from {self.__owner} with invalid data")
+                    self.__packets.remove(packet)
+                    continue
+
+                flag = int(data)
+
+                transfer = Receiver(self.__send_func, self.__owner, transfer_flag=flag)
+                self._add_transfer(transfer, flag)
+
+                ''' call transfer function '''
+                transfer.receive(packet)
+
             elif packet.flags >= Flags.SR and packet.flags < Flags.WM:
                 ''' Handle transfer '''
                 transfer_flag = packet.flags
@@ -178,8 +241,6 @@ class ConnectionWith:
                     self.__packets.remove(packet)
 
             elif (
-                packet.flags == Flags.FILE or
-                packet.flags == Flags.MSG or
                 packet.flags == Flags.ACK or 
                 packet.flags == Flags.SACK or
                 packet.flags == Flags.FIN
