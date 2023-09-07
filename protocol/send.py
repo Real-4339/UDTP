@@ -91,6 +91,10 @@ class Sender:
         
         return True
     
+    def kill(self) -> None:
+        ''' Kill connection '''
+        self.__alive = Status.DEAD
+    
     def _start(self) -> None:
         ''' Only for waiting SACK to start sending data '''
         if not self.__started:
