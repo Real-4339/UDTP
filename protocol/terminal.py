@@ -111,6 +111,22 @@ class Terminal:
             else:
                 print('Invalid address: {}:{}'.format(ip, port))
         
+        elif command.startswith('send_m'):
+            try:
+                ip, port = command.split(' ')[1].split(':')
+                message: str = command.split(' ')[2]
+            except IndexError:
+                print('Missing arguments')
+                return
+            
+            if self.__host.validate_addr(ip, int(port)):
+                
+                print('Sending message to {}:{}'.format(ip, port))
+                
+                self.__host.send_message(ip, int(port), message.encode('utf-8'))
+            else:
+                print('Invalid address: {}:{}'.format(ip, port))
+
         else:
             print('Unknown command: {}'.format(command))
 
