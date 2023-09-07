@@ -60,7 +60,7 @@ class Sender:
     def prepare_data(self, data: bytes, flags: Flags) -> None:
         ''' Prepare data for sending '''
         
-        packets = Packet.devide(data, self.__seq_num, packet_size=Size.FRAGMENT_SIZE, flags=flags)
+        packets = Packet.devide(data, self.__seq_num, fragment_size=Size.FRAGMENT_SIZE, flags=flags)
         
         self.__all_packets.extend(packets)
 
