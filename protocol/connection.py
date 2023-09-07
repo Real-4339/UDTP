@@ -82,9 +82,16 @@ class ConnectionWith:
     def disconnect(self):
         ''' Disconnect from host '''
         
+        for transfer in self.__transfers.values():
+            transfer.kill()
+
         self.__connected = False
         self.__connecting = False
         self.__alive = Status.DEAD
+
+        ''' Build fin packet '''
+        fin = Packet.construct(data = b"", flags = Flags.FIN, seq_num=3)
+        self.__send_func(fin, self.__owner)
 
     def send_file(self, data: bytes, name: str, ext: str) -> None:
         ''' Send file to host '''
