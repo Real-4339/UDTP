@@ -143,6 +143,15 @@ class ConnectionWith:
         
         self.__transfers[transfer_flag] = transfer
 
+    def _check_for_avaliable_transfer(self) -> bool:
+        ''' Check if there connection can have more transfers '''
+        
+        if self.__last_transfer + 1 >= Flags.WM:
+            LOGGER.warning(f"Too many transfers from {self.__owner}")
+            return False
+        
+        return True
+
     def _keep_alive(self) -> bool:
         ''' Keep connection alive '''
         
@@ -196,6 +205,11 @@ class ConnectionWith:
             elif packet.flags == Flags.FILE:
                 ''' Create transfer '''
 
+                ''' Check transfer overloading '''
+                if self._check_for_avaliable_transfer():
+                    self.__packets.remove(packet)
+                    continue
+
                 data = packet.data.decode().split(":")
 
                 if len(data) != 2:
@@ -214,6 +228,11 @@ class ConnectionWith:
 
             elif packet.flags == Flags.MSG:
                 ''' Create transfer '''
+
+                ''' Check transfer overloading '''
+                if self._check_for_avaliable_transfer():
+                    self.__packets.remove(packet)
+                    continue
 
                 data = packet.data.decode()
 
