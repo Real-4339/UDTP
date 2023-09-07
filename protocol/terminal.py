@@ -55,6 +55,10 @@ class Terminal:
 
     def handle_command(self, command):
         if command == 'exit':
+            self.__host.disconnect_all()
+            print('Disconnecting from all hosts')
+            self.__host.stop()
+            print('Stopping host')
             self.stop()
         elif command == 'help':
             self.display_help()
@@ -123,7 +127,7 @@ class Terminal:
                 
                 print('Sending message to {}:{}'.format(ip, port))
                 
-                self.__host.send_message(ip, int(port), message.encode('utf-8'))
+                self.__host.send_msg(ip, int(port), message.encode('utf-8'))
             else:
                 print('Invalid address: {}:{}'.format(ip, port))
 
