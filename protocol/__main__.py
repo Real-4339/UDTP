@@ -79,7 +79,6 @@ def main():
 
     try:
         host.run()
-        ...
     except KeyboardInterrupt:
         stop_event.set()
         terminal_thread.join()
