@@ -28,8 +28,6 @@ class Receiver:
         self.__send_func = send_func
         self.__own_transfer_flag = own_transfer_flag
         
-        self.__window_size = Size.WINDOW_SIZE
-        
         self.__acks: set[int] = set()
         self.__packets: list[Packet] = []
         self.__processed: set[int] = set()
