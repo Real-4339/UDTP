@@ -65,14 +65,14 @@ class Sender:
     def receive_ack(self, packet: Packet) -> None:
         ''' Receive ack '''
 
-        if packet.flags & Flags.ACK:
+        if packet.flags == Flags.ACK:
             self.__last_time = time.time()
             self.__acks.add(packet.seq_num)
             return
         
         if packet.flags == Flags.FIN:
             LOGGER.info(f"Received FIN from {self.__client}")
-            self.__alive = Status.FINISHED
+            self.__alive = Status.DEAD
             return
         
         if packet.flags == Flags.SACK:
@@ -91,10 +91,10 @@ class Sender:
         
         return True
     
-    def start(self) -> None:
+    def _start(self) -> None:
         ''' Only for waiting SACK to start sending data '''
         if not self.__started:
-            self.__send_func(Packet.construct(f"{self.name}.{self.ext}".encode(), self.own_transfer_flag, 0), self.__client)
+            self.__send_func(Packet.construct(f"{self.name}.{self.ext}:{self.own_transfer_flag}".encode(), Flags.FILE, 0), self.__client)
 
     def _send_restof_data(self, num_to_skip: int) -> None:
         ''' Send rest of data '''
@@ -105,6 +105,10 @@ class Sender:
             packet = self.__all_packets.pop(0)
             packets_to_send.append(packet)
             self.__sent_packets.append(packet)
+        else:
+            ''' Send FIN '''
+            self.__send_func(Packet.construct(f"{self.own_transfer_flag}".encode(), Flags.FIN, self.__seq_num), self.__client)
+            self.__alive = Status.DEAD
 
         for packet in packets_to_send:
             packet = Packet.packet_to_bytes(packet)
@@ -119,7 +123,7 @@ class Sender:
             return Status.FINISHED
         
         ''' Check if we can start '''
-        self.start()
+        self._start()
 
         ''' Check for acknowledgments and remove acked packets from sent_packets'''
         self.__sent_packets = [packet for packet in self.__sent_packets if packet.seq_num not in self.__acks]
