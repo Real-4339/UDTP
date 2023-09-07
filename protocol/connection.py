@@ -167,25 +167,32 @@ class ConnectionWith:
                 LOGGER.warning(f"Unexpected flags from {self.__owner}")
                 self.__packets.remove(packet)
 
-            elif packet.flags == Flags.FILE:
-                ...
-
             elif packet.flags >= Flags.SR and packet.flags < Flags.WM:
                 ''' Handle transfer '''
                 transfer_flag = packet.flags
                 if transfer_flag in self.__transfers:
                     ''' call transfer function '''
-                    self.__transfers[transfer_flag].receive(packet)
+                    self.__transfers[transfer_flag].receive_data(packet)
                 else:
                     LOGGER.warning(f"Received packet from {self.__owner} with unknown transfer_flag")
                     self.__packets.remove(packet)
 
             elif (
+                packet.flags == Flags.FILE or
+                packet.flags == Flags.MSG or
                 packet.flags == Flags.ACK or 
                 packet.flags == Flags.SACK or
                 packet.flags == Flags.FIN
             ):
-                transfer_flag = packet.data.decode()
+                data = packet.data.decode().split(":")
+                
+                if len(data) != 2:
+                    LOGGER.warning(f"Received packet from {self.__owner} with invalid data")
+                    self.__packets.remove(packet)
+                    continue
+
+                transfer_flag = data[1]
+                
                 if transfer_flag.isdigit():
 
                     transfer_flag = int(transfer_flag)
@@ -193,10 +200,10 @@ class ConnectionWith:
                         ''' call ack function '''
                         self.__transfers[transfer_flag].receive(packet)
                     else:
-                        LOGGER.warning(f"Received ack from {self.__owner} with unknown transfer_flag")
+                        LOGGER.warning(f"Received pack from {self.__owner} with unknown transfer_flag")
                         self.__packets.remove(packet)
                 else:
-                    LOGGER.warning(f"Received ack from {self.__owner} with invalid transfer_flag")
+                    LOGGER.warning(f"Received pack from {self.__owner} with invalid transfer_flag")
                     self.__packets.remove(packet)
 
             else: 
