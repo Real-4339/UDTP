@@ -62,7 +62,7 @@ class Sender:
         
         self.__all_packets.extend(packets)
 
-    def receive_ack(self, packet: Packet) -> None:
+    def receive(self, packet: Packet) -> None:
         ''' Receive ack '''
 
         if packet.flags == Flags.ACK:
