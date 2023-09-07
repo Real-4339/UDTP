@@ -39,6 +39,8 @@ class Sender:
         self.__alive = Status.ALIVE
         self.__last_time = time.time()
 
+        self.extended = 2
+
     @property
     def ext(self) -> str:
         return self.__ext
@@ -106,7 +108,9 @@ class Sender:
         else:
             ''' Send FIN '''
             self.__send_func(Packet.construct(f"{self.own_transfer_flag}".encode(), Flags.FIN, self.__seq_num), self.__client)
-            self.__alive = Status.DEAD
+            self.extended -= 1
+            if self.extended == 0:
+                self.__alive = Status.DEAD
 
         for packet in packets_to_send:
             packet = Packet.packet_to_bytes(packet)
