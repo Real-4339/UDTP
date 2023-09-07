@@ -90,7 +90,7 @@ class ConnectionWith:
         ''' Send file to host '''
 
         ''' Get last transfer '''
-        if self.__last_transfer >= Flags.SR:
+        if self.__last_transfer >= Flags.WM:
             LOGGER.warning(f"Too many transfers from {self.__owner}")
             return
         
@@ -108,8 +108,9 @@ class ConnectionWith:
         ''' Add iterator to the list '''
         self._add_iterator(transfer._iterator)
 
-        ''' Send init packet with file name and extension '''
-        init_packet = Packet.construct(data = f"{name}.{ext}".encode(), flags = Flags.FILE, seq_num=0)
+        ''' Send init packet with file name, extension and transfer flag number '''
+        init_packet = Packet.construct(data = f"{name}.{ext}:{transfer_flag}".encode(), flags = Flags.FILE, seq_num=0)
+        self.__send_func(init_packet, self.__owner)
 
     def _add_transfer(self, transfer: Sender | Receiver, transfer_flag: Flags) -> None:
         ''' Add transfer to the list '''
