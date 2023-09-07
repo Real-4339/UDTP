@@ -142,7 +142,12 @@ class Receiver:
 
         self.__acks.clear()
     
-    def _iterate(self):
+    def _iterate(self) -> Status:
         ''' Iterate over packets '''
+
+        if self.__alive == Status.DEAD:
+            return Status.FINISHED
         
         self._acknowledge_data()
+
+        return Status.SLEEPING
