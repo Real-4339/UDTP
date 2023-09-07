@@ -56,7 +56,6 @@ class Terminal:
     def handle_command(self, command):
         if command == 'exit':
             self.__host.disconnect_all()
-            print('Disconnecting from all hosts')
             self.__host.stop()
             print('Stopping host')
             self.stop()
