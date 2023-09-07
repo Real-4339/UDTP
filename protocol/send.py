@@ -21,13 +21,13 @@ class Sender:
         Handle sequence numbers.
         Have buffer for packets.
     '''
-    def __init__(self, send_func: Callable, addr: AddressInfo, name: str = None, extention: str = None, own_transfer_flag: Flags = None):
+    def __init__(self, send_func: Callable, addr: AddressInfo, name: str = None, extention: str = None, transfer_flag: Flags = None):
         self.__seq_num = 1
         self.__name = name
         self.__client = addr
         self.__ext = extention
         self.__send_func = send_func
-        self.__own_transfer_flag = own_transfer_flag
+        self.__own_transfer_flag = transfer_flag
 
         self.__window_size = Size.WINDOW_SIZE
         self.__started = False
