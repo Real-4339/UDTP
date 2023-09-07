@@ -126,6 +126,29 @@ class Packet:
         
         return packets
     
+    @staticmethod
+    def merge(packets: list['Packet']) -> bytes | None:
+        ''' Merge packets into one '''
+        if not packets:
+            LOGGER.error("Packets list is empty")
+            return None
+        
+        packets = sorted(packets, key=lambda packet: packet.seq_num)
+        
+        data = b""
+        expected_seq_num = packets[0].seq_num
+
+        for packet in packets:    
+            if packet.seq_num == expected_seq_num:
+                data += packet.data
+                expected_seq_num += 1
+            elif packet.seq_num > expected_seq_num: # Overlapping packets
+                data += packet.data
+                expected_seq_num = packet.seq_num + 1
+
+        return data
+                
+
     def __hash__(self) -> int:
         return hash((self.__data, self.__flags, self.__seq_num))
     
