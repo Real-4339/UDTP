@@ -70,13 +70,13 @@ class Sender:
         
         packets = Packet.devide(data, self.__seq_num + 1, fragment_size=Size.FRAGMENT_SIZE, flags=flags)
 
-        LOGGER.info(f"Sending {len(packets)} packets to {self.__client}")
+        # LOGGER.info(f"Sending {len(packets)} packets to {self.__client}")
         
         self.__all_packets.extend(packets)
 
         self.__count_of_packets = len(self.__all_packets)
 
-        LOGGER.info(f"len(self.__all_packets): {len(self.__all_packets)}")
+        # LOGGER.info(f"len(self.__all_packets): {len(self.__all_packets)}")
 
     def receive(self, packet: Packet) -> None:
         ''' Receive ack '''
@@ -129,7 +129,6 @@ class Sender:
         packets_to_send = []
 
         while self.__all_packets and len(packets_to_send) < self.__window_size - num_to_skip:
-            LOGGER.info(f"yes")
             packet = self.__all_packets.pop(0)
             packets_to_send.append(packet)
             self.__sent_packets.append(packet)
@@ -139,9 +138,9 @@ class Sender:
             self.__send_func(packet, self.__client)
 
         ''' Update sequence number '''
-        LOGGER.info(f"seq_num: {self.__seq_num}")
+        # LOGGER.info(f"seq_num: {self.__seq_num}")
         self.__seq_num = (self.__seq_num + len(packets_to_send)) % (2 ** 32) # HACK: 32 bits
-        LOGGER.info(f"new seq_num: {self.__seq_num}")
+        # LOGGER.info(f"new seq_num: {self.__seq_num}")
 
         if self.__count_of_acks >= self.__count_of_packets:
             ''' Send FIN '''
