@@ -89,7 +89,7 @@ class Sender:
             return
         
         if packet.flags == Flags.FIN:
-            LOGGER.info(f"Received FIN from {self.__client}")
+            LOGGER.info(f"File transfer is finished from {self.__client}")
             self.__alive = Status.DEAD
             return
         
