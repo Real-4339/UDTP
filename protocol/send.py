@@ -135,7 +135,7 @@ class Sender:
         ''' Update sequence number '''
         self.__seq_num = (self.__seq_num + len(packets_to_send)) % (2 ** 32) # HACK: 32 bits
 
-        if not self.__all_packets:
+        if not self.__all_packets: # BUG: I dont recv ack, but already sending FIN
             ''' Send FIN '''
             LOGGER.info(f"seq_num: {self.__seq_num}")
             self.__send_func(Packet.construct(f"{self.own_transfer_flag}".encode(), Flags.FIN, self.__seq_num), self.__client)
