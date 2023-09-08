@@ -79,6 +79,11 @@ class Terminal:
             else:
                 print('Invalid address: {}:{}'.format(ip, port))
         
+        elif command == 'disconnect_all':
+
+            print('Started disconnection from all hosts')
+            self.__host.disconnect_all()
+        
         elif command.startswith('disconnect'):
             ip, port = command.split(' ')[1].split(':')
             
@@ -87,12 +92,7 @@ class Terminal:
                 self.__host.disconnect(ip, int(port))
             else:
                 print('Invalid address: {}:{}'.format(ip, port))
-        
-        elif command == 'disconnect_all':
 
-            print('Started disconnection from all hosts')
-            self.__host.disconnect_all()
-        
         elif command == 'list':
             self.__host.list_connections()
 
