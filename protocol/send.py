@@ -145,9 +145,9 @@ class Sender:
 
         if self.__count_of_acks == self.__count_of_packets:
             ''' Send FIN '''
+            self.__seq_num += 1
             LOGGER.info(f"sending fin, seq: {self.__seq_num}")
             self.__send_func(Packet.construct(f"{self.own_transfer_flag}".encode(), Flags.FIN, self.__seq_num), self.__client)
-            self.__seq_num += 1
             self.extended -= 1
             if self.extended == 0:
                 self.__alive = Status.DEAD
