@@ -55,7 +55,7 @@ class ConnectionWith:
             LOGGER.warning(f"Invalid packet from {self.__owner}")
             return
     
-        LOGGER.info(f"Received packet from {self.__owner}")
+        # LOGGER.info(f"Received packet from {self.__owner}")
 
         packet = Packet.deconstruct(data)
 
@@ -143,8 +143,6 @@ class ConnectionWith:
 
         ''' Send init packet with transfer flag number '''
         init_packet = Packet.construct(data = f"{transfer_flag}".encode(), flags = Flags.MSG, seq_num=0)
-        log_packet = Packet.deconstruct(init_packet)
-        LOGGER.info(f"Packet: {log_packet}")
         self.__send_func(init_packet, self.__owner)
 
     def _add_transfer(self, transfer: Sender | Receiver, transfer_flag: int) -> None:
@@ -167,18 +165,18 @@ class ConnectionWith:
         if self.__alive == Status.DEAD:
             return False
         
-        # if not self.time_is_valid() and self.__connecting:
-        #     ''' Resend syn '''
-        #     LOGGER.info(f"Resending syn to {self.__owner}")
-        #     self.connect()
-        #     self.__last_time = time.time()
-        #     return True
+        if not self.time_is_valid() and self.__connecting:
+            ''' Resend syn '''
+            LOGGER.info(f"Resending syn to {self.__owner}")
+            self.connect()
+            self.__last_time = time.time()
+            return True
 
-        # if not self.time_is_valid() and self.__connected:
-        #     ''' Send syn | sack '''
-        #     sack = Packet.construct(data = b"", flags = (Flags.SYN | Flags.SACK), seq_num=2)
-        #     self.__send_func(sack, self.__owner)
-        #     self.__last_time = time.time()
+        if not self.time_is_valid() and self.__connected:
+            ''' Send syn | sack '''
+            sack = Packet.construct(data = b"", flags = (Flags.SYN | Flags.SACK), seq_num=2)
+            self.__send_func(sack, self.__owner)
+            self.__last_time = time.time()
         
         return True
 
@@ -195,8 +193,6 @@ class ConnectionWith:
 
         ''' Go through all packets '''
         for packet in self.__packets.copy():
-
-            LOGGER.info(f"Packet_flags: {packet.flags}, connected: {self.connected}")
 
             if packet.flags == Flags.SYN and not self.connected:
                 ''' call syn function '''
@@ -235,9 +231,6 @@ class ConnectionWith:
 
                 data = packet.data.decode().split(":")
 
-                LOGGER.info(f"File: {packet.flags} in ack, sack, fin")
-                LOGGER.info(f"Data: {data}")
-
                 if len(data) != 2:
                     LOGGER.warning(f"Received file init from {self.__owner} with invalid data")
                     self.__packets.remove(packet)
@@ -268,9 +261,6 @@ class ConnectionWith:
 
                 data = packet.data.decode()
 
-                LOGGER.info(f"Message: {packet.flags} in ack, sack, fin")
-                LOGGER.info(f"Data: {data}")
-
                 if not data.isdigit():
                     LOGGER.warning(f"Received msg from {self.__owner} with invalid data")
                     self.__packets.remove(packet)
@@ -292,7 +282,6 @@ class ConnectionWith:
 
             elif packet.flags >= Flags.SR and packet.flags < Flags.WM:
                 ''' Handle transfer '''
-                LOGGER.info(f"Packet: {packet.flags} in 32 - 63")
 
                 transfer_flag = packet.flags
                 if transfer_flag in self.__transfers:
@@ -309,9 +298,6 @@ class ConnectionWith:
                 packet.flags == Flags.FIN
             ):
                 transfer_flag = packet.data.decode().split(":")
-
-                LOGGER.info(f"{packet.flags} in ack, sack, fin")
-                LOGGER.info(f"Data: {transfer_flag}")
                 
                 if len(transfer_flag) != 1:
                     LOGGER.warning(f"Received packet from {self.__owner} with invalid data")
@@ -319,12 +305,6 @@ class ConnectionWith:
                     continue
 
                 transfer_flag = transfer_flag[0]
-
-                LOGGER.info(f"Recv transfer flag: {transfer_flag}")
-
-                for flag, transfer in self.__transfers.items():
-                    LOGGER.info(f"Transfer flag: {flag}, {type(flag)}")
-                    LOGGER.info(f"Transfer flag_value: {transfer.own_transfer_flag}, {type(transfer.own_transfer_flag)}")
                 
                 if transfer_flag.isdigit():
 
