@@ -122,16 +122,16 @@ class Packet:
         packets = []
         data_size = len(data)
         packets_num = (data_size + fragment_size - 1) // fragment_size # Number of packets needed
-        
+
         for i in range(packets_num):
             start_idx = i * fragment_size
             end_idx = (i + 1) * fragment_size
             packet_data = data[start_idx:end_idx]
 
             ''' Calculate the seq_num with wrap around '''
-            seq_num = (seq_num + i) % (2 ** 32) # HACK: 32 bits
+            current_seq_num = (seq_num + i) % (2 ** 32) # HACK: 32 bits
         
-            packet = Packet.construct_packet(packet_data, flags, seq_num + i)
+            packet = Packet.construct_packet(packet_data, flags, current_seq_num)
         
             packets.append(packet)
         
