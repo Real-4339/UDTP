@@ -118,14 +118,26 @@ class Terminal:
         
         elif command.startswith('send_m'):
             try:
-                ip, port = command.split(' ')[1].split(':')
-                message: str = command.split(' ')[2]
+                parts = command.split(' ')
+                if len(parts) < 3:
+                    raise IndexError
+
+                ip_port = parts[1].split(':')
+                if len(ip_port) != 2:
+                    raise ValueError
+
+                ip = ip_port[0]
+                port = int(ip_port[1])
+                message = ' '.join(parts[2:])
+                
                 if message == '' or message == ' ':
                     raise IndexError
+
             except IndexError:
-                print('Missing arguments')
-                return
-            
+                print('Missing or incorrect arguments')
+            except ValueError:
+                print('Invalid IP or port format')
+
             if self.__host.validate_addr(ip, int(port)):
                 
                 print('Sending message to {}:{}'.format(ip, port))
