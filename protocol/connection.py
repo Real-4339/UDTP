@@ -106,7 +106,7 @@ class ConnectionWith:
         self.__last_transfer = transfer_flag
 
         ''' Create transfer '''
-        transfer = Sender(self.__send_func, self.__owner, name, ext, transfer_flag)
+        transfer = Sender(self.__send_func, self.__owner, type = "file", name = name, extention = ext, transfer_flag = transfer_flag)
         transfer.prepare_data(data, transfer_flag)
 
         ''' Add transfer to the list '''
@@ -116,7 +116,7 @@ class ConnectionWith:
         self._add_iterator(transfer._iterator)
 
         ''' Send init packet with file name, extension and transfer flag number '''
-        init_packet = Packet.construct(data = f"{name}.{ext}:{transfer_flag}".encode(), flags = Flags.FILE, seq_num=0)
+        init_packet = Packet.construct(data = f"{name}{ext}:{transfer_flag}".encode(), flags = Flags.FILE, seq_num=0)
         self.__send_func(init_packet, self.__owner)
 
     def send_msg(self, message: bytes) -> None:
@@ -132,7 +132,7 @@ class ConnectionWith:
         self.__last_transfer = transfer_flag
 
         ''' Create transfer '''
-        transfer = Sender(self.__send_func, self.__owner, transfer_flag=transfer_flag)
+        transfer = Sender(self.__send_func, self.__owner, type = "msg", transfer_flag = transfer_flag)
         transfer.prepare_data(message, transfer_flag)
 
         ''' Add transfer to the list '''
@@ -229,7 +229,7 @@ class ConnectionWith:
                 ''' Create transfer '''
 
                 ''' Check transfer overloading '''
-                if self._check_for_avaliable_transfer():
+                if not self._check_for_avaliable_transfer():
                     self.__packets.remove(packet)
                     continue
 
@@ -238,7 +238,7 @@ class ConnectionWith:
                 LOGGER.info(f"File: {packet.flags} in ack, sack, fin")
                 LOGGER.info(f"Data: {data}")
 
-                if len(data) != 3:
+                if len(data) != 2:
                     LOGGER.warning(f"Received file init from {self.__owner} with invalid data")
                     self.__packets.remove(packet)
                     continue

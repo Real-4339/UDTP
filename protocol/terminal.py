@@ -108,7 +108,7 @@ class Terminal:
             
             if self.__host.validate_addr(ip, int(port)):
                 
-                print('Sending file to {}:{}'.format(file, ip, port))
+                print('Sending file to {}:{}'.format(ip, port))
                 
                 name, ext = get_name_and_extension(file)
 

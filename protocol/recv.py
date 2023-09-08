@@ -22,7 +22,7 @@ class Receiver:
         Handle sequence numbers.
         Have buffer for packets.
     '''
-    def __init__(self, send_func: Callable, addr: AddressInfo, name: str = None, extention: str = None, transfer_flag: Flags = None):
+    def __init__(self, send_func: Callable, addr: AddressInfo, name: str = None, extention: str = None, transfer_flag: int = None):
         self.__seq_num = 0
         self.__name = name
         self.__client = addr
@@ -121,9 +121,9 @@ class Receiver:
         name_ext, flag = data[0], int(data[1])
         name, ext = name_ext.split(".")
 
-        self.name = name
-        self.ext = ext
-        self.own_transfer_flag = flag
+        self.__name = name
+        self.__ext = ext
+        self.__own_transfer_flag = flag
 
         self._send_sack()
 
@@ -135,10 +135,11 @@ class Receiver:
         if self.name is not None and self.ext is not None:
             ''' Create file from packets and save it '''
             file_data = Packet.merge(self.__packets)
-            file_name = f"{self.__name}_{int(time.time())}.{self.__ext}"
+            file_name = f"{self.__name}_{time.time()}.{self.__ext}"
 
             ''' Construct fpath '''
-            full_file_path = os.path.join("files", file_name)
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            full_file_path = os.path.join(script_dir, 'files', file_name)
 
             try:
                 with open(full_file_path, "wb") as f:

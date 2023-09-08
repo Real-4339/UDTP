@@ -21,7 +21,7 @@ class Sender:
         Handle sequence numbers.
         Have buffer for packets.
     '''
-    def __init__(self, send_func: Callable, addr: AddressInfo, type:str = "file", name: str = None, extention: str = None, transfer_flag: Flags = None):
+    def __init__(self, send_func: Callable, addr: AddressInfo, type:str = "file", name: str = None, extention: str = None, transfer_flag: int = None):
         self.__seq_num = 1
         self.__type = type
         self.__name = name
@@ -68,7 +68,7 @@ class Sender:
     def prepare_data(self, data: bytes, flags: Flags) -> None:
         ''' Prepare data for sending '''
         
-        packets = Packet.devide(data, self.__seq_num, fragment_size=Size.FRAGMENT_SIZE, flags=flags)
+        packets = Packet.devide(data, self.__seq_num + 1, fragment_size=Size.FRAGMENT_SIZE, flags=flags)
 
         LOGGER.info(f"Sending {len(packets)} packets to {self.__client}")
         
@@ -143,11 +143,11 @@ class Sender:
         self.__seq_num = (self.__seq_num + len(packets_to_send)) % (2 ** 32) # HACK: 32 bits
         LOGGER.info(f"new seq_num: {self.__seq_num}")
 
-        if self.__count_of_acks == self.__count_of_packets:
+        if self.__count_of_acks >= self.__count_of_packets:
             ''' Send FIN '''
             self.__seq_num += 1
             LOGGER.info(f"sending fin, seq: {self.__seq_num}")
-            self.__send_func(Packet.construct(f"{self.own_transfer_flag}".encode(), Flags.FIN, self.__seq_num), self.__client)
+            self.__send_func(Packet.construct(data = f"{self.own_transfer_flag}".encode(), flags = Flags.FIN, seq_num = self.__seq_num), self.__client)
             self.extended -= 1
             if self.extended == 0:
                 self.__alive = Status.DEAD
@@ -161,6 +161,11 @@ class Sender:
         if not self._start():
             LOGGER.info(f"Waiting for SACK from {self.__client}")
             return Status.SLEEPING
+        
+        if not self.time_is_valid():
+            LOGGER.info(f"Transfer is not alive anymore")
+            self.__alive = Status.DEAD
+            return Status.FINISHED
 
         ''' Check for acknowledgments and remove acked packets from sent_packets'''
         self.__sent_packets = [packet for packet in self.__sent_packets if packet.seq_num not in self.__acks]
