@@ -68,7 +68,7 @@ class Packet:
         return Packet.construct(packet.__data, packet.__flags, packet.__seq_num)
 
     @staticmethod
-    def construct(data: bytes, flags: Flags, seq_num: int) -> bytes | None:
+    def construct(data: bytes, flags: Flags, seq_num: int) -> bytes or None:
         ''' Construct packet in Bytes '''
         crc16_func = crcmod.mkCrcFun(0x18005, rev=True, initCrc=0xFFFF, xorOut=0x0000)
         crc16 = crc16_func(data)
