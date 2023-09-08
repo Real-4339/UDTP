@@ -125,7 +125,7 @@ class Packet:
 
         for i in range(packets_num):
             start_idx = i * fragment_size
-            end_idx = (i + 1) * fragment_size
+            end_idx = min(start_idx + fragment_size, data_size)
             packet_data = data[start_idx:end_idx]
 
             ''' Calculate the seq_num with wrap around '''
