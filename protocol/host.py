@@ -217,7 +217,7 @@ class Host:
         self.__iterators = []
 
         self._add_iterator(self._iterator)
-        self.__selector.register(self.__socket, EVENT_READ| EVENT_WRITE)
+        self.__selector.register(self.__socket, EVENT_READ) # | EVENT_WRITE
 
         self.__binded = True
 
