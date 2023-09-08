@@ -29,6 +29,10 @@ def file_to_bytes(path: str) -> bytes | None:
     with open(path, "rb") as file:
         data = file.read()
 
+    if data == b'':
+        print(f"File {path} is empty")
+        return None
+
     return data
 
 class Terminal:
@@ -105,6 +109,9 @@ class Terminal:
                 return
             
             data = file_to_bytes(file)
+
+            if data is None:
+                return
             
             if self.__host.validate_addr(ip, int(port)):
                 
