@@ -130,8 +130,6 @@ class Host:
 
     def _send(self, data: bytes, addr: AddressInfo):
         ''' Send data to addr '''
-
-        LOGGER.debug(f"Sending {len(data)} bytes to {addr}")
         
         self.__socket.sendto(data, addr.values())
 
