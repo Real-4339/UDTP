@@ -3,9 +3,8 @@ import socket
 import threading
 import netifaces
 
-from terminal import Terminal
 from host import Host
-
+from terminal import Terminal
 
 def get_available_ips() -> list:
     ip_addresses = []
