@@ -59,20 +59,33 @@ def main():
 
     ip = None
     port = None
-    
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
     ''' Get ip and port '''
     while True:
         ip = get_new_ip()
         port = get_new_port()
         if ip is not None and port is not None:
+            ...
+        else:
+            continue
+        try:
+            sock.bind((ip, port))
+            print('Successfully binded , so ip and port are available')
             break
+        except OSError:
+            print('Address already in use')
+            continue
+        except socket.error:
+            print('Error: cannot bind to {}:{}'.format(ip, port))
+            continue
+
+    sock.close()
     
     host = Host(ip, port)
-
     terminal = Terminal(host, stop_event)
 
     host.register()
-    print('Starting host at {}:{}'.format(ip, port))
 
     terminal_thread = threading.Thread(target=terminal.start)
     terminal_thread.start()

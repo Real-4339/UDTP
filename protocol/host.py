@@ -37,6 +37,12 @@ class Host:
                     return connection
         return None
     
+    def get_bounded_ip_port(self) -> tuple[str, int]:
+        ''' Get bounded ip and port '''
+        
+        ip, port = self.__socket.getsockname()
+        return str(ip), int(port)
+
     def list_connections(self) -> None:
         ''' List all connections '''
         
@@ -124,6 +130,8 @@ class Host:
 
     def _send(self, data: bytes, addr: AddressInfo):
         ''' Send data to addr '''
+
+        LOGGER.debug(f"Sending {len(data)} bytes to {addr}")
         
         self.__socket.sendto(data, addr.values())
 
@@ -199,6 +207,14 @@ class Host:
         self.__socket.bind(self.__me.values())
         self.__socket.setblocking(False)
 
+        bound_ip, bound_port = self.__socket.getsockname()
+
+        LOGGER.debug(f"Host registered on {bound_ip}:{bound_port}")
+        
+        if ((str(bound_ip), int(bound_port)) != self.__me.values()):
+            LOGGER.warning(f"Host registered on {bound_ip}:{bound_port} instead of {self.__me.ip}:{self.__me.port}")
+            self.__me = AddressInfo(bound_ip, bound_port)
+
         self.__connections = []
         self.__iterators = []
 
@@ -206,8 +222,6 @@ class Host:
         self.__selector.register(self.__socket, EVENT_READ)
 
         self.__binded = True
-
-        LOGGER.info('Host registered')
 
     def unregister(self):
         ''' Unbind socket '''

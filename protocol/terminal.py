@@ -67,7 +67,8 @@ class Terminal:
             self.logging(command)
 
         elif command == 'my_address':
-            print('My address is {}:{}'.format(self.__host.me.ip, self.__host.me.port))
+            ip, port = self.__host.get_bounded_ip_port()
+            print('My address is {}:{}'.format(ip, port))
         
         elif command.startswith('connect'):
             ip, port = command.split(' ')[1].split(':')
