@@ -167,18 +167,18 @@ class ConnectionWith:
         if self.__alive == Status.DEAD:
             return False
         
-        if not self.time_is_valid() and self.__connecting:
-            ''' Resend syn '''
-            LOGGER.info(f"Resending syn to {self.__owner}")
-            self.connect()
-            self.__last_time = time.time()
-            return True
+        # if not self.time_is_valid() and self.__connecting:
+        #     ''' Resend syn '''
+        #     LOGGER.info(f"Resending syn to {self.__owner}")
+        #     self.connect()
+        #     self.__last_time = time.time()
+        #     return True
 
-        if not self.time_is_valid() and self.__connected:
-            ''' Send syn | sack '''
-            sack = Packet.construct(data = b"", flags = (Flags.SYN | Flags.SACK), seq_num=2)
-            self.__send_func(sack, self.__owner)
-            self.__last_time = time.time()
+        # if not self.time_is_valid() and self.__connected:
+        #     ''' Send syn | sack '''
+        #     sack = Packet.construct(data = b"", flags = (Flags.SYN | Flags.SACK), seq_num=2)
+        #     self.__send_func(sack, self.__owner)
+        #     self.__last_time = time.time()
         
         return True
 

@@ -120,6 +120,8 @@ class Terminal:
             try:
                 ip, port = command.split(' ')[1].split(':')
                 message: str = command.split(' ')[2]
+                if message == '' or message == ' ':
+                    raise IndexError
             except IndexError:
                 print('Missing arguments')
                 return
