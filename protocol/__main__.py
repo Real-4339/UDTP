@@ -26,9 +26,9 @@ def get_new_ip() -> str:
     ip = input('IP >>> ')
     try:
         socket.inet_aton(ip)
-        if ip not in ip_addresses:
-            print('Invalid IP')
-            return None
+        # if ip not in ip_addresses:
+        #     print('Invalid IP')
+        #     return None
     except socket.error:
         print('Invalid IP')
         return None
