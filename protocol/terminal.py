@@ -34,12 +34,13 @@ def file_to_bytes(path: str) -> bytes | None:
 class Terminal:
     def __init__(self, host: Host, stop_event: threading.Event):
         self.__host = host
-        self.__stop_event = stop_event
         self.running = False
+        self.__stop_event = stop_event
+        
+        logging.basicConfig(level=logging.NOTSET)
 
     def start(self):
         self.running = True
-        logging.basicConfig(level=logging.NOTSET)
         while self.running:
             try:
                 command = input('Try \'help\' >>> ')
