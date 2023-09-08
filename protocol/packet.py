@@ -57,7 +57,7 @@ class Packet:
         return Packet(data, flags, seq_num)
     
     @staticmethod
-    def packet_to_bytes(packet: 'Packet') -> bytes or None:
+    def packet_to_bytes(packet: 'Packet') -> bytes | None:
         ''' Convert packet to bytes '''
         if packet is None:
             LOGGER.error("Packet is None")
@@ -68,7 +68,7 @@ class Packet:
         return Packet.construct(packet.__data, packet.__flags, packet.__seq_num)
 
     @staticmethod
-    def construct(data: bytes, flags: Flags, seq_num: int) -> bytes or None:
+    def construct(data: bytes, flags: Flags, seq_num: int) -> bytes | None:
         ''' Construct packet in Bytes '''
         crc16_func = crcmod.mkCrcFun(0x18005, rev=True, initCrc=0xFFFF, xorOut=0x0000)
         crc16 = crc16_func(data)
@@ -117,7 +117,7 @@ class Packet:
         return True
     
     @staticmethod
-    def devide(data: bytes, seq_num: int, fragment_size: int, flags: Flags) -> list['Packet'] or None:
+    def devide(data: bytes, seq_num: int, fragment_size: int, flags: Flags) -> list['Packet'] | None:
         ''' Devide data into packets '''
         packets = []
         data_size = len(data)
@@ -138,7 +138,7 @@ class Packet:
         return packets
     
     @staticmethod
-    def merge(packets: list['Packet']) -> bytes or None:
+    def merge(packets: list['Packet']) -> bytes | None:
         ''' Merge packets into one '''
         if not packets:
             LOGGER.error("Packets list is empty")
