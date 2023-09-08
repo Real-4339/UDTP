@@ -82,7 +82,7 @@ class Sender:
         ''' Receive ack '''
 
         if packet.flags == Flags.ACK:
-            LOGGER.info(f"Received ACK from {self.__client}")
+            # LOGGER.info(f"Received ACK from {self.__client}")
             self.__last_time = time.time()
             self.__acks.add(packet.seq_num)
             self.__count_of_acks += 1

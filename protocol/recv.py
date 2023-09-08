@@ -99,7 +99,7 @@ class Receiver:
 
         else:
             ''' Resend ack '''
-            LOGGER.info(f"Resending ACK to {self.__client} : {packet.seq_num}")
+            # LOGGER.info(f"Resending ACK to {self.__client} : {packet.seq_num}")
             ack = Packet.construct(data=f"{self.own_transfer_flag}".encode(), flags=Flags.ACK, seq_num=packet.seq_num)
             self.__send_func(ack, self.__client)
 
@@ -163,7 +163,7 @@ class Receiver:
             return
         
         for seq_num in self.__acks:
-            LOGGER.info(f"Sending ACK to {self.__client} : {seq_num}")
+            # LOGGER.info(f"Sending ACK to {self.__client} : {seq_num}")
             ack = Packet.construct(data=f"{self.own_transfer_flag}".encode(), flags=Flags.ACK, seq_num=seq_num)
             self.__send_func(ack, self.__client)
 
