@@ -7,7 +7,7 @@ from typing import Callable
 from go.status import Status
 from connection import ConnectionWith
 from go.adressinfo import AddressInfo
-from selectors import DefaultSelector, EVENT_READ
+from selectors import DefaultSelector, EVENT_READ, EVENT_WRITE
 
 
 ''' Global variables '''
@@ -217,7 +217,7 @@ class Host:
         self.__iterators = []
 
         self._add_iterator(self._iterator)
-        self.__selector.register(self.__socket, EVENT_READ)
+        self.__selector.register(self.__socket, EVENT_READ| EVENT_WRITE)
 
         self.__binded = True
 
