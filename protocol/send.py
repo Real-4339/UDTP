@@ -139,7 +139,7 @@ class Sender:
 
         ''' Update sequence number '''
         # LOGGER.info(f"seq_num: {self.__seq_num}")
-        self.__seq_num = (self.__seq_num + len(packets_to_send)) % (2 ** 32) # HACK: 32 bits
+        self.__seq_num = (self.__seq_num + len(packets_to_send)) % (2 ** 8) # HACK: 8 bits
         # LOGGER.info(f"new seq_num: {self.__seq_num}")
 
         if self.__count_of_acks >= self.__count_of_packets:
