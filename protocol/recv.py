@@ -135,7 +135,7 @@ class Receiver:
         if self.name is not None and self.ext is not None:
             ''' Create file from packets and save it '''
             file_data = Packet.merge(self.__packets)
-            file_name = f"{self.__name}_{time.time()}.{self.__ext}"
+            file_name = f"{self.__name}_{int(time.time())}.{self.__ext}"
 
             ''' Construct fpath '''
             script_dir = os.path.dirname(os.path.abspath(__file__))
