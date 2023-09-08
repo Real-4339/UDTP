@@ -23,6 +23,7 @@ class Receiver:
         Have buffer for packets.
     '''
     def __init__(self, send_func: Callable, addr: AddressInfo, name: str = None, extention: str = None, transfer_flag: Flags = None):
+        self.__seq_num = 0
         self.__name = name
         self.__client = addr
         self.__ext = extention
@@ -76,18 +77,19 @@ class Receiver:
             self._process_file(packet)
             
         elif packet.flags == Flags.MSG:
-            return
+            self._send_sack()
 
         elif packet.flags == Flags.FIN:
             self._process_fin(packet)
 
+        self.__seq_num += 1
+
     def receive_data(self, packet: Packet) -> None:
         ''' Receive data '''
 
-        if not packet.is_valid():
-            return
-
         if packet.seq_num not in self.__processed:
+            self.__seq_num += 1
+
             self.__acks.add(packet.seq_num)
             self.__packets.append(packet)
             self.__processed.add(packet.seq_num)
@@ -96,12 +98,17 @@ class Receiver:
 
         else:
             ''' Resend ack '''
-            ack = Packet.construct(data=b"", flags=Flags.ACK, seq_num=packet.seq_num)
+            ack = Packet.construct(data=f"{self.own_transfer_flag}".encode(), flags=Flags.ACK, seq_num=packet.seq_num)
 
     def kill(self) -> None:
         ''' Kill receiver '''
 
         self.__alive = Status.DEAD
+
+    def _send_sack(self) -> None:
+        ''' Send SACK '''
+        LOGGER.info(f"Sending SACK to {self.__client}")
+        self.__send_func(Packet.construct(data=f"{self.own_transfer_flag}".encode(), flags=Flags.SACK, seq_num=self.__seq_num), self.__client)
 
     def _process_file(self, packet: Packet) -> None:
         ''' Process file '''
@@ -114,6 +121,8 @@ class Receiver:
         self.name = name
         self.ext = ext
         self.own_transfer_flag = flag
+
+        self._send_sack()
 
     def _process_fin(self, packet: Packet) -> None:
         ''' Process FIN '''
@@ -149,7 +158,7 @@ class Receiver:
             return
         
         for seq_num in self.__acks:
-            ack = Packet.construct(data=b"", flags=Flags.ACK, seq_num=seq_num)
+            ack = Packet.construct(data=f"{self.own_transfer_flag}".encode(), flags=Flags.ACK, seq_num=seq_num)
             self.__send_func(ack, self.__client)
 
         self.__acks.clear()

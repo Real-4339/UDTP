@@ -66,7 +66,7 @@ class ConnectionWith:
         ''' Check if connection is still alive '''
         
         if time.time() - self.__last_time > self.__keep_alive:
-            LOGGER.warning(f"Connection with {self.__owner} is almost dead")
+            # LOGGER.warning(f"Connection with {self.__owner} is almost dead")
             return False
         
         return True
@@ -143,6 +143,8 @@ class ConnectionWith:
 
         ''' Send init packet with transfer flag number '''
         init_packet = Packet.construct(data = f"{transfer_flag}".encode(), flags = Flags.MSG, seq_num=0)
+        log_packet = Packet.deconstruct(init_packet)
+        LOGGER.info(f"Packet: {log_packet}")
         self.__send_func(init_packet, self.__owner)
 
     def _add_transfer(self, transfer: Sender | Receiver, transfer_flag: int) -> None:
@@ -165,17 +167,17 @@ class ConnectionWith:
         if self.__alive == Status.DEAD:
             return False
         
-        if not self.time_is_valid() and self.__connecting:
-            ''' Resend syn '''
-            self.connect()
-            self.__last_time = time.time()
-            return True
+        # if not self.time_is_valid() and self.__connecting:
+        #     ''' Resend syn '''
+        #     self.connect()
+        #     self.__last_time = time.time()
+        #     return True
 
-        if not self.time_is_valid() and self.__connected:
-            ''' Send syn | sack '''
-            sack = Packet.construct(data = b"", flags = (Flags.SYN | Flags.SACK), seq_num=2)
-            self.__send_func(sack, self.__owner)
-            self.__last_time = time.time()
+        # if not self.time_is_valid() and self.__connected:
+        #     ''' Send syn | sack '''
+        #     sack = Packet.construct(data = b"", flags = (Flags.SYN | Flags.SACK), seq_num=2)
+        #     self.__send_func(sack, self.__owner)
+        #     self.__last_time = time.time()
         
         return True
 
@@ -192,6 +194,8 @@ class ConnectionWith:
 
         ''' Go through all packets '''
         for packet in self.__packets.copy():
+
+            LOGGER.info(f"Packet_flags: {packet.flags}, connected: {self.connected}")
 
             if packet.flags == Flags.SYN and not self.connected:
                 ''' call syn function '''
@@ -212,7 +216,7 @@ class ConnectionWith:
                 self._syn_sack(packet)
 
             elif not self.connected:
-                LOGGER.warning(f"Unexpected flags from {self.__owner}")
+                LOGGER.warning(f"Not connected, can not recv that packet from {self.__owner}")
                 self.__packets.remove(packet)
 
             elif packet.flags == Flags.FILE:
@@ -225,8 +229,11 @@ class ConnectionWith:
 
                 data = packet.data.decode().split(":")
 
-                if len(data) != 2:
-                    LOGGER.warning(f"Received packet from {self.__owner} with invalid data")
+                LOGGER.info(f"File: {packet.flags} in ack, sack, fin")
+                LOGGER.info(f"Data: {data}")
+
+                if len(data) != 3:
+                    LOGGER.warning(f"Received file init from {self.__owner} with invalid data")
                     self.__packets.remove(packet)
                     continue
 
@@ -239,18 +246,24 @@ class ConnectionWith:
                 ''' call transfer function '''
                 transfer.receive(packet)
 
+                ''' Delete that packet '''
+                self.__packets.remove(packet)
+
             elif packet.flags == Flags.MSG:
                 ''' Create transfer '''
 
                 ''' Check transfer overloading '''
-                if self._check_for_avaliable_transfer():
+                if not self._check_for_avaliable_transfer():
                     self.__packets.remove(packet)
                     continue
 
                 data = packet.data.decode()
 
+                LOGGER.info(f"Message: {packet.flags} in ack, sack, fin")
+                LOGGER.info(f"Data: {data}")
+
                 if not data.isdigit():
-                    LOGGER.warning(f"Received packet from {self.__owner} with invalid data")
+                    LOGGER.warning(f"Received msg from {self.__owner} with invalid data")
                     self.__packets.remove(packet)
                     continue
 
@@ -262,12 +275,16 @@ class ConnectionWith:
                 ''' call transfer function '''
                 transfer.receive(packet)
 
+                ''' Delete that packet '''
+                self.__packets.remove(packet)
+
             elif packet.flags >= Flags.SR and packet.flags < Flags.WM:
                 ''' Handle transfer '''
                 transfer_flag = packet.flags
                 if transfer_flag in self.__transfers:
                     ''' call transfer function '''
                     self.__transfers[transfer_flag].receive_data(packet)
+                    self.__packets.remove(packet)
                 else:
                     LOGGER.warning(f"Received packet from {self.__owner} with unknown transfer_flag")
                     self.__packets.remove(packet)
@@ -277,14 +294,23 @@ class ConnectionWith:
                 packet.flags == Flags.SACK or
                 packet.flags == Flags.FIN
             ):
-                data = packet.data.decode().split(":")
+                transfer_flag = packet.data.decode().split(":")
+
+                LOGGER.info(f"{packet.flags} in ack, sack, fin")
+                LOGGER.info(f"Data: {transfer_flag}")
                 
-                if len(data) != 2:
+                if len(transfer_flag) != 1:
                     LOGGER.warning(f"Received packet from {self.__owner} with invalid data")
                     self.__packets.remove(packet)
                     continue
 
-                transfer_flag = data[1]
+                transfer_flag = transfer_flag[0]
+
+                LOGGER.info(f"Recv transfer flag: {transfer_flag}")
+
+                for flag, transfer in self.__transfers.items():
+                    LOGGER.info(f"Transfer flag: {flag}, {type(flag)}")
+                    LOGGER.info(f"Transfer flag_value: {transfer.own_transfer_flag}, {type(transfer.own_transfer_flag)}")
                 
                 if transfer_flag.isdigit():
 
@@ -292,6 +318,7 @@ class ConnectionWith:
                     if transfer_flag in self.__transfers:
                         ''' call ack function '''
                         self.__transfers[transfer_flag].receive(packet)
+                        self.__packets.remove(packet)
                     else:
                         LOGGER.warning(f"Received pack from {self.__owner} with unknown transfer_flag")
                         self.__packets.remove(packet)

@@ -43,17 +43,6 @@ class Packet:
         return True
     
     @staticmethod
-    def packet_to_bytes(packet: 'Packet') -> bytes | None:
-        ''' Convert packet to bytes '''
-        if packet is None:
-            LOGGER.error("Packet is None")
-            return None
-        if not isinstance(packet, Packet):
-            LOGGER.error("Packet is not instance of Packet")
-            return None
-        return Packet.construct(packet.__data, packet.__flags, packet.__seq_num)
-    
-    @staticmethod
     def construct_packet(data: bytes, flags: Flags, seq_num: int) -> 'Packet' or None:
         ''' Construct packet '''
         if data is None:
@@ -66,6 +55,17 @@ class Packet:
             LOGGER.error("Seq_num is None")
             return None
         return Packet(data, flags, seq_num)
+    
+    @staticmethod
+    def packet_to_bytes(packet: 'Packet') -> bytes | None:
+        ''' Convert packet to bytes '''
+        if packet is None:
+            LOGGER.error("Packet is None")
+            return None
+        if not isinstance(packet, Packet):
+            LOGGER.error("Packet is not instance of Packet")
+            return None
+        return Packet.construct(packet.__data, packet.__flags, packet.__seq_num)
 
     @staticmethod
     def construct(data: bytes, flags: Flags, seq_num: int) -> bytes | None:
@@ -158,7 +158,13 @@ class Packet:
                 expected_seq_num = packet.seq_num + 1
 
         return data
-                
+
+    def __repr__(self) -> str:
+        return f"Packet({self.__data}, {self.__flags}, {self.__seq_num})"
+
+    def __str__(self) -> str:
+        return f"Packet({self.__data}, {self.__flags}, {self.__seq_num})"            
+    
     def __hash__(self) -> int:
         return hash((self.__data, self.__flags, self.__seq_num))
     
