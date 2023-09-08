@@ -57,7 +57,7 @@ class Packet:
         return Packet(data, flags, seq_num)
     
     @staticmethod
-    def packet_to_bytes(packet: 'Packet') -> bytes | None:
+    def packet_to_bytes(packet: 'Packet') -> bytes or None:
         ''' Convert packet to bytes '''
         if packet is None:
             LOGGER.error("Packet is None")
@@ -117,7 +117,7 @@ class Packet:
         return True
     
     @staticmethod
-    def devide(data: bytes, seq_num: int, fragment_size: int, flags: Flags) -> list['Packet'] | None:
+    def devide(data: bytes, seq_num: int, fragment_size: int, flags: Flags) -> list['Packet'] or None:
         ''' Devide data into packets '''
         packets = []
         data_size = len(data)
@@ -138,7 +138,7 @@ class Packet:
         return packets
     
     @staticmethod
-    def merge(packets: list['Packet']) -> bytes | None:
+    def merge(packets: list['Packet']) -> bytes or None:
         ''' Merge packets into one '''
         if not packets:
             LOGGER.error("Packets list is empty")
