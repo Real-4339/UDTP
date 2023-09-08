@@ -88,7 +88,7 @@ class Receiver:
         ''' Receive data '''
 
         if packet.seq_num not in self.__processed:
-            LOGGER.info(f"Received data from {self.__client} : {packet.seq_num}")
+            # LOGGER.info(f"Received data from {self.__client} : {packet.seq_num}")
             self.__seq_num += 1
 
             self.__acks.add(packet.seq_num)
@@ -159,7 +159,7 @@ class Receiver:
         ''' Acknowledge data '''
         
         if len(self.__acks) == 0:
-            LOGGER.info(f"No data to acknowledge")
+            # LOGGER.info(f"No data to acknowledge")
             return
         
         for seq_num in self.__acks:
