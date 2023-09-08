@@ -139,17 +139,18 @@ class Sender:
             self.__send_func(packet, self.__client)
 
         ''' Update sequence number '''
+        LOGGER.info(f"seq_num: {self.__seq_num}")
         self.__seq_num = (self.__seq_num + len(packets_to_send)) % (2 ** 32) # HACK: 32 bits
+        LOGGER.info(f"new seq_num: {self.__seq_num}")
 
         if self.__count_of_acks == self.__count_of_packets:
             ''' Send FIN '''
-            LOGGER.info(f"seq_num: {self.__seq_num}")
+            LOGGER.info(f"sending fin, seq: {self.__seq_num}")
             self.__send_func(Packet.construct(f"{self.own_transfer_flag}".encode(), Flags.FIN, self.__seq_num), self.__client)
             self.__seq_num += 1
             self.extended -= 1
             if self.extended == 0:
                 self.__alive = Status.DEAD
-
     
     def _iterator(self):
         ''' Handle packets '''

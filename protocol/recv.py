@@ -88,6 +88,7 @@ class Receiver:
         ''' Receive data '''
 
         if packet.seq_num not in self.__processed:
+            LOGGER.info(f"Received data from {self.__client} : {packet.seq_num}")
             self.__seq_num += 1
 
             self.__acks.add(packet.seq_num)
@@ -98,7 +99,9 @@ class Receiver:
 
         else:
             ''' Resend ack '''
+            LOGGER.info(f"Resending ACK to {self.__client} : {packet.seq_num}")
             ack = Packet.construct(data=f"{self.own_transfer_flag}".encode(), flags=Flags.ACK, seq_num=packet.seq_num)
+            self.__send_func(ack, self.__client)
 
     def kill(self) -> None:
         ''' Kill receiver '''
@@ -155,15 +158,17 @@ class Receiver:
         ''' Acknowledge data '''
         
         if len(self.__acks) == 0:
+            LOGGER.info(f"No data to acknowledge")
             return
         
         for seq_num in self.__acks:
+            LOGGER.info(f"Sending ACK to {self.__client} : {seq_num}")
             ack = Packet.construct(data=f"{self.own_transfer_flag}".encode(), flags=Flags.ACK, seq_num=seq_num)
             self.__send_func(ack, self.__client)
 
         self.__acks.clear()
     
-    def _iterate(self) -> Status:
+    def _iterator(self) -> Status:
         ''' Iterate over packets '''
 
         if self.__alive == Status.DEAD:

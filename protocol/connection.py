@@ -243,6 +243,9 @@ class ConnectionWith:
                 transfer = Receiver(self.__send_func, self.__owner, name, ext, flag)
                 self._add_transfer(transfer, flag)
 
+                ''' Add iterator to the list '''
+                self._add_iterator(transfer._iterator)
+
                 ''' call transfer function '''
                 transfer.receive(packet)
 
@@ -272,6 +275,9 @@ class ConnectionWith:
                 transfer = Receiver(self.__send_func, self.__owner, transfer_flag=flag)
                 self._add_transfer(transfer, flag)
 
+                ''' Add iterator to the list '''
+                self._add_iterator(transfer._iterator)
+
                 ''' call transfer function '''
                 transfer.receive(packet)
 
@@ -280,6 +286,8 @@ class ConnectionWith:
 
             elif packet.flags >= Flags.SR and packet.flags < Flags.WM:
                 ''' Handle transfer '''
+                LOGGER.info(f"Packet: {packet.flags} in 32 - 63")
+
                 transfer_flag = packet.flags
                 if transfer_flag in self.__transfers:
                     ''' call transfer function '''
