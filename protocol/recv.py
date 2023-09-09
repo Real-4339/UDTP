@@ -32,7 +32,6 @@ class Receiver:
         
         self.__acks: set[int] = set()
         self.__packets: list[Packet] = []
-        self.__processed: set[int] = set()
         
         self.__alive = Status.ALIVE
         self.__last_time = time.time()
@@ -70,6 +69,11 @@ class Receiver:
         
         return True
 
+    def kill(self) -> None:
+        ''' Kill receiver '''
+
+        self.__alive = Status.DEAD
+
     def receive(self, packet: Packet) -> None:
         ''' Receive FILE, MSG, FIN '''
 
@@ -87,26 +91,20 @@ class Receiver:
     def receive_data(self, packet: Packet) -> None:
         ''' Receive data '''
 
-        if packet.seq_num not in self.__processed:
-            # LOGGER.info(f"Received data from {self.__client} : {packet.seq_num}")
+        if packet not in self.__packets:
+            LOGGER.info(f"Received data from {self.__client} : {packet.seq_num}")
             self.__seq_num += 1
 
             self.__acks.add(packet.seq_num)
             self.__packets.append(packet)
-            self.__processed.add(packet.seq_num)
 
             self.__last_time = time.time()
 
         else:
             ''' Resend ack '''
-            # LOGGER.info(f"Resending ACK to {self.__client} : {packet.seq_num}")
+            LOGGER.info(f"Resending ACK to {self.__client} : {packet.seq_num}")
             ack = Packet.construct(data=f"{self.own_transfer_flag}".encode(), flags=Flags.ACK, seq_num=packet.seq_num)
             self.__send_func(ack, self.__client)
-
-    def kill(self) -> None:
-        ''' Kill receiver '''
-
-        self.__alive = Status.DEAD
 
     def _send_sack(self) -> None:
         ''' Send SACK '''
@@ -163,7 +161,7 @@ class Receiver:
             return
         
         for seq_num in self.__acks:
-            # LOGGER.info(f"Sending ACK to {self.__client} : {seq_num}")
+            LOGGER.info(f"Sending ACK to {self.__client} : {seq_num}")
             ack = Packet.construct(data=f"{self.own_transfer_flag}".encode(), flags=Flags.ACK, seq_num=seq_num)
             self.__send_func(ack, self.__client)
 
