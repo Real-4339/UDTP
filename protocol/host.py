@@ -141,7 +141,7 @@ class Host:
 
         breaker = Size.PPT
         
-        for key, _ in self.__selector.select(timeout=0.1):
+        for key, _ in self.__selector.select(timeout=0.01): # BUG; timeout=0
             data, addr = self.__socket.recvfrom(1472)
             
             ''' Ignore spoofed packets '''
