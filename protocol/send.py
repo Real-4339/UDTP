@@ -82,9 +82,9 @@ class Sender:
         ''' Receive ack '''
 
         if packet.flags == Flags.ACK:
-            # LOGGER.info(f"Received ACK from {self.__client}")
+            # LOGGER.info(f"Received ACK from {self.__client}, time: {time.time()}")
             self.__last_time = time.time()
-            self.__acks.add(packet.seq_num)
+            self.__acks.add(packet.seq_num) # HACK
             self.__count_of_acks += 1
             return
         
@@ -116,7 +116,7 @@ class Sender:
         if not self.__started and not self.time_is_valid():
             LOGGER.info(f"Resending FILE/MSG to {self.__client}")
             if self.__type == "file":
-                self.__send_func(Packet.construct(f"{self.name}.{self.ext}:{self.own_transfer_flag}".encode(), Flags.FILE, 0), self.__client)
+                self.__send_func(Packet.construct(f"{self.name}{self.ext}:{self.own_transfer_flag}".encode(), Flags.FILE, 0), self.__client)
             else:
                 self.__send_func(Packet.construct(f"{self.own_transfer_flag}".encode(), Flags.MSG, 0), self.__client)
             return False
@@ -165,18 +165,31 @@ class Sender:
             LOGGER.info(f"Transfer is not alive anymore")
             self.__alive = Status.DEAD
             return Status.FINISHED
+        
+        # for pack in self.__sent_packets:
+        #     LOGGER.info(f"packet: {pack}")
+
+        # LOGGER.info(f"len(self.__sent_packets), before: {len(self.__sent_packets)}")
 
         ''' Check for acknowledgments and remove acked packets from sent_packets'''
         self.__sent_packets = [packet for packet in self.__sent_packets if packet.seq_num not in self.__acks]
 
-        count = len(self.__sent_packets)
+        # LOGGER.info(f"len(self.__sent_packets), after: {len(self.__sent_packets)}")
+
+        ''' Find packets which ttl is expired '''
+        expired_packets = [packet for packet in self.__sent_packets if packet.time_is_valid() == False]
+
+        # LOGGER.info(f"exp_packs: {len(expired_packets)}")
 
         ''' Resend packets if needed '''
-        for packet in self.__sent_packets:
+        for packet in expired_packets:
             packet = Packet.packet_to_bytes(packet)
             self.__send_func(packet, self.__client)
 
         ''' Send rest of data '''
+        count = len(self.__sent_packets) - len(expired_packets)
         self._send_restof_data(count)
+
+        self.__acks.clear()
 
         return Status.RUNNING
