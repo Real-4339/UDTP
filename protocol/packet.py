@@ -14,6 +14,7 @@ LOGGER = logging.getLogger("Packet")
 class Packet:
     def __init__(self, data: bytes, flags: Flags = None, seq_num: int = 0):
         self.__time_to_live: int = time.time()
+        self.__time_stamp: int = time.perf_counter()
         self.__seq_num = seq_num
         self.__flags = flags
         self.__data = data
@@ -29,6 +30,10 @@ class Packet:
     @property
     def data(self) -> bytes:
         return self.__data
+    
+    @property
+    def time_stamp(self) -> int:
+        return self.__time_stamp
     
     @seq_num.setter
     def seq_num(self, value: int) -> None:
@@ -146,26 +151,59 @@ class Packet:
             LOGGER.error("Packets list is empty")
             return None
         
-        packets = sorted(packets, key=lambda packet: packet.seq_num)
-        
         data = b""
         expected_seq_num = packets[0].seq_num
 
-        for packet in packets:    
-            if packet.seq_num == expected_seq_num:
-                data += packet.data
-                expected_seq_num += 1
-            elif packet.seq_num > expected_seq_num: # Overlapping packets
-                data += packet.data
-                expected_seq_num = packet.seq_num + 1
+        # ''' Testing with slising packets '''
+        # packets[13].__time_stamp = packets[13].__time_stamp + 0.0783
+        # packets[14].__time_stamp = packets[14].__time_stamp + 0.0783
+        # packets[15].__time_stamp = packets[15].__time_stamp + 0.0783
+        # packets = packets[0:13] + packets[16: 210] + packets[13:16] + packets[210:]
+
+        start = packets[0].time_stamp
+        arr: list[tuple] = []
+        length = len(packets)
+        count_of_255_packets = length // 255
+
+        LOGGER.info(f"count_of_255_packets: {count_of_255_packets}")
+
+        for i in range(1, count_of_255_packets + 1):
+            end = packets[i * 255].time_stamp
+            arr.append((start, end))
+            start = packets[(i * 255) + 1].time_stamp
+
+        LOGGER.info(f"arr: {arr}")
+
+        timestamp_ranges = {}
+        for start, end in arr:
+            small_list = [packet for packet in packets if start <= packet.time_stamp <= end]
+            small_list.sort(key=lambda x: x.seq_num)
+            timestamp_ranges[end] = small_list
+
+        # sort values in dict by key
+        timestamp_ranges = dict(sorted(timestamp_ranges.items()))
+           
+        merged_packets = []
+        for value in timestamp_ranges.values():
+            merged_packets += value
+        
+        packets = merged_packets
+
+        for packet in packets:
+            if packet.seq_num != expected_seq_num:
+                LOGGER.error("Packet seq_num is not expected")
+                return None
+            
+            data += packet.data
+            expected_seq_num = (expected_seq_num + 1) % (2 ** 8)
 
         return data
 
     def __repr__(self) -> str:
-        return f"Packet({self.__flags}, {self.__seq_num})"
+        return f"Packet({self.__flags}, {self.__seq_num}, {self.__time_stamp})"
 
     def __str__(self) -> str:
-        return f"Packet({self.__flags}, {self.__seq_num})"            
+        return f"Packet({self.__flags}, {self.__seq_num}, {self.__time_stamp})"            
     
     def __hash__(self) -> int:
         return hash((self.__data, self.__flags, self.__seq_num))
