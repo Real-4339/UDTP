@@ -22,7 +22,7 @@ class Sender:
         Have buffer for packets.
     '''
     def __init__(self, send_func: Callable, addr: AddressInfo, type:str = "file", name: str = None, extention: str = None, transfer_flag: int = None):
-        self.__seq_num = 1
+        self.__seq_num = 0
         self.__type = type
         self.__name = name
         self.__client = addr
@@ -68,7 +68,7 @@ class Sender:
     def prepare_data(self, data: bytes, flags: Flags) -> None:
         ''' Prepare data for sending '''
         
-        packets = Packet.devide(data, self.__seq_num + 1, fragment_size=Size.FRAGMENT_SIZE, flags=flags)
+        packets = Packet.devide(data, self.__seq_num, fragment_size=Size.FRAGMENT_SIZE, flags=flags)
 
         # LOGGER.info(f"Sending {len(packets)} packets to {self.__client}")
         
