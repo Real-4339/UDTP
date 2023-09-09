@@ -162,10 +162,10 @@ class Packet:
         return data
 
     def __repr__(self) -> str:
-        return f"Packet({self.__data}, {self.__flags}, {self.__seq_num})"
+        return f"Packet({self.__flags}, {self.__seq_num})"
 
     def __str__(self) -> str:
-        return f"Packet({self.__data}, {self.__flags}, {self.__seq_num})"            
+        return f"Packet({self.__flags}, {self.__seq_num})"            
     
     def __hash__(self) -> int:
         return hash((self.__data, self.__flags, self.__seq_num))
