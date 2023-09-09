@@ -153,6 +153,7 @@ class Packet:
         
         data = b""
         expected_seq_num = packets[0].seq_num
+        original_len = len(packets)
 
         # ''' Testing with slising packets '''
         # packets[13].__time_stamp = packets[13].__time_stamp + 0.0783
@@ -162,40 +163,42 @@ class Packet:
 
         start = packets[0].time_stamp
         arr: list[tuple] = []
-        length = len(packets)
-        count_of_255_packets = length // 255
 
-        LOGGER.info(f"count_of_255_packets: {count_of_255_packets}")
+        count_of_255_packets = len(packets) // 255
 
         for i in range(1, count_of_255_packets + 1):
-            end = packets[i * 255].time_stamp
-            arr.append((start, end))
-            start = packets[(i * 255) + 1].time_stamp
+                end = packets[(i * 255) + (i-1)].time_stamp
+                arr.append((start, end))
+                start = packets[(i * 255) + (i-1) + 1].time_stamp
 
-        LOGGER.info(f"arr: {arr}")
+        if count_of_255_packets * 255 < len(packets):
+            arr.append((start, packets[-1].time_stamp))
 
         timestamp_ranges = {}
         for start, end in arr:
             small_list = [packet for packet in packets if start <= packet.time_stamp <= end]
-            small_list.sort(key=lambda x: x.seq_num)
+            small_list = sorted(small_list, key=lambda packet: packet.seq_num)
             timestamp_ranges[end] = small_list
 
-        # sort values in dict by key
         timestamp_ranges = dict(sorted(timestamp_ranges.items()))
            
         merged_packets = []
         for value in timestamp_ranges.values():
-            merged_packets += value
+            merged_packets.extend(value)
         
         packets = merged_packets
 
         for packet in packets:
             if packet.seq_num != expected_seq_num:
-                LOGGER.error("Packet seq_num is not expected")
+                LOGGER.debug("Packet seq is not expected, num, expeted: %s: %s", packet.seq_num, expected_seq_num)
                 return None
-            
+                    
             data += packet.data
             expected_seq_num = (expected_seq_num + 1) % (2 ** 8)
+
+        if original_len != len(packets):
+            LOGGER.error("Packets are missing")
+            return None
 
         return data
 
