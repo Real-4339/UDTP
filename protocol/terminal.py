@@ -155,6 +155,23 @@ class Terminal:
             else:
                 print('Invalid address: {}:{}'.format(ip, port))
 
+        elif command.startswith('change_fragment_size'):
+            try:
+                size = int(command.split(' ')[1])
+            except IndexError:
+                print('Missing fragment size')
+                return
+            except ValueError:
+                print('Invalid fragment size')
+                return
+            
+            if size < 1 and size > 1468:
+                print('Invalid fragment size: Allowed range is 1-1468')
+                return
+            
+            self.__host.fragment_size = size
+            print('Fragment size set to {}'.format(size))
+            
         else:
             print('Unknown command: {}'.format(command))
 
@@ -183,11 +200,11 @@ class Terminal:
         print('  disconnect <ip>:<port>: Disconnect from a host')
         print('  disconnect_all: Disconnect from all hosts')
         print('  list: List connected hosts')
-        print('  list_available: List available hosts') # TODO: Implement
+        print('  list_available: List available hosts')  # IDK if i want this
         print('  detection_time <time>: Set the detection time of available hosts') # IDK if i want this
         print('  send_m <ip>:<port> <message>: Send a message to a host')
         print('  send_f <ip>:<port> <file>: Send a file to a host')
-        print('  change_fragment_size <size>: Change the fragment size') # TODO: Implement
+        print('  change_fragment_size <size>: Change the fragment size')
         print('  log_level <level>: Set the log level')
         print('  help: Display this help message')
         print('  exit: Exit the terminal')
