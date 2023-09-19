@@ -22,11 +22,20 @@ class Host:
         self.__selector = DefaultSelector()
         self.__me = AddressInfo(ip, port)
         self.__socket = NotImplemented
+        self.__fragment_size = 1468
         self.__binded = False
 
     @property
     def me(self) -> AddressInfo:
         return self.__me
+    
+    @property
+    def fragment_size(self) -> int:
+        return self.__fragment_size
+    
+    @fragment_size.setter
+    def fragment_size(self, value: int) -> None:
+        self.__fragment_size = value
 
     def get_connection(self, addr: AddressInfo) -> ConnectionWith | None:
         ''' Get connection '''
