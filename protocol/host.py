@@ -18,8 +18,10 @@ class Host:
     def __init__(self, ip: str, port: int):
         self.__connections: list[ConnectionWith] = []
         self.__connections_lock = threading.Lock()
+
         self.__iterators: list[Callable] = []
         self.__selector = DefaultSelector()
+        
         self.__me = AddressInfo(ip, port)
         self.__socket = NotImplemented
         self.__fragment_size = 1468
@@ -83,7 +85,7 @@ class Host:
         connection = self.get_connection(addr)
         
         if connection is None:
-            connection = ConnectionWith(addr, self._send)
+            connection = ConnectionWith(addr, self._send, self.fragment_size)
 
             with self.__connections_lock:
                 self.__connections.append(connection)
