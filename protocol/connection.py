@@ -16,10 +16,11 @@ LOGGER = logging.getLogger("Connection")
 
 
 class ConnectionWith:
-    def __init__(self, addr: AddressInfo, send_func: Callable):
+    def __init__(self, addr: AddressInfo, send_func: Callable, frag_size: int):
         
         self._add_iterator = NotImplemented
         self.__send_func = send_func
+        self.__frag_size = frag_size
 
         self.__alive = Status.ALIVE
         self.__connecting = False
@@ -44,6 +45,10 @@ class ConnectionWith:
     @property
     def connected(self) -> bool:
         return self.__connected
+    
+    @property
+    def frag_size(self) -> int:
+        return self.__frag_size
 
     def get_addr(self) -> AddressInfo:
         return self.__owner
@@ -106,7 +111,15 @@ class ConnectionWith:
         self.__last_transfer = transfer_flag
 
         ''' Create transfer '''
-        transfer = Sender(self.__send_func, self.__owner, type = "file", name = name, extention = ext, transfer_flag = transfer_flag)
+        transfer = Sender(
+            self.__send_func, 
+            self.__owner, 
+            type = "file", 
+            name = name, 
+            extention = ext, 
+            transfer_flag = transfer_flag, 
+            fragment_size = self.frag_size
+        )
         transfer.prepare_data(data, transfer_flag)
 
         ''' Add transfer to the list '''
@@ -132,7 +145,7 @@ class ConnectionWith:
         self.__last_transfer = transfer_flag
 
         ''' Create transfer '''
-        transfer = Sender(self.__send_func, self.__owner, type = "msg", transfer_flag = transfer_flag)
+        transfer = Sender(self.__send_func, self.__owner, type = "msg", transfer_flag = transfer_flag, fragment_size = self.frag_size)
         transfer.prepare_data(message, transfer_flag)
 
         ''' Add transfer to the list '''
@@ -239,7 +252,7 @@ class ConnectionWith:
                 name_ext, flag = data[0], int(data[1])
                 name, ext = name_ext.split(".")
 
-                transfer = Receiver(self.__send_func, self.__owner, name, ext, flag)
+                transfer = Receiver(self.__send_func, self.__owner, name, ext, flag, self.frag_size)
                 self._add_transfer(transfer, flag)
 
                 ''' Add iterator to the list '''
@@ -268,7 +281,7 @@ class ConnectionWith:
 
                 flag = int(data)
 
-                transfer = Receiver(self.__send_func, self.__owner, transfer_flag=flag)
+                transfer = Receiver(self.__send_func, self.__owner, transfer_flag=flag, fragment_size=self.frag_size)
                 self._add_transfer(transfer, flag)
 
                 ''' Add iterator to the list '''
