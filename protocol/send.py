@@ -21,13 +21,17 @@ class Sender:
         Handle sequence numbers.
         Have buffer for packets.
     '''
-    def __init__(self, send_func: Callable, addr: AddressInfo, type:str = "file", name: str = None, extention: str = None, transfer_flag: int = None):
+    def __init__(self, send_func: Callable, addr: AddressInfo, 
+                 type:str = "file", name: str = None, 
+                 extention: str = None, transfer_flag: int = None,
+                 fragment_size: int = 1468):
         self.__seq_num = 0
         self.__type = type
         self.__name = name
         self.__client = addr
         self.__ext = extention
         self.__send_func = send_func
+        self.__fragment_size = fragment_size
         self.__own_transfer_flag = transfer_flag
 
         self.__window_size = Size.WINDOW_SIZE
@@ -62,13 +66,17 @@ class Sender:
         return self.__own_transfer_flag
     
     @property
+    def fragment_size(self) -> int:
+        return self.__fragment_size
+    
+    @property
     def client(self) -> AddressInfo:
         return self.__client
 
     def prepare_data(self, data: bytes, flags: Flags) -> None:
         ''' Prepare data for sending '''
         
-        packets = Packet.devide(data, self.__seq_num, fragment_size=Size.FRAGMENT_SIZE, flags=flags)
+        packets = Packet.devide(data, self.__seq_num, fragment_size=self.fragment_size, flags=flags)
 
         # LOGGER.info(f"Sending {len(packets)} packets to {self.__client}")
         

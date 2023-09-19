@@ -22,12 +22,15 @@ class Receiver:
         Handle sequence numbers.
         Have buffer for packets.
     '''
-    def __init__(self, send_func: Callable, addr: AddressInfo, name: str = None, extention: str = None, transfer_flag: int = None):
+    def __init__(self, send_func: Callable, addr: AddressInfo, 
+                 name: str = None, extention: str = None, 
+                 transfer_flag: int = None, fragment_size: int = 1468):
         self.__seq_num = 0
         self.__name = name
         self.__client = addr
         self.__ext = extention
         self.__send_func = send_func
+        self.__fragment_size = fragment_size
         self.__own_transfer_flag = transfer_flag
         
         self.__acks: set[int] = set()
@@ -51,6 +54,10 @@ class Receiver:
     @property
     def own_transfer_flag(self) -> Flags:
         return self.__own_transfer_flag
+    
+    @property
+    def fragment_size(self) -> int:
+        return self.__fragment_size
     
     @property
     def client(self) -> AddressInfo:
@@ -144,7 +151,7 @@ class Receiver:
                     f.write(file_data)
                 LOGGER.info(f"Received file from {self.__client}")
                 LOGGER.info(f"File name: {self.__name}_{int(time.time())}.{self.__ext}")
-                LOGGER.info(f"File size: {len(self.__packets) * Size.FRAGMENT_SIZE} bytes")
+                LOGGER.info(f"File size: {len(self.__packets) * self.fragment_size} bytes")
             except Exception as e:
                 LOGGER.error(f"Failed to save file: {e}")
 
