@@ -28,3 +28,7 @@ ConnectionResetError: [WinError 10054] An existing connection was forcibly close
 ---
 
 If can not connect to host - process not stopping.
+
+---
+
+Can not connect Windows and linux VM.
