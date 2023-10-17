@@ -24,3 +24,7 @@ Try 'help' >>>   File "<frozen runpy>", line 88, in _run_code
     data, addr = self.__socket.recvfrom(1472)
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+
+---
+
+If can not connect to host - process not stopping.
