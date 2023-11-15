@@ -139,6 +139,11 @@ class Host:
         else:
             LOGGER.warning('Connection to {}:{} does not exist'.format(ip, port))
 
+    def test(self, data: bytes, addr: AddressInfo):
+        ''' Simulate file and message transfer errors '''
+
+        ...
+
     def _send(self, data: bytes, addr: AddressInfo):
         ''' Send data to addr '''
         
