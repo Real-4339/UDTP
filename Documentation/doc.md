@@ -331,7 +331,7 @@ Without Connection Establishment, peers can not send data to each other.
 
 Here is a visual representation of the connection establishment mechanism in UDTP:
 
-![Connection Establishment](images/conn_estab.svg)
+![Connection Establishment](images/conn_estab.jpg)
 
 ## Keep Alive
 
@@ -349,7 +349,7 @@ But if data isnt empty that means that fin goes to transfer room. (Transfer is o
 
 Here is a visual representation of the connection termination mechanism in UDTP:
 
-![Connection Termination](images/conn_term.svg)
+![Connection Termination](images/conn_term.jpg)
 
 # The application
 
