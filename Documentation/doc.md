@@ -23,6 +23,11 @@
 - [Protocol rules and conventions](#protocol-rules-and-conventions)
     * [Connection Establishment](#connection-establishment)
     * [Keep Alive](#keep-alive)
+    * [Connection Termination](#connection-termination)
+- [The application](#the-application)
+    * [Not Important](#not-important)
+        + [Changing of max frame size](#changing-of-max-frame-size)
+        + [Error simulation](#error-simulation)
 
 
 # UDTP (UDP Reliable Transfer Protocol)
@@ -45,11 +50,15 @@ UDP is less usable in a network, its fast but not reliable. UDP does not provide
 
 ## Why UDP, but not TCP?
 
-TCP is a connection-oriented protocol, but too much complicated, it has a lot of features, but in a case of file transfer, it is not the best choice. Minimum header size of TCP is 20 bytes, and maximum is 60 bytes. And also an IP header can take up to 60 bytes, so min aval. payload size is 1380 bytes, and max is 1460 bytes. UDP is always 8 bytes...
+TCP is a connection-oriented protocol, but too much complicated, it has a lot of features, but in a case of file transfer, it is not the best choice. Minimum header size of TCP is 20 bytes, and maximum is 60 bytes. And also an IP header can take up to 60 bytes, so min available payload size is 1380 bytes, and max is 1460 bytes. When UDP is always 8 bytes.
 
 ## UDP Header
 
-Image from [Wikipedia](https://en.wikipedia.org/wiki/User_Datagram_Protocol)
+Image from Wikipedia: 
+
+![Wikipedia](images/udp_header.png)
+
+So UDP header is 8 bytes, in it we can see source port 2 bytes, destination port 2 bytes, length 2 bytes, checksum 2 bytes and payload.
 
 # General Information
 
@@ -95,6 +104,7 @@ An app is asynchronous, it can send and receive data at the same time. I dont us
 For communication between apps, they have to know ip and ports of each other. 
 
 ### IP and ports
+---
 
 IP addresses are taken from the interfaces, so app can work only on existing interfaces. If there are no interfaces, app will not work.
 
@@ -112,9 +122,11 @@ Mine UDTP protocols header looks like so:
 
 And full with UDP header:
 
-| Source Port (16) | Destination Port (16) | Length (16) | Checksum (16) | Flags (8) | CRC16 (16) | Sequence Number (8) |
-|:----------------:|:---------------------:|:-----------:|:-------------:|:---------:|:----------:|:--------------------:|
-|||| Payload ||||
+| Source Port (16) | Destination Port (16) | Length (16) | Checksum (16) |
+|:----------------:|:---------------------:|:-----------:|:-------------:|
+| Flags (8) | CRC16 (16) | Sequence Number (8) |
+|| Payload ||
+
 
 ## Header specification
 
@@ -132,37 +144,61 @@ And full with UDP header:
 | FIN | 0x80 | Finish |
 
 #### Notes
+---
 
 There are things i wont to clarify about flags.
 
-SACK - special flag i use in different situations, for example in keep alive packets, or in when i send a file, receiver uses SACK to acknowledge that he starts listening for a file. And many more.
+- SACK - special flag i use in different situations, for example in keep alive packets, or in when i send a file, receiver uses SACK to acknowledge that he starts listening for a file. And many more.
 
-WM - Window Multiplier, is a flag i use to tell receiver that i can use extended window size (64 packets), and i want to use it. Receiver can ignore it, and in return ill get basic ack, without WM flag, that means we agreed on basic one (16 packets). Or he can ack with WM flag, that means we agreed on extended window size.
+- WM - Window Multiplier flag is employed to communicate to the recipient the availability and intent to use an extended window size, specifically 64 packets. The recipient retains the discretion to either disregard this indication, responding with a basic acknowledgment devoid of the WM flag, signifying mutual agreement on a standard window size of 16 packets. Alternatively, the recipient may acknowledge with the WM flag, indicating a mutual accord to employ the extended window size. It is noteworthy that the current implementation may not exploit the full potential of this flag, leaving room for future utilization, possibly for acknowledgment range or similar enhancements, pending conceptualization.
 
-I didnt use full potencial of this flag (bits), i could use it in a future for ack range, or smth like that, if ill get idea, how could i do that...
+- SR - Send/Receive, the SR metric is employed as a mechanism to regulate the directionality of packet conversations. This metric aids in discerning whether the packet is intended for sending or receiving purposes, thereby contributing to the effective control and management of communication streams.
 
-SR - Send/Receive, i use this metric to control what is thats packet conversation is goes to.
-
-More about Flags in ...
+Or in more simple words,
+I use SR metric to control to what transfer is that packet goes to.
 
 ### Checksum
+---
 
 CRC or Cyclic Redundancy Check, is a type of checksum algorithm that is used to 
-detect errors in  data transmission  or storage. 
+detect errors in  data transmission  or storage.  
 The basic idea behind a CRC algorithm is to generate a checksum, or a 
-small amount of error-detecting code, based on the data being transmitted.  
+small amount of error-detecting code, based on the data being transmitted.
+
+
 When the data is received, the receiver can use the same CRC algorithm to generate a checksum based on the received data and compare it to the original checksum. If the two checksums match, the data is assumed to be error-free. 
 If they do not match, it indicates that there was an error in transmission and the data may be corrupted.  
 
-#### Example (CRC-16)
+---
+#### Example: CRC-16 Error Probability Analysis
+---
 
-For example, lets say i have 1 GB file, i have packet len 1428B, that means ill have 700281 packets. There is a formula: (1 - error rate) ^ (packet count). That formula will give us the probability of a random error going undetected.
+Consider a scenario involving a _1 GB_ file with a packet length of _1428 bytes_, resulting in _700,281_ packets. To determine the probability of a random error going undetected using CRC-16, we apply the following formula:
 
-So lets find out crc16 error rate. CRC-16 is 16 bits, so it can have 65536 different values. So error rate is 1/65536 = 0.0000152587890625. Or 0.00152587890625%. The probability of a random error going undetected is (1 - 0.0000152587890625) ^ 700281 = 2.287372724887968e-05 or 0.00002287372724887968. So the probability of a random error going undetected is 0.002287372724887968%. And based on formula it gives us approximately 2 packets with errors might not be detected by CRC16.  
+___P(undetected)=(1−error rate)^(packet count)___
 
-However, this is a theoretical estimation and actual results can vary based on various factors. Because work of CRC16 can catch some robust errors, so the percentage of undetected errors can be even lower.
+For CRC-16, which has 16 bits, there are 65,536 possible values, yielding an error rate of _1/65,536_ or approximately _0.0000152587890625_ (0.00152587890625%).
 
+Substituting these values into the formula:
+
+___P(undetected)=(1−0.0000152587890625)^700,281___
+
+This computation results in a probability of __2.287372724887968e−05__ or __0.00002287372724887968__. 
+
+Thus, the theoretical probability of a random error going undetected by CRC-16 is approximately 0.002287372724887968. According to this estimate, around 2 packets with errors might __not__ be detected by CRC-16.
+
+It is essential to note that this is a theoretical calculation, and actual outcomes may vary due to multiple factors. The CRC-16 algorithm may effectively identify robust errors, potentially leading to a lower percentage of undetected errors than the theoretical estimation suggests.
+
+| CRC Type | Undetected Error Probability | % Undetected Errors |
+|:--------:|:----------------------------:|:-------------------:|
+| CRC-8 | 1/2^8 | 0.390625 |
+| CRC-16 | 1/2^16 | 0.00152587890625 |
+| CRC-32 | 1/2^32 | 0.000000023283064 |
+| CRC-64 | 1/2^64 | 5.4 x 10^-20 |
+
+---
 #### UDP Checksum(RFC 1071)
+---
 
 The Internet Checksum (RFC 1071) is a simple checksum algorithm that is used in the Internet Protocol (IP), Transmission Control Protocol (TCP), and User Datagram Protocol (UDP). It is designed to provide a first line of defense against corrupted data, but it is not foolproof. 
 
@@ -173,18 +209,22 @@ For example, if two bits in the same position in two different 16-bit words are 
 Im gonna estimate the probability of an undetected errors for the Internet checksum using similar approach:
 
 - The checksum is 16 bits, so it can have 65536 different values. 
-- Error rate is 1/65536 = 0.0000152587890625. Or 0.00152587890625%.
+- Error rate is 1/65536 = 0.0000152587890625 or 0.00152587890625%.
 - The probability of a random error going undetected is (1 - 0.0000152587890625) ^ 700281 = 2.287372724887968e-05 or 0.00002287372724887968.
 
-#### Combined Checksum
+---
+#### Combined Error Probability Analysis
+---
 
-Combined = CRC-16 probability x Internet Checksum probability.
+__Combined = CRC-16 probability x Internet Checksum probability.__
 
-I can not really say what is the probability of an undetected error for the combined checksum, because i dont know how they work together, but i can say that even TCP uses modified RFC 1071, there are not the same, but they are similar. (RFC 1145)
+In evaluating the combined error probability of CRC-16 and Internet Checksum, it's challenging to precisely determine the undetected error rate due to the complex interaction between the two checksum algorithms. While the specifics of their collaborative behavior might be elusive, it's noteworthy that both CRC-16 and Internet Checksum are employed in network protocols like TCP.
 
-So even TCP, can validate corrupted packets...
+As an additional insight, it is acknowledged that TCP utilizes a modified version of RFC 1071 and introduces its own adjustments, as outlined in RFC 1145. Despite that, the probability of an undetected error for TCP is still existent, albeit lower than the theoretical estimate for RFC 1071. But it is still existent.
 
-I could use CRC-32, but it is 2 times bigger than CRC-16, and it is slower. So i decided to use CRC-16.
+While considering the potential advantages of CRC-32, such as a larger bit space, it's recognized that its increased size and computational demands might not align with my specific requirements. Hence, the decision to opt for CRC-16, with its more manageable size and efficient processing, seems apt for my application. But, if i would want in the future add more reliability, i may consider CRC-32.
+
+In conclusion, the combined error probability of CRC-16 and Internet Checksum represents a multifaceted interplay that, while challenging to quantify precisely, underscores the robustness of error detection mechanisms in network protocols.
 
 ## Features
 
@@ -196,6 +236,7 @@ I could use CRC-32, but it is 2 times bigger than CRC-16, and it is slower. So i
 - Reliable data transfer
 
 ### Flow Control (TCP)
+---
 
 About Flow Control, basically how it works in TCP? TCP uses a sliding window
 protocol to control the flow of data between two hosts. The sender can only
@@ -212,36 +253,61 @@ This hybrid approach is known as Selective Repeat with Selective Acknowledgments
     
 - This improves efficiency compared to pure Go-Back-N, especially in the presence of network conditions causing occasional packet loss or reordering.
 
-So, simple example:
+In a TCP communication scenario, consider the following example of flow control:
 
-Lets say the receiver's window size is 10 packets. 
-- The sender sends 10 packets of data to the receiver.
-- The receiver receives 1,2,3 and 6-10 packets and acknowledges them. Either with ACK or ACK with SACK.
-- The receiver sends ACK3, SACK6-10. OR just ACK3
+    1. Receiver's Window Size: 10 Packets
+        - The sender dispatches 10 packets of data to the receiver.
+        - The receiver successfully receives packets 1, 2, 3, and 6 to 10.
 
-if no SACK is used, the sender will retransmit all packets from 4-10. If SACK is used, the sender will only retransmit packets 4 and 5.
+    2. Acknowledgment by Receiver:
+        - The receiver acknowledges the receipt of packets. This acknowledgment can take two forms:
+            - Without SACK:
+                The receiver sends an ACK3.
+                If a packet is missing (e.g., packet 4), the sender will retransmit all subsequent packets (4 to 10).
+            - With SACK (Selective Acknowledgment):
+                The receiver sends ACK3 along with SACK6-10.
+                The sender, upon receiving this information, recognizes that only packets 4 and 5 need retransmission.
 
-But with SACK, as receiver can get up to 10 packets, and sender needs to retransmit only 2 packets, the sender can send 8 more new packets.  
+    3. Efficiency with SACK:
+        - When SACK is employed, the sender, knowing that only packets 4 and 5 need retransmission, can use the available window space more efficiently.
+        - The sender retransmits only packets 4 and 5, allowing for additional space to transmit 8 new packets.
 
-In total always will be sent up to 10 packets.
+    4. Total Packets Transmitted:
+        - In this scenario, the total number of packets transmitted remains at or below the receiver's window size (10 packets). This is due to the efficiency gained by retransmitting only the necessary packets, leaving room for new data.
 
-### Flow Control (UDTP)
+### Flow Control in UDTP Protocol (Selective Repeat):
+---
 
-So basically, i only use Selective Repeat. Its slightly modifed, maybe, someone, maybe me, could create a more modifed version of Selective Repeat for my protocol with ack range, but thats not a priority and not a goal of this project.
+In the UDTP (UDP Reliable Transfer Protocol) the flow control mechanism is based on a modified version of Selective Repeat. Here's how it operates:
 
-So, how does it work?
+1. Sender Action:
 
-Lets say the receiver's window size is 10 packets.
+    - The sender initiates the communication by dispatching a set of packets to the receiver, with the window size set to 10 packets in this example.
+    - Each packet is assigned a Time-to-Live (TTL), and the sender awaits acknowledgments from the receiver.
 
-- The sender sends 10 packets of data to the receiver.
-- The receiver receives 1,2,3 and 6-10 packets and acknowledges them.
-ACK1, ACK2, ACK3, ACK6, ACK7, ACK8, ACK9, ACK10.
-- The sender gets those and sends more 8 packets.
-- Every packet have his own TTL, and If sender didnt get ACKs, for packets he sent, he will retransmit them after TTL.
+2. Receiver Acknowledgment:
 
-So, the task of receiver is only to send ACKs on each packet he gets, and the task of sender is to send packets, and retransmit them if needed.
+    - The receiver acknowledges the successfully received packets individually. For example, if packets 1, 2, 3, 6, 7, 8, 9, and 10 are received without errors, the receiver sends ACK1, ACK2, ACK3, ACK6, ACK7, ACK8, ACK9, and ACK10.
 
-That means, if receiver got an corrupted packet, he discards it, and wont notify sender about it...
+3. Sender Response:
+
+    - Upon receiving these acknowledgments, the sender interprets them and recognizes which packets were successfully received by the receiver.
+    - The sender can then proceed to send an additional 8 packets, considering the window size and the successful acknowledgments.
+
+4. Retransmission on Timeout:
+
+    - The sender incorporates a Time-to-Live (TTL) for each packet. If the sender does not receive acknowledgments within the specified TTL, it retransmits the corresponding packets.
+
+5. Error Handling:
+
+    - If the receiver encounters a corrupted packet, it discards the packet without notifying the sender. The sender, relying on the lack of acknowledgment, initiates retransmission as per the TTL.
+
+
+In essence, the receiver's role is simplified to sending individual acknowledgments for successfully received packets. The sender, guided by these acknowledgments and the TTL, dynamically manages the transmission of new packets and handles retransmissions when necessary. The protocol aims to maintain efficient communication while providing reliability through selective repeat and automatic retransmission.
+
+Here is a visual representation of the flow control mechanism in UDTP:
+
+![Flow Control](images/selective_rep.svg)
 
 # Protocol rules and conventions
 
@@ -263,11 +329,15 @@ For All that part of keep alive func, if they could connect in 3 seconds, they c
 
 Without Connection Establishment, peers can not send data to each other.
 
+Here is a visual representation of the connection establishment mechanism in UDTP:
+
+![Connection Establishment](images/conn_estab.svg)
+
 ## Keep Alive
 
 Keep Alive is a function, which is used to keep connection alive, and to check if peer is still alive. If keep alive func in connection establishment part, and peers didnt be able to connect in 3 seconds, keep alive func will cut off connection.
 
-If peers are connected and dont send or recv any data, keep alive func will send keep alive packets to each other, SYN-SACK packets. Keep alive timeout is `10` seconds, but all that kinda magic numbers can be set in config file* of the app.
+If peers are connected and dont send or recv any data, keep alive func will send keep alive packets to each other, SYN-SACK packets. Keep alive timeout is `10` seconds, but all that kinda magic numbers can be set in config files* of the app.
 
 If peer didnt get any packet in `30` seconds, keep alive func will cut off connection.
 
@@ -276,6 +346,10 @@ If peer didnt get any packet in `30` seconds, keep alive func will cut off conne
 Connection termination is a process that is used to terminate a connection between the peers. If peer B get FIN flag with no data, it means that peer A wants to terminate connection. So peer B send FIN in responce. If Connection room isnt removed by garbage collector, and it still exists, if peer B answered with his FIN, but peer A didnt get it, and if peer A again send FIN, peer B will again send FIN, but if there isnt any more this connection room. Then room will be created answered with FIN and make that room dead.
 
 But if data isnt empty that means that fin goes to transfer room. (Transfer is over). Read more in ...
+
+Here is a visual representation of the connection termination mechanism in UDTP:
+
+![Connection Termination](images/conn_term.svg)
 
 # The application
 
@@ -287,10 +361,14 @@ My protocol always sends packets of 1B, but the peer app, that sends files and m
 
 ### Error simulation
 
-My protocol can simulate errors, like packet loss, packet corruption, packet duplication. It can be done by changing the config file*.
+My protocol can simulate errors, like packet loss, packet corruption, packet duplication. It can be done by changing the config files*.
 
 1. Packet loss - by that i mean, that on sender side, i wont send some packets once.
 
 2. Packet corruption - by that i mean, that on sender side, i will change some bits in packet. (CRC16 will not match)
 
 3. Packet duplication - by that i mean, that on sender side, i will send some packets twice.
+
+## Specification
+
+...
