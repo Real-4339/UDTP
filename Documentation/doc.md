@@ -191,12 +191,12 @@ It is essential to note that this is a theoretical calculation, and actual outco
 | CRC-64 | 1/2^64 | 5.4 x 10^-20 |
 
 ---
-#### UDP Checksum(RFC 1071)
+#### UDP Checksum
 ---
 
-The Internet Checksum (RFC 1071) is a simple checksum algorithm that is used in the Internet Protocol (IP), Transmission Control Protocol (TCP), and User Datagram Protocol (UDP). It is designed to provide a first line of defense against corrupted data, but it is not foolproof. 
+The Internet Checksum [RFC 1071](https://tools.ietf.org/html/rfc1071) is a simple checksum algorithm that is used in the Internet Protocol (IP), Transmission Control Protocol (TCP), and User Datagram Protocol (UDP). It is designed to provide a first line of defense against corrupted data, but it is not foolproof. 
 
-The probability of an undetected error for a single bit in Internet Checksum (RFC 1071) is not explicitly defined in the RFC document. However, it’s important to note that the Internet Checksum is a simple sum of 16-bit words, and it can miss some types of errors that a more robust checksum or CRC might catch.
+The probability of an undetected error for a single bit in Internet Checksum [RFC 1071](https://tools.ietf.org/html/rfc1071) is not explicitly defined in the RFC document. However, it’s important to note that the Internet Checksum is a simple sum of 16-bit words, and it can miss some types of errors that a more robust checksum or CRC might catch.
 
 For example, if two bits in the same position in two different 16-bit words are flipped, the Internet Checksum will not detect this error. 
 
@@ -214,7 +214,9 @@ __Combined = CRC-16 probability x Internet Checksum probability.__
 
 In evaluating the combined error probability of CRC-16 and Internet Checksum, it's challenging to precisely determine the undetected error rate due to the complex interaction between the two checksum algorithms. While the specifics of their collaborative behavior might be elusive, it's noteworthy that both CRC-16 and Internet Checksum are employed in network protocols like TCP.
 
-As an additional insight, it is acknowledged that TCP utilizes a modified version of RFC 1071 and introduces its own adjustments, as outlined in RFC 1145. Despite that, the probability of an undetected error for TCP is still existent, albeit lower than the theoretical estimate for RFC 1071. But it is still existent.
+As an additional insight, it is acknowledged that TCP utilizes a modified version of [RFC 1071](https://tools.ietf.org/html/rfc1071) and introduces its own adjustments, as outlined in [RFC 1145](https://tools.ietf.org/html/rfc1145). These modifications are intended to improve the error detection capabilities of the Internet Checksum.
+
+Despite that, the probability of an undetected error for TCP is still existent, albeit lower than the theoretical estimate for [RFC 1071](https://tools.ietf.org/html/rfc1071). But it is still existent.
 
 While considering the potential advantages of CRC-32, such as a larger bit space, it's recognized that its increased size and computational demands might not align with my specific requirements. Hence, the decision to opt for CRC-16, with its more manageable size and efficient processing, seems apt for my application. But, if i would want in the future add more reliability, i may consider CRC-32.
 
@@ -339,7 +341,7 @@ If peer didnt get any packet in `30` seconds, keep alive func will cut off conne
 
 Connection termination is a process that is used to terminate a connection between the peers. If peer B get FIN flag with no data, it means that peer A wants to terminate connection. So peer B send FIN in responce. If Connection room isnt removed by garbage collector, and it still exists, if peer B answered with his FIN, but peer A didnt get it, and if peer A again send FIN, peer B will again send FIN, but if there isnt any more this connection room. Then room will be created answered with FIN and make that room dead.
 
-But if data isnt empty that means that fin goes to transfer room. (Transfer is over). Read more in ...
+But if data isnt empty that means that fin goes to transfer room. (Transfer is over). Read more in [Transfer.md](Transfer.md).
 
 Here is a visual representation of the connection termination mechanism in UDTP:
 
