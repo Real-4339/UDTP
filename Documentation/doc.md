@@ -32,6 +32,11 @@
 
 # UDTP (UDP Reliable Transfer Protocol)
 
+![Version 1.0.0](https://img.shields.io/badge/version-1.0.0-blue.svg) 
+![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg) 
+![License GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)
+[![Author](https://img.shields.io/badge/author-Vadym%20Tilihuzov-green.svg)](mailto:vad.tili@gmail.com)
+
 UDTP is a P2P protocol that provides reliable data transfer over UDP and that is easy to implement and understand.  
 
 UDTP used for transferring files between systems in a local network.
@@ -307,7 +312,7 @@ In essence, the receiver's role is simplified to sending individual acknowledgme
 
 Here is a visual representation of the flow control mechanism in UDTP:
 
-![Flow Control](images/selective_rep.svg)
+![Flow Control](images/selective_rep.jpg)
 
 # Protocol rules and conventions
 
