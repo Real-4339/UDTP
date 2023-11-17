@@ -232,6 +232,8 @@ class ConnectionWith:
                 self._syn_sack(packet)
 
             elif not self.connected:
+                """call fin function"""
+                self.disconnect()
                 LOGGER.warning(
                     f"Not connected, can not recv that packet from {self.__owner}"
                 )
