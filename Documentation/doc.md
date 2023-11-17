@@ -121,6 +121,8 @@ And full with UDP header:
 | Flags (8) | CRC16 (16) | Sequence Number (8) |
 || Payload ||
 
+UDP header is 8 bytes, and UDTP header is 4 bytes, so in a result, my protocol header is 12 bytes.
+If IP header is 20 bytes, then max payload size is 1468 bytes, but if IP header is 60 bytes, then max payload size is 1428 bytes.
 
 ## Header specification
 
