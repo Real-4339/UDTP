@@ -301,7 +301,7 @@ In essence, the receiver's role is simplified to sending individual acknowledgme
 
 Here is a visual representation of the flow control mechanism in UDTP:
 
-![Flow Control](images/selective_rep.jpg)
+![Flow Control](images/selective_rep.svg)
 
 # Protocol rules and conventions
 
@@ -325,7 +325,7 @@ Without Connection Establishment, peers can not send data to each other.
 
 Here is a visual representation of the connection establishment mechanism in UDTP:
 
-![Connection Establishment](images/conn_estab.jpg)
+![Connection Establishment](images/conn_estab.svg)
 
 ## Keep Alive
 
@@ -343,7 +343,7 @@ But if data isnt empty that means that fin goes to transfer room. (Transfer is o
 
 Here is a visual representation of the connection termination mechanism in UDTP:
 
-![Connection Termination](images/conn_term.jpg)
+![Connection Termination](images/conn_term.svg)
 
 # The application
 
