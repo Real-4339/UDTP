@@ -71,17 +71,6 @@ So UDP header is 8 bytes, in it we can see source port 2 bytes, destination port
 
 Protocol UDTP was implemented in Python 3 programming language with using following libraries:
 
-- time
-- socket
-- threading
-- netifaces
-- selectors
-- struct
-- logging
-- crcmod
-- os
-
-Why do i use those libraries?
 
 | Name of lib | How do i use it? | Functionality |
 |:-----------:|:----------------:|:-------------:|
