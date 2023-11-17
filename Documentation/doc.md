@@ -277,8 +277,20 @@ Connection termination is a process that is used to terminate a connection betwe
 
 But if data isnt empty that means that fin goes to transfer room. (Transfer is over). Read more in ...
 
-# Anything more?
+# The application
 
-Yes, there are some NOT IMPORTANT things, but thats not what the chip says, right FIIT?
+## Not Important
 
-## Chaning of fragmet size.
+### Changing of max frame size
+
+My protocol always sends packets of 1B, but the peer app, that sends files and msg, can change the max bytes they can send. Minimum is 1B, maximum is 1468B. The change is applied only on new transfers, so if there are already some transfers, they will not be affected by this change.
+
+### Error simulation
+
+My protocol can simulate errors, like packet loss, packet corruption, packet duplication. It can be done by changing the config file*.
+
+1. Packet loss - by that i mean, that on sender side, i wont send some packets once.
+
+2. Packet corruption - by that i mean, that on sender side, i will change some bits in packet. (CRC16 will not match)
+
+3. Packet duplication - by that i mean, that on sender side, i will send some packets twice.
