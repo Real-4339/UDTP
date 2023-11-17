@@ -331,7 +331,7 @@ Here is a visual representation of the connection establishment mechanism in UDT
 
 Keep Alive is a function, which is used to keep connection alive, and to check if peer is still alive. If keep alive func in connection establishment part, and peers didnt be able to connect in 3 seconds, keep alive func will cut off connection.
 
-If peers are connected and dont send or recv any data, keep alive func will send keep alive packets to each other, SYN-SACK packets. Keep alive timeout is `10` seconds, but all that kinda magic numbers can be set in config files* of the app.
+If peers are connected and dont send or recv any data, keep alive func will send keep alive packets to each other, SYN-SACK packets. Keep alive timeout is `10` seconds, but all that kinda magic numbers can be set in `config files`* of the app.
 
 If peer didnt get any packet in `30` seconds, keep alive func will cut off connection.
 
@@ -355,7 +355,7 @@ My protocol always sends packets of 1B, but the peer app, that sends files and m
 
 ### Error simulation
 
-My protocol can simulate errors, like packet loss, packet corruption, packet duplication. It can be done by changing the config files*.
+My protocol can simulate errors, like packet loss, packet corruption, packet duplication. It can be done by changing the `config files`*.
 
 1. Packet loss - by that i mean, that on sender side, i wont send some packets once.
 
