@@ -109,7 +109,8 @@ some ideas i left in own repository. Read more about it in
 
 = UDP
 <udp>
-Lets first look at udp, and why do i created another protocol on top of
+
+Lets first look at udp, and why was considered to create another protocol on top of
 it.
 
 UDP in general is a connectionless protocol, which means that there is
@@ -199,12 +200,12 @@ BUT, in the task also requested, not only to create a protocol, but also
 to create an application for it, which will be able to send and receive
 files and messages.
 
-The application i made is a CLI application, created on Linux, but it
-can be easily ported to Windows or MacOS, because i use only standard
+The application is a CLI application, created on Linux, but it
+can be easily opened on Windows or MacOS, because was used only standard
 libraries, which are available on all platforms.
 
 An app is asynchronous, it can send and receive data at the same time. I
-dont use any `threads` or any `async` libraries, i use `selectors`
+dont use any `threads` or any `async` libraries, only `selectors`
 library, which is a part of Python 3.4 and higher.
 
 For communication between apps, they have to know ip and ports of each
@@ -478,9 +479,8 @@ mechanisms in network protocols.
 
 And at the end, all that calculations were done without taking into an account Ethernet CRC, which is CRC-32.
 
-#line(
-  length: 100%,
-)
+#pagebreak()
+
 == Features
 <features>
 - Flow control
@@ -489,6 +489,10 @@ And at the end, all that calculations were done without taking into an account E
 - Error simulation
 - Retransmission timeout
 - Reliable data transfer
+
+#line(
+  length: 100%,
+)
 
 == Flow Control \(TCP)
 <flow-control-tcp>
@@ -631,6 +635,8 @@ mechanism in UDTP:
   ]
 )
 
+\ \ \
+
 == Keep Alive
 <keep-alive>
 Keep Alive is a function, which is used to keep connection alive, and to
@@ -688,13 +694,13 @@ change.
 My protocol can simulate errors, like packet loss, packet corruption,
 packet duplication. It can be done by changing the `config files`\*.
 
-+ Packet loss - by that i mean, that on sender side, i wont send some
-  packets once.
++ Packet loss - by that was meant, that on sender side, it wont send one
+  packet once.
 
-+ Packet corruption - by that i mean, that on sender side, i will change
-  some bits in packet. \(CRC16 will not match)
++ Packet corruption - on sender side, some bits in packet
+  will change \(CRC16 will not match)
 
-+ Packet duplication - by that i mean, that on sender side, i will send
++ Packet duplication - on sender side, its going to send
   some packets twice.
 
 == Specification
@@ -735,11 +741,11 @@ Ill go through only important commands.
 - `log_level` - change log level. Where #strong[level] is a level of
   logging. 0 - DEBUG, 1 - INFO, 2 - WARNING, 3 - ERROR, 4 - CRITICAL.
 
-If i wasnt able to do terminal without separate thread i would do that,
+If i was able to do terminal without separate thread i would do that,
 but it is what it is. `threading` library were used to achive that goal.
 
-So i have running cli in diff thread, that is listening on commands from
-user and sending them to core app. Where is the main logic running.
+Lets summarize, running cli in diff thread, that is listening on commands from
+user and sending them to core app. Where is the main logic runs.
 
 == Core Idea
 <core-idea>
@@ -925,7 +931,7 @@ The receiver reads the transfer_flag from the received data, associates it with 
 ```
 
 This approach work well for managing multiple transfers between sender
-and receiver.
+and receiver. One #strong[Connection] can have opened and running, at the same time #strong[31 transfers].
 
 === Sender
 <sender>
