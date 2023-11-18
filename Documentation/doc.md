@@ -427,7 +427,7 @@ Ill go through only important commands.
 - `change_fragment_size` - change max frame size. Where __size__ is a size of a frame 1-1468 bytes.
 - `log_level` - change log level. Where __level__ is a level of logging. 0 - DEBUG, 1 - INFO, 2 - WARNING, 3 - ERROR, 4 - CRITICAL.
 
-If i was able to do terminal without separate thread i would do that, but it is what it is. I used `threading` library for that.
+If i wasnt able to do terminal without separate thread i would do that, but it is what it is. I used `threading` library for that.
 
 So i have running cli in diff thread, that was listening on commands from user and sending them to core app. Where were the main logic running.
 
