@@ -205,13 +205,13 @@ $$
 For CRC-16, which has 16 bits, there are 65,536 possible values, yielding an error rate of
 
 $$
-frac{1}{65.536}
+\frac{1}{65.536}
 $$
 
 or approximately
 
 $$
-0.0000152587890625, - (0.00152587890625%)
+0.0000152587890625\, - (0.00152587890625\%)
 $$
 
 Substituting these values into the formula:
