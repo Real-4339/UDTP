@@ -137,7 +137,7 @@ And full with UDP header:
 ------------------------------------------------------
 | Source Port (2 bytes) | Destination Port (2 bytes) |
 ------------------------------------------------------
-|    Length (2 bytes)   |      Checksum (2 bytes)    |
+|    Length (2 bytes)   |     Checksum (2 bytes)     |
 ------------------------------------------------------
 | Flags (1 byte) | CRC16 (2 bytes) | Seq Num (1 byte)|
 ------------------------------------------------------
