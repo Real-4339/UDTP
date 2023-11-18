@@ -28,6 +28,14 @@
     * [Not Important](#not-important)
         + [Changing of max frame size](#changing-of-max-frame-size)
         + [Error simulation](#error-simulation)
+    * [Specification](#specification-1)
+        + [Commands](#commands)
+    * [Core Idea](#core-idea)
+    * [Core Implementation](#core-implementation)
+    * [Core Events Overview](#core-events-overview)
+        + [Host - High Level](#host---high-level)
+        + [Connection - Medium Level](#connection---medium-level)
+        + [Transfer - Low Level](#transfer---low-level)
 
 
 # UDTP (UDP Reliable Transfer Protocol)
