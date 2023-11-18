@@ -36,6 +36,10 @@
         + [Host - High Level](#host---high-level)
         + [Connection - Medium Level](#connection---medium-level)
         + [Transfer - Low Level](#transfer---low-level)
+    * [Balance](#balance)
+    * [V4](#v4)
+    * [Packet distribution diagrams](#packet-distribution-diagrams)
+        
 
 
 # UDTP (UDP Reliable Transfer Protocol)
@@ -118,16 +122,29 @@ Ports are taken randomly, but they are taken from a range of 49152-65535, becaus
 
 Mine UDTP protocols header looks like so:
 
+```
+---------------------------------------------------------------
 | Flags (1 byte) | CRC16 (2 bytes) | Sequence Number (1 byte) |
-|:--------------:|:---------------:|:------------------------:|
-|| Payload ||
+---------------------------------------------------------------
+|                          Payload                            |
+---------------------------------------------------------------
+
+```
 
 And full with UDP header:
 
-| Source Port (16) | Destination Port (16) | Length (16) | Checksum (16) |
-|:----------------:|:---------------------:|:-----------:|:-------------:|
-| Flags (8) | CRC16 (16) | Sequence Number (8) |
-|| Payload ||
+```
+------------------------------------------------------
+| Source Port (2 bytes) | Destination Port (2 bytes) |
+------------------------------------------------------
+|    Length (2 bytes)   |      Checksum (2 bytes)    |
+------------------------------------------------------
+| Flags (1 byte) | CRC16 (2 bytes) | Seq Num (1 byte)|
+------------------------------------------------------
+|                    Payload                         |
+------------------------------------------------------
+
+```
 
 UDP header is 8 bytes, and UDTP header is 4 bytes, so in a result, my protocol header is 12 bytes.
 If IP header is 20 bytes, then max payload size is 1468 bytes, but if IP header is 60 bytes, then max payload size is 1428 bytes.
@@ -479,3 +496,39 @@ This layer is responsible for creating transfers, keep alive funcitonality, and 
 ---
 
 This layer is responsible for sending and receiving files, and messages, acknowledgments, and retransmissions.
+
+## Balance
+
+The current design allows for efficient socket reading, considering the workload and available packets. The system is configured to read from the socket if it is not busy and there are packets available. Presently, this operation is limited to a maximum of 16 iterations, a value that remains __adjustable for future optimizations__. This approach ensures a balance between effective socket handling and system resources, providing flexibility for potential adjustments as the project evolves.
+
+## V4
+
+The V4 loop is responsible for managing events and executing their corresponding handlers. It is designed to be efficient and lightweight, with a focus on performance and simplicity. The V4 loop is implemented using a `while` loop, which is executed until the application is terminated. The loop is comprised of three primary components:
+
+1. Event Emission:
+    - The loop emits events from the event queue, which is populated by the event handlers.
+    - The event queue is a list of events that are ready to be executed.
+    - The event queue is populated by the event handlers, which are executed by the loop.
+
+2. Event Handling:
+    - The loop handles events by executing their corresponding handlers.
+    - The event handlers are functions that are executed by the loop.
+    - The event handlers are executed by the loop.
+
+3. Event Management:
+    - The loop manages events by maintaining their status and removing inactive events.
+    - The event status is managed by the emitter.
+    - The loop removes inactive events from the event queue.
+
+Here is a visual representation of the V4 loop:
+
+![V4 Loop](images/v4_loop.svg)
+
+## Packet distribution diagrams
+
+| Data Received | Data Sent | 
+|:-------------:|:---------:|
+| ![Data Received](images/data_recv.png) | ![Data Sent](images/data_send.png) |
+
+## Data Transfer
+
