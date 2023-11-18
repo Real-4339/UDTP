@@ -429,7 +429,7 @@ Ill go through only important commands.
 
 If i wasnt able to do terminal without separate thread i would do that, but it is what it is. I used `threading` library for that.
 
-So i have running cli in diff thread, that is listening on commands from user and sending them to core app. Where were the main logic running.
+So i have running cli in diff thread, that is listening on commands from user and sending them to core app. Where is the main logic running.
 
 ## Core Idea
 
