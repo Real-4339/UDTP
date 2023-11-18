@@ -14,7 +14,7 @@
         + [Flags](#flags)
             - [Notes](#notes)
         + [Checksum](#checksum)
-            - [Example: CRC-16 Error Probability Analysis](#example--crc-16-error-probability-analysis)
+            - [Example: CRC-16 Error Probability Analysis](#example-crc-16-error-probability-analysis)
             - [UDP Checksum](#udp-checksum)
             - [Combined Error Probability Analysis](#combined-error-probability-analysis)
     * [Features](#features)
