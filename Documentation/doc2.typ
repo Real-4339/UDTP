@@ -734,7 +734,7 @@ Ill go through only important commands.
   logging. 0 - DEBUG, 1 - INFO, 2 - WARNING, 3 - ERROR, 4 - CRITICAL.
 
 If i wasnt able to do terminal without separate thread i would do that,
-but it is what it is. I used `threading` library for that.
+but it is what it is. `threading` library were used to achive that goal.
 
 So i have running cli in diff thread, that is listening on commands from
 user and sending them to core app. Where is the main logic running.
@@ -746,16 +746,16 @@ particularly the utilization of the `EventEmitter` class, which
 facilitates the emission and reception of events. I found this pattern
 highly effective and wished to incorporate it into my work.
 
-Additionally, I drew inspiration from the core principles of libuv, V8,
+Additionally, the writer drew inspiration from the core principles of libuv, V8,
 and Go. In particular, I sought to implement a design similar to Node.js
-in Python. To achieve this, I developed my own GO \(Generic Object),
+in Python. To achieve this, was developed my own GO \(Generic Object),
 choosing a simplified `v4` version as an alternative to the more
 intricate V8 engine. This choice was made to strike a balance between
 the efficiency of V8 and the complexity associated with it.
 
-Rather than relying on libuv, I employed the selectors library,
+Rather than relying on libuv, the author employed the selectors library,
 specifically utilizing the DefaultSelector. It’s important to note that,
-in contrast to libuv’s asynchronous features, I opted for the
+in contrast to libuv’s asynchronous features, me personally opted for the
 synchronous version of selectors. This decision was driven by the
 specific nature of my application, which involves a singular socket and
 doesn’t necessitate asynchronous functionality.
@@ -821,7 +821,7 @@ module has been introduced to manage the state of events, categorizing
 them as busy, sleeping, or inactive and more.
 
 Each event operates within its designated level and is constrained from
-traversing upward. While an event can pass a packet to the level above,
+traversing upward. While an event can pass a packet to the level below,
 it cannot surpass its allocated level.
 
 === Host - High Level
@@ -983,6 +983,9 @@ Here is a visual representation of the data transfer mechanism in UDTP:
 
 == Important
 <important>
+
+\
+
 The last, but not least, UDTP can transfer any size of files or
 messages. \
 Because of `merge` function, which is used to merge packets into a file.
@@ -990,7 +993,7 @@ Because of `merge` function, which is used to merge packets into a file.
 Based on timestamps and sequence numbers it can merge packets into a
 file, even if they are not in order.
 
-I use only 1B for sequence numbers, so max sequence number is 255, but
+Protocol use only 1B for sequence numbers, so max sequence number is 255, but
 it is enough for my protocol, so if packet reaches 255, it will start
 from 0 again.
 
@@ -998,9 +1001,22 @@ The only one thing here is important, if receiver responces with ack
 number and i have two the same seq nums but diff packets, they will be
 acked both, but, there is a very small chance that this will happen.
 
-The probability of a packet being lost and peer A not getting an ack is
-0.25% for each packet, approx. I receive packets from 0 to 16 packets at
-a time, and if I don’t get an ack for a packet sent within 3 seconds, I
-retransmit it, but if peer B doesn’t acknowledge the packets, then peer
-A simply can’t send new ones, i.e.~for peer B to receive new packets it
-has to respond to the old ones.
+The likelihood of a packet encountering loss and peer A failing to receive an acknowledgment stands at 
+approximately 25% for each individual packet.  
+I receive packets in batches ranging from 0 to 16 at a given time.  
+In the event that an acknowledgment is not received within a 3-second timeframe for a transmitted packet,  
+initiates a retransmission. However, it is imperative to note that if peer B fails to acknowledge the received packets,  
+peer A is precluded from dispatching new ones.  
+Consequently, for peer B to gain access to new packets, it is requisite that it responds to the previously transmitted ones.
+
+In a simulated test scenario designed to approximate a specific use case, consider the following parameters: a Retransmission Time-Out (RTO) of 3000ms and a Round-Trip Time (RTT) of 2ms. The ensuing analysis involves the calculation of probabilities based on the established assumptions.
+
+Within a window size of 16 packets, only 4 acknowledgments (acks) are received, implying the loss of 12 packets. Subsequently, 4 acks are received within a 2ms interval, prompting Peer A to transmit an additional 4 packets. However, a single acknowledgment is obtained in return, leading to the transmission of one more packet. Consequently, the duration from the initiation of the initial packet transmission to this point totals approximately 5ms.
+
+At this stage, 15 packets remain unacknowledged, resulting in a current acknowledgment reception rate of 25%. This implies the potential transmission of a new packet contingent upon acknowledgment receipt. If an acknowledgment is not received, a retransmission of all 15 unacknowledged packets ensues, possibly followed by the transmission of a new packet.
+
+Persisting in this iterative process, the focus turns to determining the probability of not receiving an acknowledgment for the first packet among the 16. This calculation involves considering the cumulative probabilities of not receiving acknowledgments for each successive packet within the given window size.
+
+$ (1 - (1/16 * 15/16 * 14/16 * 13/16)) * 100 = 95,83% $
+
+All that process repeats, and chance that peer A wont get ack for the first packet getting lower and lower...
