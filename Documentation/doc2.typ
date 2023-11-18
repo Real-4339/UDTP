@@ -1,5 +1,47 @@
 #image("images/image.png", width: 32%)
 
+#align(
+  center,
+  emph(text(
+  top-edge: 4.7em,
+  size: 2.5em,
+  blue,
+)[UDP Relialbe Transfer Protocol])
+)
+
+#align(
+  center,
+  emph(text(
+  size: 1.9em,
+  blue
+)[Specification])
+)
+
+#align(
+  left + bottom,
+  emph(text(
+  size: 1.6em,
+  navy
+)[Made by Vadym Tilihuzov])
+)
+
+#align(
+  left + bottom,
+  emph(text(
+  size: 1.6em,
+  navy
+)[2023/2024])
+)
+
+#align(
+  left + bottom,
+  emph(text(
+  size: 1.6em,
+  navy
+)[Practioner - Ing. Lukáš Mastiľak])
+)
+
+
 #pagebreak()
 
 = Table of Contents
@@ -249,8 +291,12 @@ is 1428 bytes.
 )
 ]
 
-== \#\#\#\# Notes
+==== Notes
 <notes>
+#line(
+  length: 100%,
+)
+
 There are things i wont to clarify about flags.
 
 - SACK - special flag i use in different situations, for example in keep
@@ -278,8 +324,12 @@ There are things i wont to clarify about flags.
 Or in more simple words, I use SR metric to control to what transfer is
 that packet goes to.
 
-== \#\#\# Checksum
+=== Checksum
 <checksum>
+#line(
+  length: 100%,
+)
+
 CRC or Cyclic Redundancy Check, is a type of checksum algorithm that is
 used to detect errors in data transmission or storage. \
 The basic idea behind a CRC algorithm is to generate a checksum, or a
@@ -294,21 +344,29 @@ in transmission and the data may be corrupted.
 
 ==== Example: CRC-16 Error Probability Analysis
 <example--crc-16-error-probability-analysis>
+#line(
+  length: 100%,
+)
 
 Consider a scenario involving a #emph[1 GB] file with a packet length of
 #emph[1428 bytes], resulting in #emph[700,281] packets. To determine the
 probability of a random error going undetected using CRC-16, we apply
 the following formula:
 
-#strong[#emph[P\(undetected)\=\(1−error rate)^\(packet count)]]
+$ P("undetected") = ("1 - error rate")^("packet count") $
 
 For CRC-16, which has 16 bits, there are 65,536 possible values,
-yielding an error rate of #emph[1/65,536] or approximately
-#emph[0.0000152587890625] \(0.00152587890625%).
+yielding an error rate of 
+
+$ 1/65.536 $ 
+
+or approximately
+
+$ 0.0000152587890625 - (0.00152587890625%) $
 
 Substituting these values into the formula:
 
-#strong[#emph[P\(undetected)\=\(1−0.0000152587890625)^700,281]]
+$ P("undetected") = (1−0.0000152587890625)^(700.281) $
 
 This computation results in a probability of
 #strong[2.287372724887968e−05] or #strong[0.00002287372724887968].
@@ -344,8 +402,13 @@ suggests.
 )
 ]
 
+#pagebreak()
+
 ==== UDP Checksum
 <udp-checksum>
+#line(
+  length: 100%,
+)
 
 The Internet Checksum
 #link("https://tools.ietf.org/html/rfc1071")[RFC 1071] is a simple
@@ -375,6 +438,9 @@ Internet checksum using similar approach:
 
 ==== Combined Error Probability Analysis
 <combined-error-probability-analysis>
+#line(
+  length: 100%,
+)
 
 #strong[Combined \= CRC-16 probability x Internet Checksum probability.]
 
@@ -410,6 +476,9 @@ Checksum represents a multifaceted interplay that, while challenging to
 quantify precisely, underscores the robustness of error detection
 mechanisms in network protocols.
 
+#line(
+  length: 100%,
+)
 == Features
 <features>
 - Flow control
@@ -467,6 +536,8 @@ control:
 4. Total Packets Transmitted:
     - In this scenario, the total number of packets transmitted remains at or below the receiver's window size (10 packets). This is due to the efficiency gained by retransmitting only the necessary packets, leaving room for new data.
 ```
+
+#pagebreak()
 
 == Flow Control in UDTP Protocol \(Selective Repeat):
 <flow-control-in-udtp-protocol-selective-repeat>
@@ -572,6 +643,8 @@ timeout is `10` seconds, but all that kinda magic numbers can be set in
 
 If peer didnt get any packet in `30` seconds, keep alive func will cut
 off connection.
+
+#pagebreak()
 
 == Connection Termination
 <connection-termination>
@@ -734,9 +807,11 @@ which is invoked within the V4 context. This hierarchical structure
 allows for modular and organized event handling throughout the
 application.
 
-#quote(
+#text(
+  fill: blue,
+quote(
  "p.s. Host can be created only once, and it is created when app starts."
-)
+))
 
 == Core Events Overview
 <core-events-overview>
@@ -749,19 +824,31 @@ Each event operates within its designated level and is constrained from
 traversing upward. While an event can pass a packet to the level above,
 it cannot surpass its allocated level.
 
-== \#\#\# Host - High Level
+=== Host - High Level
 <host---high-level>
+#line(
+  length: 100%,
+)
+
 This layer is responsible for reading packets from a socket, create
 connections, sending packets, putting packets into a connections, and
 deleted dead events from a v4 loop.
 
-== \#\#\# Connection - Medium Level
+=== Connection - Medium Level
 <connection---medium-level>
+#line(
+  length: 100%,
+)
+
 This layer is responsible for creating transfers, keep alive
 funcitonality, and approving connection establishment and termination.
 
-== \#\#\# Transfer - Low Level
+=== Transfer - Low Level
 <transfer---low-level>
+#line(
+  length: 100%,
+)
+
 This layer is responsible for sending and receiving files, and messages,
 acknowledgments, and retransmissions.
 
@@ -815,18 +902,80 @@ Here is a visual representation of the V4 loop:
   align: (col, row) => (center,center,).at(col),
   inset: 6pt,
   [Data Received], [Data Sent],
-  [#box(width: 331.0pt, image("images/data_recv.png"))],
-  [#box(width: 259.0pt, image("images/data_send.png"))],
+  [#box(width: 100%, image("images/data_recv.png"))],
+  [#box(width: 100%, image("images/data_send.png"))],
 )
 ]
 
 == Data Transfer
 <data-transfer>
-See #link("Transfer.md") for more information about data transfer.
+
+=== Transfer types
+<transfer-types>
+There are two types of transfers: #strong[Sender] and #strong[Receiver].
+
+```
+When sending a file, the sender generates a unique transfer_flag and assigns it to the transfer.
+
+The transfer_flag is embedded in the data being sent. This allows the receiver to know which transfer the data corresponds to.
+
+The receiver reads the transfer_flag from the received data, associates it with a specific transfer, and processes the data accordingly.
+```
+
+This approach work well for managing multiple transfers between sender
+and receiver.
+
+=== Sender
+<sender>
+The sender is responsible for creating a transfer and sending data.
+
+```
+It generates a packet with File flag and sends it to the receiver with the data.
+Data are: name of a file, extension, and transfer_flag.
+```
+
++ It waits, for SACK from the receiver, and if it receives it, it starts
+  sending data.
+
+  It generates a packet with transfer\_flag as Flag and sends it to the
+  receiver with the data. Data are: Raw data.
+
++ If it doesnt receive SACK, it resends the packet with File flag.
+
++ Sender, waits for ACK from the receiver, and if it receives it, it
+  sends the next packet, otherwise it resends the packets, or it does
+  both, resends and if there more packets to send, it sends them.
+
++ When it sends the last packet, it waits for ACK from the receiver, and
+  if it receives it, it sends the packet with FIN flag.
+
++ If it doesnt receive FIN in a certain amount of time, it resends the
+  packet with FIN flag again.
+
+=== Receiver
+<receiver>
+The receiver is responsible for receiving data and sending ACKs. SACK
+and FIN.
+
+```
+It receives a packet with File flag, and if it receives it, it sends SACK to the sender, with the transfer_flag in the data.
+```
+
++ It receives a packet with transfer\_flag as Flag, and if it receives
+  it, it sends ACK to the sender, with the transfer\_flag in the data.
+
++ When Receiver receives the packet with FIN flag, it sends FIN to the
+  sender, with the transfer\_flag in the data.
+
++ If it doesnt receive FIN in a certain amount of time, it resends the
+  packet with FIN flag again.
+
++ In the end Receiver prints the name of the file, extension, and the
+  size of the file and pull path.
 
 Here is a visual representation of the data transfer mechanism in UDTP:
 
-#figure([#box(width: 433.5pt, image("images/data_transfer.svg"))],
+#figure([#image("images/data_transfer.svg")],
   caption: [
     Data Transfer
   ]
@@ -837,5 +986,21 @@ Here is a visual representation of the data transfer mechanism in UDTP:
 The last, but not least, UDTP can transfer any size of files or
 messages. \
 Because of `merge` function, which is used to merge packets into a file.
+\
 Based on timestamps and sequence numbers it can merge packets into a
 file, even if they are not in order.
+
+I use only 1B for sequence numbers, so max sequence number is 255, but
+it is enough for my protocol, so if packet reaches 255, it will start
+from 0 again.
+
+The only one thing here is important, if receiver responces with ack
+number and i have two the same seq nums but diff packets, they will be
+acked both, but, there is a very small chance that this will happen.
+
+The probability of a packet being lost and peer A not getting an ack is
+0.25% for each packet, approx. I receive packets from 0 to 16 packets at
+a time, and if I don’t get an ack for a packet sent within 3 seconds, I
+retransmit it, but if peer B doesn’t acknowledge the packets, then peer
+A simply can’t send new ones, i.e.~for peer B to receive new packets it
+has to respond to the old ones.
