@@ -476,6 +476,8 @@ Checksum represents a multifaceted interplay that, while challenging to
 quantify precisely, underscores the robustness of error detection
 mechanisms in network protocols.
 
+And at the end, all that calculations were done without taking into an account Ethernet CRC, which is CRC-32.
+
 #line(
   length: 100%,
 )
