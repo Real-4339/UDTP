@@ -40,8 +40,7 @@
     * [V4](#v4)
     * [Packet distribution diagrams](#packet-distribution-diagrams)
     * [Data Transfer](#data-transfer)
-        
-
+    * [Important](#important)        
 
 # UDTP (UDP Reliable Transfer Protocol)
 
@@ -538,3 +537,9 @@ See [Transfer.md](Transfer.md) for more information about data transfer.
 Here is a visual representation of the data transfer mechanism in UDTP:
 
 ![Data Transfer](images/data_transfer.svg)
+
+## Important
+
+The last, but not least, UDTP can transfer any size of files or messages.  
+Because of `merge` function, which is used to merge packets into a file.
+Based on timestamps and sequence numbers it can merge packets into a file, even if they are not in order.
