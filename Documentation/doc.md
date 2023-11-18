@@ -37,13 +37,13 @@
 ![License GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)
 [![Author](https://img.shields.io/badge/author-Vadym%20Tilihuzov-green.svg)](mailto:vad.tili@gmail.com)
 
-UDTP is a P2P protocol that provides reliable data transfer over UDP and that is easy to implement and understand.  
+UDTP is a communication protocol for peer-to-peer data transfer that provides reliable data transfer over UDP and that is easy to implement and understand. :3
 
 UDTP used for transferring files between systems in a local network.
 
 It is designed to be used in situations where TFTP is not suitable, and FTP is too complicated and can not send as quick and as much data as UDTP, if we are talking about FTP on TCP. Also FTP is client-server. 
 
-My protocol in a future can be updated and upgrated via some instructions i left in own repository. Read more about it in [Improvements.md](Improvements.md).
+My protocol in a future can be updated and upgrated, for example, using some ideas i left in own repository. Read more about it in [Improvements.md](Improvements.md).
 
 # UDP
 
@@ -369,4 +369,105 @@ My protocol can simulate errors, like packet loss, packet corruption, packet dup
 
 ## Specification
 
-...
+The application for now its only cli, but still there are some commands, which can be used to interact with the app. 
+
+```bash
+
+Available commands:
+  my_address: Display the host's address
+  connect <ip>:<port>: Connect to a host
+  disconnect <ip>:<port>: Disconnect from a host
+  disconnect_all: Disconnect from all hosts
+  list: List connected hosts
+  list_available: List available hosts
+  detection_time <time>: Set the detection time of available hosts
+  send_m <ip>:<port> <message>: Send a message to a host
+  send_f <ip>:<port> <file>: Send a file to a host
+  change_fragment_size <size>: Change the fragment size
+  log_level <level>: Set the log level
+  help: Display this help message
+  exit: Exit the terminal
+
+```
+
+### Commands
+
+Ill go through only important commands.
+
+- `list` - list of connected peers.
+- `list_available` - list of peers that are running UDTP app.
+- `detection_time` - time in seconds, how often app will check for new peers that are running UDTP app.
+- `send_m` - send message to peer. Where __message__ is a message.
+- `send_f` - send file to peer. Where __file__ is a path to a file.
+- `change_fragment_size` - change max frame size. Where __size__ is a size of a frame 1-1468 bytes.
+- `log_level` - change log level. Where __level__ is a level of logging. 0 - DEBUG, 1 - INFO, 2 - WARNING, 3 - ERROR, 4 - CRITICAL.
+
+If i was able to do terminal without separate thread i would do that, but it is what it is. I used `threading` library for that.
+
+So i have running cli in diff thread, that was listening on commands from user and sending them to core app. Where were the main logic running.
+
+## Core Idea
+
+The foundational concept for this project was inspired by Node.js, particularly the utilization of the `EventEmitter` class, which facilitates the emission and reception of events. I found this pattern highly effective and wished to incorporate it into my work.
+
+Additionally, I drew inspiration from the core principles of libuv, V8, and Go. In particular, I sought to implement a design similar to Node.js in Python. To achieve this, I developed my own GO (Generic Object), choosing a simplified `v4` version as an alternative to the more intricate V8 engine. This choice was made to strike a balance between the efficiency of V8 and the complexity associated with it.
+
+Rather than relying on libuv, I employed the selectors library, specifically utilizing the DefaultSelector. It's important to note that, in contrast to libuv's asynchronous features, I opted for the synchronous version of selectors. This decision was driven by the specific nature of my application, which involves a singular socket and doesn't necessitate asynchronous functionality.
+
+In summary, my implementation draws inspiration from various sources, melding the event-driven paradigm of Node.js, the efficiency principles of libuv, and the simplicity of design found in Go. This amalgamation has culminated in a Python-based solution that aligns with the specific requirements of my project, delivering an effective and tailored approach to event handling and socket management.
+
+## Core Implementation
+
+V4 functionality is the same as [V8](https://nodejs.org/en/learn/getting-started/the-v8-javascript-engine).
+
+In the architecture of my application, events can execute distinct tasks related to their parent elements. The application comprises several hierarchical levels:
+
+1. Host (Top Level):
+    - Responsible for core functionality such as socket reading.
+    - Maintains a list of Connections.
+    - Runs v4 loop.
+
+2. Connection (Second Level):
+    - Created for each new user, representing their specific connection.
+    - Maintains a list of Transfers.
+
+3. Transfer (Last Level):
+    - Created for each new transfer, establishing a specific transfer room.
+    - Maintains a list of Packets.
+
+To illustrate:
+
+    Host -> V4:
+        V4 manages events.
+        Host reads data from socket.
+
+    Connection:
+        Manages individual user connections and maintains a list of Transfers.
+
+    Transfer:
+        Manages specific transfer rooms and maintains a list of Packets.
+
+Each new instance of these classes generates its own event emitter, which is invoked within the V4 context. This hierarchical structure allows for modular and organized event handling throughout the application.
+
+> p.s. Host can be created only once, and it is created when app starts.
+
+## Core Events Overview
+
+In the core architecture, events are emitted and processed by the V4 loop, where the corresponding event handlers are executed. A Status module has been introduced to manage the state of events, categorizing them as busy, sleeping, or inactive and more.
+
+Each event operates within its designated level and is constrained from traversing upward. While an event can pass a packet to the level above, it cannot surpass its allocated level.
+
+### Host - High Level
+---
+
+This layer is responsible for reading packets from a socket, create connections, sending packets, putting packets into a connections, and deleted dead events from a v4 loop.
+
+### Connection - Medium Level
+---
+
+This layer is responsible for creating transfers, keep alive funcitonality, and approving connection establishment and termination.
+
+### Transfer - Low Level
+---
+
+This layer is responsible for sending and receiving files, and messages, acknowledgments, and retransmissions.
