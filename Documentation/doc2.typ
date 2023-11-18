@@ -226,7 +226,7 @@ Ports are taken randomly, but they are taken from a range of
 <protocol>
 == Header Structure
 <header-structure>
-Mine UDTP protocols header looks like so:
+My UDTP protocols header looks like so:
 
 ```
 ---------------------------------------------------------------
