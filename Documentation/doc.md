@@ -14,7 +14,7 @@
         + [Flags](#flags)
             - [Notes](#notes)
         + [Checksum](#checksum)
-            - [Example: CRC-16 Error Probability Analysis](#example--crc-16-error-probability-analysis)
+            - [Example: CRC-16 Error Probability Analysis](#example-crc-16-error-probability-analysis)
             - [UDP Checksum](#udp-checksum)
             - [Combined Error Probability Analysis](#combined-error-probability-analysis)
     * [Features](#features)
@@ -202,15 +202,16 @@ P_{\text{undetected}} = (1 - \text{error rate})^{\text{packet count}}
 $$
 
 
-For CRC-16, which has 16 bits, there are 65,536 possible values, yielding an error rate of 
+For CRC-16, which has 16 bits, there are 65,536 possible values, yielding an error rate of
+
 $$
-\frac{1}{65,536}
+\frac{1}{65.536}
 $$
 
 or approximately
 
 $$
-0.0000152587890625 \, - (0.00152587890625\%)
+0.0000152587890625 \text{ gives us } (0.00152587890625 \text{ percent})
 $$
 
 Substituting these values into the formula:
