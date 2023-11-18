@@ -396,7 +396,7 @@ My protocol can simulate errors, like packet loss, packet corruption, packet dup
 
 The application for now its only cli, but still there are some commands, which can be used to interact with the app. 
 
-```bash
+```
 
 Available commands:
   my_address: Display the host's address
