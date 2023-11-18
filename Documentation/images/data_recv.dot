@@ -1,0 +1,7 @@
+digraph DataReceivingProcess {
+  Socket [label="Socket\n(Receive Raw Data)", shape="box"];
+  CheckForConnection [label="Check for Connection\n(If Yes, Push to it\nIf No, Create and Push to New)", shape="box"];
+  ConnectionValidation [label="Connection Validation\n(Check if Packet is Valid\nIf Yes, Save Packet)", shape="box"];
+
+  Socket -> CheckForConnection -> ConnectionValidation;
+}

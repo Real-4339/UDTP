@@ -1,0 +1,7 @@
+digraph DataSendingProcess {
+  TransferInstance [label="Transfer Instance\n(Link to Socket Send)", shape="box"];
+  PacketClass [label="Packet Class\n(Encapsulation Module)", shape="box"];
+  LinkToSocket [label="Link to Socket\n(Send Raw Data)", shape="box"];
+
+  TransferInstance -> PacketClass -> LinkToSocket;
+}
