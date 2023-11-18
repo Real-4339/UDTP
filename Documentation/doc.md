@@ -564,7 +564,7 @@ Based on timestamps and sequence numbers it can merge packets into a file, even 
 
 I use only 1B for sequence numbers, so max sequence number is 255, but it is enough for my protocol, so if packet reaches 255, it will start from 0 again.
 
-The only one thing here is important, if receiver responces with ack number and i have two the same seq nums but diff packets, they will be acked both, but, there is a very, very small chance that this will happen, even less than CRC32 error probability.
+The only one thing here is important, if receiver responces with ack number and i have two the same seq nums but diff packets, they will be acked both, but, there is a very small chance that this will happen.
 
-The probability of a packet being lost and peer A not getting an ack is 0.25% for each packet. I receive packets every ~2 ms, from 0 to 16 packets at a time, and if I don't get an ack for a packet sent within 3 seconds, I retransmit it, and this goes in a loop, but if peer B doesn't acknowledge the packets, then peer A simply can't send new ones, i.e. for peer B to receive new packets it has to respond to the old ones.
+The probability of a packet being lost and peer A not getting an ack is 0.25% for each packet, approx. I receive packets from 0 to 16 packets at a time, and if I don't get an ack for a packet sent within 3 seconds, I retransmit it, but if peer B doesn't acknowledge the packets, then peer A simply can't send new ones, i.e. for peer B to receive new packets it has to respond to the old ones.
 
