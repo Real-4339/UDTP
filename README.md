@@ -1,6 +1,5 @@
-# Communicator
-Communicator with own protocol on application level with UDP as L3 level of TCP/IP model
-
+# Reliabel Data Transfer Protocol
+Relialbe data-transfer P2P application with UDP as L3 level of TCP/IP model.
 
 ## How to run
 
