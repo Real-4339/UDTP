@@ -211,7 +211,7 @@ $$
 or approximately
 
 $$
-0.0000152587890625 {\text{ gives us }} (0.00152587890625 \{%})
+0.0000152587890625 {\text{ gives us }} (0.00152587890625 \%)
 $$
 
 Substituting these values into the formula:
