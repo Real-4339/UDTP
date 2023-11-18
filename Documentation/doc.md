@@ -14,9 +14,9 @@
         + [Flags](#flags)
             - [Notes](#notes)
         + [Checksum](#checksum)
-            - [Example (CRC-16)](#example--crc-16-)
-            - [UDP Checksum(RFC 1071)](#udp-checksum-rfc-1071-)
-            - [Combined Checksum](#combined-checksum)
+            - [Example: CRC-16 Error Probability Analysis](#example--crc-16-error-probability-analysis)
+            - [UDP Checksum](#udp-checksum)
+            - [Combined Error Probability Analysis](#combined-error-probability-analysis)
     * [Features](#features)
         + [Flow Control (TCP)](#flow-control--tcp-)
         + [Flow Control (UDTP)](#flow-control--udtp-)
@@ -194,15 +194,31 @@ If they do not match, it indicates that there was an error in transmission and t
 #### Example: CRC-16 Error Probability Analysis
 ---
 
-Consider a scenario involving a _1 GB_ file with a packet length of _1428 bytes_, resulting in _700,281_ packets. To determine the probability of a random error going undetected using CRC-16, we apply the following formula:
+Consider a scenario involving a _1 GB_ file with a packet length of _1428 bytes_, resulting in _700,281_ packets.  
+To determine the probability of a random error going undetected using CRC-16, we apply the following formula:
 
-___P(undetected)=(1−error rate)^(packet count)___
+$$
+P_{\text{undetected}} = (1 - \text{error rate})^{\text{packet count}}
+$$
 
-For CRC-16, which has 16 bits, there are 65,536 possible values, yielding an error rate of _1/65,536_ or approximately _0.0000152587890625_ (0.00152587890625%).
+
+For CRC-16, which has 16 bits, there are 65,536 possible values, yielding an error rate of 
+$$
+\frac{1}{65,536}
+$$
+
+or approximately
+
+$$
+0.0000152587890625 \, - (0.00152587890625\%)
+$$
 
 Substituting these values into the formula:
 
-___P(undetected)=(1−0.0000152587890625)^700,281___
+$$
+P_{\text{undetected}} = (1 - 0.0000152587890625)^{700,281}
+$$
+
 
 This computation results in a probability of __2.287372724887968e−05__ or __0.00002287372724887968__. 
 
@@ -236,6 +252,8 @@ Im gonna estimate the probability of an undetected errors for the Internet check
 ---
 #### Combined Error Probability Analysis
 ---
+
+<br>
 
 __Combined = CRC-16 probability x Internet Checksum probability.__
 
@@ -541,5 +559,12 @@ Here is a visual representation of the data transfer mechanism in UDTP:
 ## Important
 
 The last, but not least, UDTP can transfer any size of files or messages.  
-Because of `merge` function, which is used to merge packets into a file.
+Because of `merge` function, which is used to merge packets into a file.  
 Based on timestamps and sequence numbers it can merge packets into a file, even if they are not in order.
+
+I use only 1B for sequence numbers, so max sequence number is 255, but it is enough for my protocol, so if packet reaches 255, it will start from 0 again.
+
+The only one thing here is important, if receiver responces with ack number and i have two the same seq nums but diff packets, they will be acked both, but, there is a very, very small chance that this will happen, even less than CRC32 error probability.
+
+The probability of a packet being lost and peer A not getting an ack is 0.25% for each packet. I receive packets every ~2 ms, from 0 to 16 packets at a time, and if I don't get an ack for a packet sent within 3 seconds, I retransmit it, and this goes in a loop, but if peer B doesn't acknowledge the packets, then peer A simply can't send new ones, i.e. for peer B to receive new packets it has to respond to the old ones.
+
