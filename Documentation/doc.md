@@ -533,3 +533,7 @@ Here is a visual representation of the V4 loop:
 ## Data Transfer
 
 See [Transfer.md](Transfer.md) for more information about data transfer.
+
+Here is a visual representation of the data transfer mechanism in UDTP:
+
+![Data Transfer](images/data_transfer.svg)
