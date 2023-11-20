@@ -1002,9 +1002,8 @@ Based on timestamps and sequence numbers it can merge packets into a
 file, even if they are not in order.
 
 Protocol use only 1B for sequence numbers, so max sequence number is 255, but
-it is enough for my protocol, so if packet reaches 255, it will start
-from 0 again.
+it is enough for my protocol, so if seq. reaches number 255, it flip to 0.
 
-Several factors significantly influence the process of data transmission. When the time comes to retransmit packets, priority is given to the subsequent set of packets awaiting transmission. Specifically, packets requiring retransmission are accorded precedence and occupy the foremost position until acknowledgment is received. This prioritization extends to the subsequent packet stack.
+Lots of things affect how data gets sent. When it's time to resend some data packets, the ones waiting to be sent again get first dibs. Basically, the ones needing a redo get top priority and hold the front spot until they get the green light. This priority thing also applies to the next set of packets.
 
-The crucial aspect of this process involves the acknowledgment of packets associated with the preceding stack if, at the termination of the initial range (0-255), there exist residual packets from the antecedent stack. It is imperative that these residual packets be acknowledged before transitioning to the subsequent stack.
+The important part here is making sure we acknowledge the packets from the previous set when we finish with the first gap (0-255). If there are any leftover packets from before, it's crucial to give them a thumbs up before moving on to the next batch.
