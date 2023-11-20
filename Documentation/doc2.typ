@@ -1005,26 +1005,6 @@ Protocol use only 1B for sequence numbers, so max sequence number is 255, but
 it is enough for my protocol, so if packet reaches 255, it will start
 from 0 again.
 
-The only one thing here is important, if receiver responces with ack
-number and i have two the same seq nums but diff packets, they will be
-acked both, but, there is a very small chance that this will happen.
+Several factors significantly influence the process of data transmission. When the time comes to retransmit packets, priority is given to the subsequent set of packets awaiting transmission. Specifically, packets requiring retransmission are accorded precedence and occupy the foremost position until acknowledgment is received. This prioritization extends to the subsequent packet stack.
 
-The likelihood of a packet encountering loss and peer A failing to receive an acknowledgment stands at 
-approximately 25% for each individual packet.  
-I receive packets in batches ranging from 0 to 16 at a given time.  
-In the event that an acknowledgment is not received within a 3-second timeframe for a transmitted packet,  
-initiates a retransmission. However, it is imperative to note that if peer B fails to acknowledge the received packets,  
-peer A is precluded from dispatching new ones.  
-Consequently, for peer B to gain access to new packets, it is requisite that it responds to the previously transmitted ones.
-
-In a simulated test scenario designed to approximate a specific use case, consider the following parameters: a Retransmission Time-Out (RTO) of 3000ms and a Round-Trip Time (RTT) of 2ms. The ensuing analysis involves the calculation of probabilities based on the established assumptions.
-
-Within a window size of 16 packets, only 4 acknowledgments (acks) are received, implying the loss of 12 packets. Subsequently, 4 acks are received within a 2ms interval, prompting Peer A to transmit an additional 4 packets. However, a single acknowledgment is obtained in return, leading to the transmission of one more packet. Consequently, the duration from the initiation of the initial packet transmission to this point totals approximately 5ms.
-
-At this stage, 15 packets remain unacknowledged, resulting in a current acknowledgment reception rate of 25%. This implies the potential transmission of a new packet contingent upon acknowledgment receipt. If an acknowledgment is not received, a retransmission of all 15 unacknowledged packets ensues, possibly followed by the transmission of a new packet.
-
-Persisting in this iterative process, the focus turns to determining the probability of not receiving an acknowledgment for the first packet among the 16. This calculation involves considering the cumulative probabilities of not receiving acknowledgments for each successive packet within the given window size.
-
-$ (1 - (1/16 * 15/16 * 14/16 * 13/16)) * 100 = 95,83% $
-
-All that process repeats, and chance that peer A wont get ack for the first packet getting lower and lower...
+The crucial aspect of this process involves the acknowledgment of packets associated with the preceding stack if, at the termination of the initial range (0-255), there exist residual packets from the antecedent stack. It is imperative that these residual packets be acknowledged before transitioning to the subsequent stack.
