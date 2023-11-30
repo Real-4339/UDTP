@@ -48,7 +48,7 @@ class Packet:
         return True
 
     @staticmethod
-    def construct_packet(data: bytes, flags: Flags, seq_num: int) -> "Packet" or None:
+    def construct_packet(data: bytes, flags: Flags, seq_num: int) -> "Packet" | None:
         """Construct packet"""
         if data is None:
             LOGGER.error("Data is None")
@@ -132,6 +132,8 @@ class Packet:
             data_size + fragment_size - 1
         ) // fragment_size  # Number of packets needed
 
+        LOGGER.debug(f"Packets num: {packets_num}")
+
         current_seq_num = 0
 
         for i in range(packets_num):
@@ -141,6 +143,7 @@ class Packet:
 
             """ Calculate the seq_num with wrap around """
             current_seq_num = (seq_num + i) % (2**8)  # HACK: 8 bits for seq_num
+            LOGGER.debug(f"Current seq_num: {current_seq_num}")
 
             packet = Packet.construct_packet(packet_data, flags, current_seq_num)
 
