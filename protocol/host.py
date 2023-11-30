@@ -164,7 +164,7 @@ class Host:
             connected_with = self.get_connection(AddressInfo(*addr))
 
             if connected_with is None:
-                LOGGER.info(f"New connection with {addr}")
+                # LOGGER.info(f"New connection with {addr}")
                 connected_with = ConnectionWith(
                     AddressInfo(*addr), self._send, self.fragment_size
                 )
