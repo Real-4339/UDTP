@@ -174,7 +174,7 @@ class Receiver:
             Packet.construct(
                 data=f"{self.own_transfer_flag}".encode(),
                 flags=Flags.FIN,
-                seq_num=self.__seq_num + 1,
+                seq_num=self.__packets[-1].seq_num,
             ),
             self.__client,
         )
