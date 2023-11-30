@@ -455,6 +455,7 @@ class ConnectionWith:
             """Keep alive"""
             self.__last_time = time.time()
             LOGGER.info(f"Got keep alive from {self.__owner}")
+            return
 
         """ Approved connection """
         self.__connected = True
