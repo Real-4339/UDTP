@@ -46,6 +46,9 @@ class Receiver:
         self.__alive = Status.ALIVE
         self.__last_time = time.time()
 
+        self.__started = None
+        self.__ended = None
+
     @property
     def alive(self) -> Status:
         return self.__alive
@@ -136,6 +139,8 @@ class Receiver:
             self.__client,
         )
 
+        self.__started = time.time()
+
     def _process_file(self, packet: Packet) -> None:
         """Process file"""
 
@@ -157,6 +162,12 @@ class Receiver:
         """Process FIN"""
 
         self.__alive = Status.DEAD
+
+        self.__ended = time.time()
+
+        LOGGER.info(
+            f"File transfer is finished from {self.__client} in {self.__ended - self.__started} seconds"
+        )
 
         """ Send FIN """
         self.__send_func(
