@@ -202,11 +202,12 @@ class ConnectionWith:
             if not can_i_do_smth():
                 self.__connecting = False
 
-            """Resend syn"""
-            LOGGER.info(f"Resending syn to {self.__owner}")
-            self.connect()
-            self.__last_time = time.time()
-            return True
+            if Time.CONN_RESEND < time.time() - self.__resend_time:
+                """Resend syn"""
+                LOGGER.info(f"Resending syn to {self.__owner}")
+                self.connect()
+                self.__last_time = time.time()
+                return True
 
         if not can_i_do_smth() and self.__connected:
             if not self.time_is_valid():
