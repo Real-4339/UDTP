@@ -67,6 +67,7 @@ class ConnectionWith:
 
         self.__packets.append(packet)
         self.__last_time = time.time()
+        self.__keep_alive.time = time.time()
 
     def time_is_valid(self) -> bool:
         """Check if connection is still alive"""
@@ -186,18 +187,33 @@ class ConnectionWith:
     def _keep_alive(self) -> bool:  # XXX: Redo function
         """Keep connection alive"""
 
+        if not hasattr(self._keep_alive, "time"):
+            self._keep_alive.time = time.time()
+
+        def can_i_do_smth() -> bool:
+            if time.time() - self._keep_alive.time > 5:
+                return False
+            return True
+
         if self.__alive == Status.DEAD:
             return False
 
-        if not self.time_is_valid() and self.__connecting:
+        if self.__connecting:
+            if not can_i_do_smth():
+                self.__connecting = False
+
             """Resend syn"""
             LOGGER.info(f"Resending syn to {self.__owner}")
             self.connect()
             self.__last_time = time.time()
             return True
 
-        if not self.time_is_valid() and self.__connected:
-            """Send syn | sack"""
+        if not can_i_do_smth() and self.__connected:
+            if not self.time_is_valid():
+                self.__alive = Status.DEAD
+                return False
+
+            """Resend (syn | sack) - Keep alive"""
             sack = Packet.construct(data=b"", flags=(Flags.SYN | Flags.SACK), seq_num=2)
             self.__send_func(sack, self.__owner)
             self.__last_time = time.time()
@@ -220,6 +236,10 @@ class ConnectionWith:
             if packet.flags == Flags.SYN and not self.connected:
                 """call syn function"""
                 self._syn(packet)
+
+            elif packet.flags == Flags.SYN and self.connected:
+                """call syn sack function"""
+                self._syn_sack(packet)
 
             elif packet.flags == (Flags.SYN | Flags.ACK) and (
                 self.__connecting or self.connected
@@ -376,6 +396,9 @@ class ConnectionWith:
 
         # LOGGER.info(f"Received syn from {self.__owner}")
 
+        """ Delete that packet """
+        self.__packets.remove(packet)
+
         """ Check ttl of a packet """
         if not packet.time_is_valid():
             LOGGER.warning(f"Packet from {self.__owner} is dead")
@@ -389,13 +412,13 @@ class ConnectionWith:
         """ Approve connection """
         self.__connecting = True
 
-        """ Delete that packet """
-        self.__packets.remove(packet)
-
     def _syn_ack(self, packet: Packet):
         """Syn ack function"""
 
         # LOGGER.info(f"Received syn ack from {self.__owner}")
+
+        """ Delete that packet """
+        self.__packets.remove(packet)
 
         """ Check ttl of a packet """
         if not packet.time_is_valid():
@@ -411,9 +434,6 @@ class ConnectionWith:
         self.__connected = True
         self.__connecting = False
 
-        """ Delete that packet """
-        self.__packets.remove(packet)
-
         LOGGER.info(f"Connected to {self.__owner}")
 
     def _syn_sack(self, packet: Packet):
@@ -421,13 +441,13 @@ class ConnectionWith:
 
         # LOGGER.info(f"Received syn sack from {self.__owner}")
 
+        """ Delete that packet """
+        self.__packets.remove(packet)
+
         """ Check ttl of a packet """
         if not packet.time_is_valid():
             LOGGER.warning(f"Packet from {self.__owner} is dead")
             return
-
-        """ Delete that packet """
-        self.__packets.remove(packet)
 
         if self.connected:
             """Keep alive"""
