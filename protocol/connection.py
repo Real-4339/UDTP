@@ -219,6 +219,7 @@ class ConnectionWith:
             sack = Packet.construct(data=b"", flags=(Flags.SYN | Flags.SACK), seq_num=2)
             self.__send_func(sack, self.__owner)
             self.__last_time = time.time()
+            self.__resend_time = time.time()
 
         return True
 
