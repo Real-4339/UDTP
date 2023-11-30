@@ -67,7 +67,7 @@ class ConnectionWith:
 
         self.__packets.append(packet)
         self.__last_time = time.time()
-        self.__keep_alive.time = time.time()
+        self.__resend_time = time.time()
 
     def time_is_valid(self) -> bool:
         """Check if connection is still alive"""
@@ -184,14 +184,14 @@ class ConnectionWith:
 
         return True
 
-    def _keep_alive(self) -> bool:  # XXX: Redo function
+    def _keep_alive(self) -> bool:
         """Keep connection alive"""
 
-        if not hasattr(self._keep_alive, "time"):
-            self._keep_alive.time = time.time()
+        if not hasattr(self, "__resend_time"):
+            self.__resend_time = time.time()
 
         def can_i_do_smth() -> bool:
-            if time.time() - self._keep_alive.time > Time.RESEND:
+            if time.time() - self.__resend_time > Time.RESEND:
                 return False
             return True
 
