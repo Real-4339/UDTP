@@ -118,11 +118,16 @@ class Sender:
 
     def time_is_valid(self) -> bool:
         """Check if connection is still alive"""
-
         if time.time() - self.__last_time > Time.KEEPALIVE:
             return False
 
         return True
+
+    def time_to_resend(self) -> bool:
+        if time.time() - self.__last_time > Time.RESEND:
+            return True
+
+        return False
 
     def kill(self) -> None:
         """Kill connection"""
@@ -130,7 +135,7 @@ class Sender:
 
     def _start(self) -> bool:
         """Only for waiting SACK to start sending data"""
-        if not self.__started and not self.time_is_valid():
+        if not self.__started and self.time_to_resend():
             LOGGER.info(f"Resending FILE/MSG to {self.__client}")
             if self.__type == "file":
                 self.__send_func(
@@ -151,6 +156,8 @@ class Sender:
             return False
         if self.__started:
             return True
+
+        return False
 
     def _send_restof_data(self, num_to_skip: int) -> None:
         """Send rest of data"""
