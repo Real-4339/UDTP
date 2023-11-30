@@ -33,8 +33,6 @@
    I ignore spoofed packets, but only based on ip, mb should check for both.  
    Windows: Idk, need to check wireshark.
 
-2. error simulation, only packet corruption
-
 3. Seems packets are send one by one, not in range
 
 4. Terminal: Proper input validation (new message, min)
@@ -49,3 +47,4 @@
 
 - Keep alive
 - Free update
+- error simulation, only packet corruption
