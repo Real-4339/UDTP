@@ -135,7 +135,7 @@ class Packet:
             data_size + fragment_size - 1
         ) // fragment_size  # Number of packets needed
 
-        LOGGER.debug(f"Packets num: {packets_num}")
+        # LOGGER.debug(f"Packets num: {packets_num}")
 
         current_seq_num = 0
 
