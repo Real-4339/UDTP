@@ -38,8 +38,6 @@
     ^^^^^^^^^  
     ValueError: not enough values to unpack (expected 2, got 1)
 
-3. Seems packets are send one by one, not in range
-
 4. Terminal: Proper input validation (new message, min)
 
 5. WM
@@ -53,3 +51,4 @@
 - Keep alive
 - Free update
 - error simulation, only packet corruption
+- Seems packets are send one by one, not in range
