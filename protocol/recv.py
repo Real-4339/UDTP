@@ -167,7 +167,7 @@ class Receiver:
 
         if self.name is not None and self.ext is not None:
             """Create file from packets and save it"""
-            file_data = Packet.merge(self.__packets)
+            file_data = Packet.merge_new(self.__packets)
             file_name = f"{self.__name}_{int(time.time())}.{self.__ext}"
 
             """ Construct fpath """
@@ -187,7 +187,7 @@ class Receiver:
 
         else:
             """Create message from packets and print it"""
-            message = Packet.merge(self.__packets).decode()
+            message = Packet.merge_new(self.__packets).decode()
             LOGGER.info(f"Received message from {self.__client} : {message}")
 
     def _acknowledge_data(self) -> None:
