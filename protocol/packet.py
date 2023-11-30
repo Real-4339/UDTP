@@ -173,7 +173,7 @@ class Packet:
 
             """ Calculate the seq_num with wrap around """
             current_seq_num = (seq_num + i) % (2**8)  # HACK: 8 bits for seq_num
-            LOGGER.debug(f"Current seq_num: {current_seq_num}")
+            # LOGGER.debug(f"Current seq_num: {current_seq_num}")
 
             packet = Packet.construct_packet(packet_data, flags, current_seq_num)
 
