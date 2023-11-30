@@ -172,6 +172,8 @@ class Receiver:
             """Create file from packets and save it"""
             file_data = Packet.merge_new(self.__packets)
             file_name = f"{self.__name}_{int(time.time())}.{self.__ext}"
+            if self.__ext == "":
+                file_name = f"{self.__name}_{int(time.time())}"
 
             """ Construct fpath """
             script_dir = os.path.dirname(os.path.abspath(__file__))
