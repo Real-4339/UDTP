@@ -167,6 +167,8 @@ class Sender:
             self.__all_packets
             and len(packets_to_send) < self.__window_size - num_to_skip
         ):
+            if self.__all_packets[0].seq_num == 0 and self.__sent_packets != []:
+                break
             packet = self.__all_packets.pop(0)
             packets_to_send.append(packet)
             self.__sent_packets.append(packet)
@@ -238,9 +240,6 @@ class Sender:
         for packet in expired_packets:
             packet = Packet.packet_to_bytes(packet)
             self.__send_func(packet, self.__client)
-
-        # HACK: add check for new gap, check for old packets, before gap.
-        LOGGER.debug(f"seq_num: {self.__seq_num}")
 
         """ Send rest of data """
         count = len(self.__sent_packets) - len(expired_packets)
