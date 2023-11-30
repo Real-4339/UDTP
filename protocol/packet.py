@@ -90,7 +90,7 @@ class Packet:
 
     @staticmethod
     def construct_broken_crc(data: bytes, flags: Flags, seq_num: int) -> bytes | None:
-        """Construct packet in Bytes"""
+        """Construct packet in Bytes, Test purpose only !!!"""
         crc16_func = crcmod.mkCrcFun(0x18005, rev=True, initCrc=0xFFFF, xorOut=0x0000)
         crc16 = crc16_func(data)
 
