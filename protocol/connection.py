@@ -191,7 +191,7 @@ class ConnectionWith:
             self._keep_alive.time = time.time()
 
         def can_i_do_smth() -> bool:
-            if time.time() - self._keep_alive.time > 5:
+            if time.time() - self._keep_alive.time > Time.RESEND:
                 return False
             return True
 
