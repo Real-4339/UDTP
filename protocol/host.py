@@ -103,7 +103,7 @@ class Host:
         addr = AddressInfo(ip, port)
         connection = self.get_connection(addr)
 
-        if connection is not None:
+        if connection:
             connection.disconnect()
         else:
             LOGGER.warning("Connection to {}:{} does not exist".format(ip, port))
@@ -123,7 +123,7 @@ class Host:
         addr = AddressInfo(ip, port)
         connection = self.get_connection(addr)
 
-        if connection is not None:
+        if connection:
             connection.send_file(data, name, ext)
         else:
             LOGGER.warning("Connection to {}:{} does not exist".format(ip, port))
@@ -134,7 +134,7 @@ class Host:
         addr = AddressInfo(ip, port)
         connection = self.get_connection(addr)
 
-        if connection is not None:
+        if connection:
             connection.send_msg(message)
         else:
             LOGGER.warning("Connection to {}:{} does not exist".format(ip, port))
