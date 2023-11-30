@@ -161,7 +161,7 @@ class Sender:
     def _send_restof_data(self, num_to_skip: int) -> None:
         """Send rest of data"""
 
-        packets_to_send = []
+        packets_to_send: list[Packet] = []
 
         while (
             self.__all_packets
@@ -174,6 +174,10 @@ class Sender:
             self.__sent_packets.append(packet)
 
         for packet in packets_to_send:
+            if packet.seq_num == 255:
+                packet = Packet.packet_to_bytes_broken_crc(packet)  # ONLY FOR TESTING
+                self.__send_func(packet, self.__client)
+                continue
             packet = Packet.packet_to_bytes(packet)
             self.__send_func(packet, self.__client)
 
