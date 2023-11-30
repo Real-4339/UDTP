@@ -175,9 +175,12 @@ class Sender:
 
         for packet in packets_to_send:
             if packet.seq_num == 255:
-                packet = Packet.packet_to_bytes_broken_crc(packet)  # ONLY FOR TESTING
+                packet = Packet.packet_to_bytes_broken_crc(
+                    packet
+                )  # BUG: ONLY FOR TESTING
                 self.__send_func(packet, self.__client)
                 continue
+
             packet = Packet.packet_to_bytes(packet)
             self.__send_func(packet, self.__client)
 
