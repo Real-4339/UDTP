@@ -288,7 +288,11 @@ class ConnectionWith:
                     continue
 
                 name_ext, flag = data[0], int(data[1])
-                name, ext = name_ext.split(".")
+                try:
+                    name, ext = name_ext.split(".")
+                except ValueError:
+                    name = name_ext
+                    ext = ""
 
                 transfer = Receiver(
                     self.__send_func, self.__owner, name, ext, flag, self.frag_size
