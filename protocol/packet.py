@@ -89,6 +89,20 @@ class Packet:
         return header + data
 
     @staticmethod
+    def construct_broken_crc(data: bytes, flags: Flags, seq_num: int) -> bytes | None:
+        """Construct packet in Bytes"""
+        crc16_func = crcmod.mkCrcFun(0x18005, rev=True, initCrc=0xFFFF, xorOut=0x0000)
+        crc16 = crc16_func(data)
+
+        try:
+            header = struct.pack("!BHB", flags, crc16 + 1, seq_num)
+        except struct.error as e:
+            LOGGER.error("Failed to pack header: %s", e)
+            return None
+
+        return header + data
+
+    @staticmethod
     def deconstruct(data: bytes) -> Packet | None:
         """Deconstruct bytes to packet"""
         if len(data) < 4:
