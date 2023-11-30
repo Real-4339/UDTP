@@ -152,8 +152,10 @@ class Host:
 
         breaker = Size.PPT
 
-        for key, _ in self.__selector.select(timeout=0.01):  # BUG; timeout=0
+        for key, _ in self.__selector.select(timeout=1):  # BUG; timeout=0
             data, addr = self.__socket.recvfrom(1472)
+
+            LOGGER.debug("Received packet")
 
             """ Ignore spoofed packets """
             if addr[0] == self.__me.ip:

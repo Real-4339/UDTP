@@ -225,7 +225,7 @@ class Sender:
         # for pack in self.__sent_packets:
         #     LOGGER.info(f"packet: {pack}")
 
-        # LOGGER.info(f"len(self.__sent_packets), before: {len(self.__sent_packets)}")
+        LOGGER.info(f"len(self.__sent_packets), before: {len(self.__sent_packets)}")
 
         """ Check for acknowledgments and remove acked packets from sent_packets"""
         self.__sent_packets = [
@@ -234,7 +234,7 @@ class Sender:
             if packet.seq_num not in self.__acks
         ]
 
-        # LOGGER.info(f"len(self.__sent_packets), after: {len(self.__sent_packets)}")
+        LOGGER.info(f"len(self.__sent_packets), after: {len(self.__sent_packets)}")
 
         """ Find packets which ttl is expired """
         expired_packets = [
