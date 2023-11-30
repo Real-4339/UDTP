@@ -26,8 +26,9 @@ class ConnectionWith:
         self.__connected = False
         self.__owner = addr
 
-        self.__keep_alive = Time.KEEPALIVE
+        self.__resend_time = None
         self.__last_time = time.time()
+        self.__keep_alive = Time.KEEPALIVE
         self.__last_transfer = Flags.SR - 1
 
         self.__transfers: dict[int, Sender | Receiver] = {}
@@ -187,7 +188,7 @@ class ConnectionWith:
     def _keep_alive(self) -> bool:
         """Keep connection alive"""
 
-        if not hasattr(self, "__resend_time"):
+        if self.__resend_time is None:
             self.__resend_time = time.time()
 
         def can_i_do_smth() -> bool:
