@@ -142,7 +142,10 @@ class Receiver:
         data = packet.data.decode().split(":")
 
         name_ext, flag = data[0], int(data[1])
-        name, ext = name_ext.split(".")
+        try:
+            name, ext = name_ext.split(".")
+        except ValueError:
+            name, ext = name_ext, ""
 
         self.__name = name
         self.__ext = ext
@@ -196,6 +199,8 @@ class Receiver:
         if len(self.__acks) == 0:
             # LOGGER.info(f"No data to acknowledge")
             return
+
+        LOGGER.debug(f"I got {len(self.__acks)} packets to acknowledge")
 
         for seq_num in self.__acks:
             # LOGGER.info(f"Sending ACK to {self.__client} : {seq_num}")
