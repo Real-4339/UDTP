@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 import struct
 import crcmod
@@ -48,7 +50,7 @@ class Packet:
         return True
 
     @staticmethod
-    def construct_packet(data: bytes, flags: Flags, seq_num: int) -> "Packet" | None:
+    def construct_packet(data: bytes, flags: Flags, seq_num: int) -> Packet | None:
         """Construct packet"""
         if data is None:
             LOGGER.error("Data is None")
