@@ -119,6 +119,7 @@ class Packet:
         computed_crc16 = crc16_func(packet_data)
 
         if computed_crc16 != crc16:
+            LOGGER.error("CRC16 is not valid")
             return False
 
         return True
