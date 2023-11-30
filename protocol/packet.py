@@ -64,7 +64,7 @@ class Packet:
         return Packet(data, flags, seq_num)
 
     @staticmethod
-    def packet_to_bytes(packet: "Packet") -> bytes | None:
+    def packet_to_bytes(packet: Packet) -> bytes | None:
         """Convert packet to bytes"""
         if packet is None:
             LOGGER.error("Packet is None")
@@ -89,7 +89,7 @@ class Packet:
         return header + data
 
     @staticmethod
-    def deconstruct(data: bytes) -> "Packet" or None:
+    def deconstruct(data: bytes) -> Packet | None:
         """Deconstruct bytes to packet"""
         if len(data) < 4:
             LOGGER.error("Packet is too short")
@@ -126,7 +126,7 @@ class Packet:
     @staticmethod
     def devide(
         data: bytes, seq_num: int, fragment_size: int, flags: Flags
-    ) -> list["Packet"] | None:
+    ) -> list[Packet] | None:
         """Devide data into packets"""
         packets = []
         data_size = len(data)
@@ -154,7 +154,7 @@ class Packet:
         return packets
 
     @staticmethod
-    def merge(packets: list["Packet"]) -> bytes | None:
+    def merge(packets: list[Packet]) -> bytes | None:
         """Merge packets into one"""
         if not packets:
             LOGGER.error("Packets list is empty")
@@ -218,7 +218,7 @@ class Packet:
         return data
 
     @staticmethod
-    def merge_new(packets: list["Packet"]) -> bytes | None:
+    def merge_new(packets: list[Packet]) -> bytes | None:
         """Merge packets into one"""
         if not packets:
             LOGGER.error("Packets list is empty")
