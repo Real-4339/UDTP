@@ -267,6 +267,7 @@ class ConnectionWith:
             elif packet.flags == Flags.FIN and packet.data == b"":
                 """call fin function"""
                 self.disconnect()
+                LOGGER.info(f"Disconnected from {self.__owner}")
                 self.__packets.remove(packet)
 
             elif packet.flags == Flags.FILE:
