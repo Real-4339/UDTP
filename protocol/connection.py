@@ -30,7 +30,7 @@ class ConnectionWith:
         self.__last_time = time.time()
         self.__last_transfer = Flags.SR - 1
 
-        self.__transfers: dict[int : Sender | Receiver] = {}
+        self.__transfers: dict[int, Sender | Receiver] = {}
         self.__packets: list[Packet] = []
 
     @property
@@ -62,6 +62,8 @@ class ConnectionWith:
         # LOGGER.info(f"Received packet from {self.__owner}")
 
         packet = Packet.deconstruct(data)
+        if packet is None:
+            return
 
         self.__packets.append(packet)
         self.__last_time = time.time()
@@ -181,7 +183,7 @@ class ConnectionWith:
 
         return True
 
-    def _keep_alive(self) -> bool:
+    def _keep_alive(self) -> bool:  # XXX: Redo function
         """Keep connection alive"""
 
         if self.__alive == Status.DEAD:
