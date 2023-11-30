@@ -33,12 +33,7 @@
    I ignore spoofed packets, but only based on ip, mb should check for both.  
    Windows: Idk, need to check wireshark.
 
-2. File "/home/vad/Desktop/github/UDTP/protocol/connection.py", line 291, in _iterator  
-    name, ext = name_ext.split(".")  
-    ^^^^^^^^^  
-    ValueError: not enough values to unpack (expected 2, got 1)
-
-4. Terminal: Proper input validation (new message, min)
+4. Terminal: Proper input validation (new message, min), remove raise errors
 
 5. WM
 
