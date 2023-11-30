@@ -75,6 +75,19 @@ class Packet:
         return Packet.construct(packet.__data, packet.__flags, packet.__seq_num)
 
     @staticmethod
+    def packet_to_bytes_broken_crc(packet: Packet) -> bytes | None:
+        """Convert packet to bytes, Test purpose only"""
+        if packet is None:
+            LOGGER.error("Packet is None")
+            return None
+        if not isinstance(packet, Packet):
+            LOGGER.error("Packet is not instance of Packet")
+            return None
+        return Packet.construct_broken_crc(
+            packet.__data, packet.__flags, packet.__seq_num
+        )
+
+    @staticmethod
     def construct(data: bytes, flags: Flags, seq_num: int) -> bytes | None:
         """Construct packet in Bytes"""
         crc16_func = crcmod.mkCrcFun(0x18005, rev=True, initCrc=0xFFFF, xorOut=0x0000)
