@@ -29,25 +29,23 @@
   ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
 ```
 
-1) Explanation, Unix:
-   I ignore spoofed packets, but only based on ip, mb should check for both.
-   Windows:
-   Idk, need to check wireshark.
+1. Explanation, Unix:  
+   I ignore spoofed packets, but only based on ip, mb should check for both.  
+   Windows: Idk, need to check wireshark.
 
-2) Free update
+2. error simulation, only packet corruption
 
-3) error simulation, only packet corruption
+3. Seems packets are send one by one, not in range
 
-4) Seems packets are send one by one, not in range
+4. Terminal: Proper input validation (new message, min)
 
-5) Terminal: Proper input validation (new message, min)
+5. WM
 
-6) WM
+6. IP header 60 bytes, have to check and mb dynamicly change MTU.
 
-7) IP header 60 bytes, have to check and mb dynamicly change MTU.
-
-8) Can not connect Windows and linux VM. (I think because of old spoofing check)
+7. Can not connect Windows and linux VM. (I think because of old spoofing check)
 
 # Done
 
 - Keep alive
+- Free update
