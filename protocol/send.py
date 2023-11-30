@@ -184,7 +184,6 @@ class Sender:
 
         if self.__all_packets == []:  # self.__count_of_acks >= self.__count_of_packets:
             """Send FIN"""
-            self.__seq_num += 1
             LOGGER.info(f"sending fin, seq: {self.__seq_num}")
             self.__send_func(
                 Packet.construct(
@@ -195,6 +194,7 @@ class Sender:
                 self.__client,
             )
             self.extended -= 1
+            self.__seq_num += 1
             if self.extended == 0:
                 self.__alive = Status.DEAD
 

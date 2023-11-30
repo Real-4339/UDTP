@@ -155,6 +155,16 @@ class Receiver:
 
         self.__alive = Status.DEAD
 
+        """ Send FIN """
+        self.__send_func(
+            Packet.construct(
+                data=f"{self.own_transfer_flag}".encode(),
+                flags=Flags.FIN,
+                seq_num=self.__seq_num + 1,
+            ),
+            self.__client,
+        )
+
         if self.name is not None and self.ext is not None:
             """Create file from packets and save it"""
             file_data = Packet.merge(self.__packets)
