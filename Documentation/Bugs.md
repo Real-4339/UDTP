@@ -40,9 +40,9 @@
 
 4) Seems packets are send one by one, not in range
 
-5) WM
+5) Terminal: Proper input validation (new message, min)
 
-6) Terminal: Proper input validation (new message, min)
+6) WM
 
 7) IP header 60 bytes, have to check and mb dynamicly change MTU.
 
