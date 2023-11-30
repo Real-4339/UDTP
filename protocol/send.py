@@ -48,8 +48,8 @@ class Sender:
         self.__all_packets: list[Packet] = []
         self.__sent_packets: list[Packet] = []
 
-        self.__count_of_acks = 0
-        self.__count_of_packets = 0
+        # self.__count_of_acks = 0
+        # self.__count_of_packets = 0
 
         self.__alive = Status.ALIVE
         self.__last_time = time.time()
@@ -91,8 +91,7 @@ class Sender:
 
         self.__all_packets.extend(packets)
 
-        self.__count_of_packets = len(self.__all_packets)
-
+        # self.__count_of_packets = len(self.__all_packets)
         # LOGGER.info(f"len(self.__all_packets): {len(self.__all_packets)}")
 
     def receive(self, packet: Packet) -> None:
@@ -101,8 +100,8 @@ class Sender:
         if packet.flags == Flags.ACK:
             # LOGGER.info(f"Received ACK from {self.__client}, time: {time.time()}")
             self.__last_time = time.time()
-            self.__acks.add(packet.seq_num)  # HACK
-            self.__count_of_acks += 1
+            self.__acks.add(packet.seq_num)
+            # self.__count_of_acks += 1
             return
 
         if packet.flags == Flags.FIN:
@@ -183,7 +182,7 @@ class Sender:
         )  # HACK: 8 bits
         # LOGGER.info(f"new seq_num: {self.__seq_num}")
 
-        if self.__count_of_acks >= self.__count_of_packets:
+        if self.__all_packets == []:  # self.__count_of_acks >= self.__count_of_packets:
             """Send FIN"""
             self.__seq_num += 1
             LOGGER.info(f"sending fin, seq: {self.__seq_num}")
@@ -235,12 +234,13 @@ class Sender:
 
         # LOGGER.info(f"exp_packs: {len(expired_packets)}")
 
-        """ Resend packets if needed """  # HACK: window size is constrained
+        """ Resend packets if needed """
         for packet in expired_packets:
             packet = Packet.packet_to_bytes(packet)
             self.__send_func(packet, self.__client)
 
         # HACK: add check for new gap, check for old packets, before gap.
+        LOGGER.debug(f"seq_num: {self.__seq_num}")
 
         """ Send rest of data """
         count = len(self.__sent_packets) - len(expired_packets)
