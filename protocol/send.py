@@ -170,17 +170,17 @@ class Sender:
             if self.__all_packets[0].seq_num == 0 and self.__sent_packets != []:
                 break
             packet = self.__all_packets.pop(0)
-            # packet.__time_to_live = time.time()  # HACK: only for testing
+            packet.__time_to_live = time.time()  # HACK: only for testing
             packets_to_send.append(packet)
             self.__sent_packets.append(packet)
 
         for packet in packets_to_send:
-            # if packet.seq_num == 255:
-            #     packet = Packet.packet_to_bytes_broken_crc(
-            #         packet
-            #     )  # BUG: ONLY FOR TESTING
-            #     self.__send_func(packet, self.__client)
-            #     continue
+            if packet.seq_num == 255:
+                packet = Packet.packet_to_bytes_broken_crc(
+                    packet
+                )  # HACK: ONLY FOR TESTING
+                self.__send_func(packet, self.__client)
+                continue
 
             packet = Packet.packet_to_bytes(packet)
             self.__send_func(packet, self.__client)
