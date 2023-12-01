@@ -246,11 +246,13 @@ class Packet:
         return data
 
     @staticmethod
-    def merge_new(packets: list[Packet]) -> bytes | None:
+    def merge_new(packets: set[Packet]) -> bytes | None:
         """Merge packets into one"""
         if not packets:
             LOGGER.error("Packets list is empty")
             return None
+
+        packets = sorted(packets, key=lambda packet: packet.time_stamp)
 
         data = b""
         original_len = len(packets)
