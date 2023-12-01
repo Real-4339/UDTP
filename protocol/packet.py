@@ -158,11 +158,7 @@ class Packet:
         """Devide data into packets"""
         packets = []
         data_size = len(data)
-        packets_num = (
-            data_size + fragment_size - 1
-        ) // fragment_size  # Number of packets needed
-
-        # LOGGER.debug(f"Packets num: {packets_num}")
+        packets_num = (data_size + fragment_size - 1) // fragment_size
 
         current_seq_num = 0
 
@@ -172,8 +168,7 @@ class Packet:
             packet_data = data[start_idx:end_idx]
 
             """ Calculate the seq_num with wrap around """
-            current_seq_num = (seq_num + i) % (2**8)  # HACK: 8 bits for seq_num
-            # LOGGER.debug(f"Current seq_num: {current_seq_num}")
+            current_seq_num = (seq_num + i) % (2**8)
 
             packet = Packet.construct_packet(packet_data, flags, current_seq_num)
 

@@ -74,7 +74,7 @@ class Receiver:
     def client(self) -> AddressInfo:
         return self.__client
 
-    def get_packets(self) -> set[Packet]:  # list[Packet]:
+    def get_packets(self) -> set[Packet]:
         """Get packets"""
 
         return self.__packets
@@ -110,18 +110,14 @@ class Receiver:
         """Receive data"""
 
         if packet not in self.__packets:
-            # LOGGER.info(f"Received data from {self.__client} : {packet.seq_num}")
             self.__seq_num += 1
 
             self.__acks.add(packet.seq_num)
             self.__packets.add(packet)
-            # self.__packets.append(packet)
-
             self.__last_time = time.time()
 
         else:
             """Resend ack"""
-            # LOGGER.info(f"Resending ACK to {self.__client} : {packet.seq_num}")
             ack = Packet.construct(
                 data=f"{self.own_transfer_flag}".encode(),
                 flags=Flags.ACK,
@@ -210,13 +206,9 @@ class Receiver:
         """Acknowledge data"""
 
         if len(self.__acks) == 0:
-            # LOGGER.info(f"No data to acknowledge")
             return
 
-        # LOGGER.debug(f"I got {len(self.__acks)} packets to acknowledge")
-
         for seq_num in self.__acks:
-            # LOGGER.info(f"Sending ACK to {self.__client} : {seq_num}")
             ack = Packet.construct(
                 data=f"{self.own_transfer_flag}".encode(),
                 flags=Flags.ACK,

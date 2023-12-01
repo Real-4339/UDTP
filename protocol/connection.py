@@ -60,8 +60,6 @@ class ConnectionWith:
             LOGGER.warning(f"Invalid packet from {self.__owner}")
             return
 
-        # LOGGER.info(f"Received packet from {self.__owner}")
-
         packet = Packet.deconstruct(data)
         if packet is None:
             return
@@ -74,7 +72,6 @@ class ConnectionWith:
         """Check if connection is still alive"""
 
         if time.time() - self.__last_time > self.__keep_alive:
-            # LOGGER.warning(f"Connection with {self.__owner} is almost dead")
             return False
 
         return True
@@ -205,7 +202,6 @@ class ConnectionWith:
 
             if Time.CONN_RESEND < time.time() - self.__resend_time:
                 """Resend syn"""
-                LOGGER.info(f"Resending syn to {self.__owner}")
                 self.connect()
                 self.__last_time = time.time()
                 return True
@@ -216,8 +212,8 @@ class ConnectionWith:
                 return False
 
             """Resend (syn | sack) - Keep alive"""
-            # sack = Packet.construct(data=b"", flags=(Flags.SYN | Flags.SACK), seq_num=2)
-            # self.__send_func(sack, self.__owner)
+            sack = Packet.construct(data=b"", flags=(Flags.SYN | Flags.SACK), seq_num=2)
+            self.__send_func(sack, self.__owner)
             self.__last_time = time.time()
             self.__resend_time = time.time()
 
@@ -401,8 +397,6 @@ class ConnectionWith:
     def _syn(self, packet: Packet):
         """Syn function"""
 
-        # LOGGER.info(f"Received syn from {self.__owner}")
-
         """ Delete that packet """
         self.__packets.remove(packet)
 
@@ -421,8 +415,6 @@ class ConnectionWith:
 
     def _syn_ack(self, packet: Packet):
         """Syn ack function"""
-
-        # LOGGER.info(f"Received syn ack from {self.__owner}")
 
         """ Delete that packet """
         self.__packets.remove(packet)
@@ -446,8 +438,6 @@ class ConnectionWith:
     def _syn_sack(self, packet: Packet):
         """Syn sack function"""
 
-        # LOGGER.info(f"Received syn sack from {self.__owner}")
-
         """ Delete that packet """
         self.__packets.remove(packet)
 
@@ -459,7 +449,6 @@ class ConnectionWith:
         if self.connected:
             """Keep alive"""
             self.__last_time = time.time()
-            LOGGER.info(f"Got keep alive from {self.__owner}")
             return
 
         """ Approved connection """
