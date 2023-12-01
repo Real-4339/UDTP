@@ -270,21 +270,14 @@ class Packet:
         if count_of_255_packets * 255 < len(packets):
             arr.append((start, len(packets) - 1))
 
-        seq_num_ranges = {}
         for start, end in arr:
             small_list = packets[start : end + 1]
             small_list = sorted(small_list, key=lambda packet: packet.seq_num)
-            seq_num_ranges[end] = small_list
+            packets[start : end + 1] = small_list
 
-        seq_num_ranges = dict(sorted(seq_num_ranges.items()))
-        merged_packets: list[Packet] = []
+        expected_seq_num = packets[0].seq_num
 
-        for value in seq_num_ranges.values():
-            merged_packets.extend(value)
-
-        expected_seq_num = merged_packets[0].seq_num
-
-        for packet in merged_packets:
+        for packet in packets:
             if packet.seq_num != expected_seq_num:
                 LOGGER.debug(
                     "Packet seq is not expected, num, expeted: %s: %s",
