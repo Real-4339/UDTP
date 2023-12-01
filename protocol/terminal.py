@@ -76,7 +76,11 @@ class Terminal:
             print("My address is {}:{}".format(ip, port))
 
         elif command.startswith("connect"):
-            ip, port = command.split(" ")[1].split(":")
+            try:
+                ip, port = command.split(" ")[1].split(":")
+            except IndexError:
+                print("Missing arguments")
+                return
 
             if self.__host.validate_addr(ip, int(port)):
                 print("Starting connection to {}:{}".format(ip, port))
@@ -89,7 +93,11 @@ class Terminal:
             self.__host.disconnect_all()
 
         elif command.startswith("disconnect"):
-            ip, port = command.split(" ")[1].split(":")
+            try:
+                ip, port = command.split(" ")[1].split(":")
+            except IndexError:
+                print("Missing arguments")
+                return
 
             if self.__host.validate_addr(ip, int(port)):
                 print("Starting disconnection from {}:{}".format(ip, port))
@@ -141,8 +149,10 @@ class Terminal:
 
             except IndexError:
                 print("Missing or incorrect arguments")
+                return
             except ValueError:
                 print("Invalid IP or port format")
+                return
 
             if self.__host.validate_addr(ip, int(port)):
                 print("Sending message to {}:{}".format(ip, port))
