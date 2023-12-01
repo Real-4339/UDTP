@@ -92,7 +92,7 @@ class Sender:
         self.__all_packets.extend(packets)
 
         # self.__count_of_packets = len(self.__all_packets)
-        # LOGGER.info(f"len(self.__all_packets): {len(self.__all_packets)}")
+        LOGGER.info(f"len(self.__all_packets): {len(self.__all_packets)}")
 
     def receive(self, packet: Packet) -> None:
         """Receive ack"""
@@ -170,16 +170,17 @@ class Sender:
             if self.__all_packets[0].seq_num == 0 and self.__sent_packets != []:
                 break
             packet = self.__all_packets.pop(0)
+            # packet.__time_to_live = time.time()  # HACK: only for testing
             packets_to_send.append(packet)
             self.__sent_packets.append(packet)
 
         for packet in packets_to_send:
-            if packet.seq_num == 255:
-                packet = Packet.packet_to_bytes_broken_crc(
-                    packet
-                )  # BUG: ONLY FOR TESTING
-                self.__send_func(packet, self.__client)
-                continue
+            # if packet.seq_num == 255:
+            #     packet = Packet.packet_to_bytes_broken_crc(
+            #         packet
+            #     )  # BUG: ONLY FOR TESTING
+            #     self.__send_func(packet, self.__client)
+            #     continue
 
             packet = Packet.packet_to_bytes(packet)
             self.__send_func(packet, self.__client)
@@ -191,7 +192,7 @@ class Sender:
         )  # HACK: 8 bits
         # LOGGER.info(f"new seq_num: {self.__seq_num}")
 
-        if self.__all_packets == []:  # self.__count_of_acks >= self.__count_of_packets:
+        if self.__all_packets == [] and self.__sent_packets == []:
             """Send FIN"""
             LOGGER.info(f"sending fin, seq: {self.__seq_num}")
             self.__send_func(
@@ -225,7 +226,7 @@ class Sender:
         # for pack in self.__sent_packets:
         #     LOGGER.info(f"packet: {pack}")
 
-        LOGGER.info(f"len(self.__sent_packets), before: {len(self.__sent_packets)}")
+        # LOGGER.info(f"len(self.__sent_packets), before: {len(self.__sent_packets)}")
 
         """ Check for acknowledgments and remove acked packets from sent_packets"""
         self.__sent_packets = [
@@ -234,7 +235,7 @@ class Sender:
             if packet.seq_num not in self.__acks
         ]
 
-        LOGGER.info(f"len(self.__sent_packets), after: {len(self.__sent_packets)}")
+        # LOGGER.info(f"len(self.__sent_packets), after: {len(self.__sent_packets)}")
 
         """ Find packets which ttl is expired """
         expired_packets = [
@@ -248,8 +249,13 @@ class Sender:
             packet = Packet.packet_to_bytes(packet)
             self.__send_func(packet, self.__client)
 
+        # if expired_packets:
+        #     LOGGER.info(
+        #         f"{expired_packets[0].seq_num}, {expired_packets[-1].seq_num} - packets were resent"
+        #     )
+
         """ Send rest of data """
-        count = len(self.__sent_packets) - len(expired_packets)
+        count = len(self.__sent_packets) + len(expired_packets)
         self._send_restof_data(count)
 
         self.__acks.clear()
