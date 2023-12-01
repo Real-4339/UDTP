@@ -19,9 +19,9 @@ with number of packets: 333
 INFO:Receiver:File name: package-lock_1701393635.json
 INFO:Receiver:File size: 488844 bytes
 
-INFO:Receiver:File transfer is finished from ... in 78.43824076652527 seconds,with number of packets: 92485
-INFO:Receiver:File name: 
-INFO:Receiver:File size: 
+INFO:Receiver:File transfer is finished from ... in 52.401453495025635 seconds,with number of packets: 92485
+INFO:Receiver:File name: forticlient_vpn_7.0.7.0246_amd64.deb
+INFO:Receiver:File size: 135,8 MB (135766978 bytes)
 
 only one packet:
 INFO:Receiver:File transfer is finished from AddressInfo(ip=10.0.2.15, port=50000) in 0.03718209266662598 seconds
