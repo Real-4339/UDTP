@@ -33,9 +33,7 @@
    I ignore spoofed packets, but only based on ip, mb should check for both.  
    Windows: Idk, need to check wireshark.
 
-4. Terminal: Proper input validation (new message, min), remove raise errors
-
-5. WM
+5. WM - not done.
 
 6. IP header 60 bytes, have to check and mb dynamicly change MTU.
 
@@ -47,3 +45,4 @@
 - Free update
 - error simulation, only packet corruption
 - Seems packets are send one by one, not in range
+- Terminal: Proper input validation
