@@ -41,7 +41,8 @@ class Receiver:
         self.__own_transfer_flag = transfer_flag
 
         self.__acks: set[int] = set()
-        self.__packets: list[Packet] = []
+        # self.__packets: list[Packet] = []
+        self.__packets: set[Packet] = set()
 
         self.__alive = Status.ALIVE
         self.__last_time = time.time()
@@ -73,7 +74,7 @@ class Receiver:
     def client(self) -> AddressInfo:
         return self.__client
 
-    def get_packets(self) -> list[Packet]:
+    def get_packets(self) -> set[Packet]:  # list[Packet]:
         """Get packets"""
 
         return self.__packets
@@ -113,13 +114,14 @@ class Receiver:
             self.__seq_num += 1
 
             self.__acks.add(packet.seq_num)
-            self.__packets.append(packet)
+            self.__packets.add(packet)
+            # self.__packets.append(packet)
 
             self.__last_time = time.time()
 
         else:
             """Resend ack"""
-            LOGGER.info(f"Resending ACK to {self.__client} : {packet.seq_num}")
+            # LOGGER.info(f"Resending ACK to {self.__client} : {packet.seq_num}")
             ack = Packet.construct(
                 data=f"{self.own_transfer_flag}".encode(),
                 flags=Flags.ACK,
@@ -162,19 +164,17 @@ class Receiver:
         """Process FIN"""
 
         self.__alive = Status.DEAD
-
         self.__ended = time.time()
 
         LOGGER.info(
-            f"File transfer is finished from {self.__client} in {self.__ended - self.__started} seconds"
+            f"File transfer is finished from {self.__client} in {self.__ended - self.__started} seconds,"
+            f"with number of packets: {len(self.__packets)}"
         )
 
         """ Send FIN """
         self.__send_func(
             Packet.construct(
-                data=f"{self.own_transfer_flag}".encode(),
-                flags=Flags.FIN,
-                seq_num=self.__packets[-1].seq_num,
+                data=f"{self.own_transfer_flag}".encode(), flags=Flags.FIN, seq_num=3
             ),
             self.__client,
         )
@@ -213,7 +213,7 @@ class Receiver:
             # LOGGER.info(f"No data to acknowledge")
             return
 
-        LOGGER.debug(f"I got {len(self.__acks)} packets to acknowledge")
+        # LOGGER.debug(f"I got {len(self.__acks)} packets to acknowledge")
 
         for seq_num in self.__acks:
             # LOGGER.info(f"Sending ACK to {self.__client} : {seq_num}")
