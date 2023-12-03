@@ -209,6 +209,7 @@ class ConnectionWith:
         if not can_i_do_smth() and self.__connected:
             if not self.time_is_valid():
                 self.__alive = Status.DEAD
+                LOGGER.warning(f"Connection with {self.__owner} is dead")
                 return False
 
             """Resend (syn | sack) - Keep alive"""
