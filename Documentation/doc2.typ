@@ -52,8 +52,6 @@
   indent: 10pt
 )
 
-\ \ \
-
 = UDTP \(UDP Reliable Transfer Protocol)
 <udtp-udp-reliable-transfer-protocol>
 
