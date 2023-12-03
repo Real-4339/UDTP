@@ -1,9 +1,11 @@
+#import "@preview/bytefield:0.0.3": *
+
 #image("images/image.png", width: 32%)
 
 #align(
   center,
   emph(text(
-  top-edge: 4.9em,
+  top-edge: 5em,
   size: 2.5em,
   blue,
 )[UDP Relialbe Transfer Protocol])
@@ -41,52 +43,14 @@
 )[Practioner - Ing. Lukáš Mastiľak])
 )
 
+#set page(numbering: "1")
+
 
 #pagebreak()
 
-= Table of Contents
-<table-of-contents>
-- #link(<udtp-udp-reliable-transfer-protocol>)[UDTP \(UDP Reliable Transfer Protocol)]
-- #link(<udp>)[UDP]
-  - #link(<why-udp-but-not-tcp>)[Why UDP, but not TCP?]
-  - #link(<udp-header>)[UDP Header]
-- #link(<general-information>)[General Information]
-  - #link(<implementation-enviroment-and-basic-tech-implementation-information>)[Implementation enviroment and basic tech-implementation information]
-  - #link(<specification>)[Specification]
-    - #link(<ip-and-ports>)[IP and ports]
-- #link(<protocol>)[Protocol]
-  - #link(<header-structure>)[Header Structure]
-  - #link(<header-specification>)[Header specification]
-    - #link(<flags>)[Flags]
-      - #link(<notes>)[Notes]
-    - #link(<checksum>)[Checksum]
-      - #link(<example--crc-16-error-probability-analysis>)[Example: CRC-16 Error Probability Analysis]
-      - #link(<udp-checksum>)[UDP Checksum]
-      - #link(<combined-error-probability-analysis>)[Combined Error Probability Analysis]
-  - #link(<features>)[Features]
-    - #link(<flow-control-tcp>)[Flow Control \(TCP)]
-    - #link(<flow-control-in-udtp-protocol-selective-repeat>)[Flow Control in UDTP Protocol \(Selective Repeat)]
-- #link(<protocol-rules-and-conventions>)[Protocol rules and conventions]
-  - #link(<connection-establishment>)[Connection Establishment]
-  - #link(<keep-alive>)[Keep Alive]
-  - #link(<connection-termination>)[Connection Termination]
-- #link(<the-application>)[The application]
-  - #link(<not-important>)[Not Important]
-    - #link(<changing-of-max-frame-size>)[Changing of max frame size]
-    - #link(<error-simulation>)[Error simulation]
-  - #link(<specification-1>)[Specification]
-    - #link(<commands>)[Commands]
-  - #link(<core-idea>)[Core Idea]
-  - #link(<core-implementation>)[Core Implementation]
-  - #link(<core-events-overview>)[Core Events Overview]
-    - #link(<host---high-level>)[Host - High Level]
-    - #link(<connection---medium-level>)[Connection - Medium Level]
-    - #link(<transfer---low-level>)[Transfer - Low Level]
-  - #link(<balance>)[Balance]
-  - #link(<v4>)[V4]
-  - #link(<packet-distribution-diagrams>)[Packet distribution diagrams]
-  - #link(<data-transfer>)[Data Transfer]
-  - #link(<important>)[Important]
+#outline(
+  indent: 10pt
+)
 
 \ \ \
 
@@ -229,27 +193,20 @@ Ports are taken randomly, but they are taken from a range of
 <header-structure>
 My UDTP protocols header looks like so:
 
-```
----------------------------------------------------------------
-| Flags (1 byte) | CRC16 (2 bytes) | Sequence Number (1 byte) |
----------------------------------------------------------------
-|                          Payload                            |
----------------------------------------------------------------
-```
+#bytefield(
+  bytes(1)[Flags], bytes(2)[CRC16], bytes(1)[Seq Num],
+  bytes(4)[Payload],
+)
 
 And full with UDP header:
 
-```
-------------------------------------------------------
-| Source Port (2 bytes) | Destination Port (2 bytes) |
-------------------------------------------------------
-|    Length (2 bytes)   |     Checksum (2 bytes)     |
-------------------------------------------------------
-| Flags (1 byte) | CRC16 (2 bytes) | Seq Num (1 byte)|
-------------------------------------------------------
-|                      Payload                       |
-------------------------------------------------------
-```
+#bytefield(
+  bytes(2)[Source Port], bytes(2)[Destination Port],
+  bytes(2)[UDP Length], bytes(2)[Checksum],
+  bytes(1)[Flags], bytes(2)[CRC16], bytes(1)[Seq Num],
+  bytes(4)[Payload],
+
+)
 
 UDP header is 8 bytes, and UDTP header is 4 bytes, so in a result, my
 protocol header is 12 bytes. If IP header is 20 bytes, then max payload
@@ -1007,3 +964,91 @@ it is enough for my protocol, so if seq. reaches number 255, it flip to 0.
 Lots of things affect how data gets sent. When it's time to resend some data packets, the ones waiting to be sent again get first dibs. Basically, the ones needing a redo get top priority and hold the front spot until they get the green light. This priority thing also applies to the next set of packets.
 
 The important part here is making sure we acknowledge the packets from the previous set when we finish with the first gap (0-255). If there are any leftover packets from before, it's crucial to give them a thumbs up before moving on to the next batch.
+
+= Draft vs Final documents
+
+I have not implemented WM flag and dynamic adjustment to the ip protocol size. 
+
+= Tests
+
+All tests were done on Virtual Machine, with Linux, Debian like.  
+
+Host: VirtualBox 1.2 \
+CPU: AMD Ryzen 7 5800HS with Radeon G
+
+#line(length: 100%)
+Peer: A
+```bash
+
+Available IPs: ['127.0.0.1', '10.0.2.15', '172.17.0.1', '127.0.0.1']
+IP >>> 10.0.2.15
+Port range: 49152 - 65535
+Port >>> 50000
+Successfully binded , so ip and port are available
+DEBUG:Host:Host registered on 10.0.2.15:50000
+Try 'help' >>> connect 127.0.0.1:60000
+Starting connection to 127.0.0.1:60000
+Try 'help' >>> INFO:Connection:Connected to AddressInfo(ip=127.0.0.1, port=60000)
+send_m 127.0.0.1:60000 Hi, mario
+Sending message to 127.0.0.1:60000
+INFO:Sender:len(self.__all_packets): 1
+Try 'help' >>> INFO:Sender:Starting sending data to AddressInfo(ip=127.0.0.1, port=60000)
+INFO:Sender:sending fin, seq: 1
+INFO:Sender:File transfer is finished from AddressInfo(ip=127.0.0.1, port=60000)
+exit
+INFO:Host:Disconnected from all hosts
+Stopping host
+
+```
+
+Peer: B
+
+```bash
+Available IPs: ['127.0.0.1', '10.0.2.15', '172.17.0.1', '127.0.0.1']
+IP >>> 127.0.0.1
+Port range: 49152 - 65535
+Port >>> 60000
+Successfully binded , so ip and port are available
+DEBUG:Host:Host registered on 127.0.0.1:60000
+Try 'help' >>> INFO:Connection:Connected to AddressInfo(ip=10.0.2.15, port=50000)
+INFO:Receiver:Sending SACK to AddressInfo(ip=10.0.2.15, port=50000)
+INFO:Receiver:File transfer is finished from AddressInfo(ip=10.0.2.15, port=50000) in 0.5495731830596924 seconds,with number of packets: 1
+INFO:Receiver:Received message from AddressInfo(ip=10.0.2.15, port=50000) : Hi, mario
+INFO:Connection:Disconnected from AddressInfo(ip=10.0.2.15, port=50000)
+exit
+INFO:Host:Disconnected from all hosts
+Stopping host
+  
+```
+
+And in the back, we can check wireshark:
+
+#figure([#image("images/wireshark.png")],
+  caption: [
+    Wireshark
+  ]
+)
+
+And also solo tests:
+
+```bash
+
+INFO:Receiver:File transfer is finished from AddressInfo(ip=10.0.2.15, port=50000) in 0.4596529006958008 seconds
+INFO:Receiver:File name: main_1701385537
+INFO:Receiver:File size: 55784 bytes (54,9 KB)
+
+INFO:Receiver:File transfer is finished from AddressInfo(ip=10.0.2.15, port=50000) in 1.2467424869537354 seconds,
+with number of packets: 333
+INFO:Receiver:File name: package-lock_1701393635.json
+INFO:Receiver:File size: 488844 bytes (487,7 KB)
+
+INFO:Receiver:File transfer is finished from AddressInfo(ip=10.0.2.15, port=50000) in 2.17768268585205 seconds,
+with number of packets: 2804
+INFO:Receiver:File name: tk8.5.19-src.tar.gz_1701386678
+INFO:Receiver:File size: 4116272 bytes (4.1 MB)
+
+INFO:Receiver:File transfer is finished from ... in 52.401453495025635 seconds,with number of packets: 92485
+INFO:Receiver:File name: forticlient_vpn_7.0.7.0246_amd64.deb
+INFO:Receiver:File size: 135,8 MB (135766978 bytes)
+
+```
