@@ -340,6 +340,8 @@ may effectively identify robust errors, potentially leading to a lower
 percentage of undetected errors than the theoretical estimation
 suggests.
 
+\ \
+
 #align(center)[#table(
   columns: 3,
   align: (col, row) => (center,center,center,).at(col),
@@ -359,8 +361,6 @@ suggests.
   [5.4 x 10^-20],
 )
 ]
-
-#pagebreak()
 
 ==== UDP Checksum
 <udp-checksum>
@@ -436,7 +436,9 @@ mechanisms in network protocols.
 
 And at the end, all that calculations were done without taking into an account Ethernet CRC, which is CRC-32.
 
-#pagebreak()
+#line(
+  length: 100%,
+)
 
 == Features
 <features>
@@ -500,7 +502,9 @@ control:
     - In this scenario, the total number of packets transmitted remains at or below the receiver's window size (10 packets). This is due to the efficiency gained by retransmitting only the necessary packets, leaving room for new data.
 ```
 
-#pagebreak()
+#line(
+  length: 100%,
+)
 
 == Flow Control in UDTP Protocol \(Selective Repeat):
 <flow-control-in-udtp-protocol-selective-repeat>
@@ -1052,3 +1056,16 @@ INFO:Receiver:File name: forticlient_vpn_7.0.7.0246_amd64.deb
 INFO:Receiver:File size: 135,8 MB (135766978 bytes)
 
 ```
+
+\
+
+= Sources
+
+- #link("https://typst.app/docs")[typst docs]
+
+- #link("https://github.com/jomaway/typst-bytefield")[jomaway/typst-bytefield]
+
+- #link("https://nodejs.org/en/learn/getting-started/the-v8-javascript-engine")[The V8 JavaScript Engine]
+
+- #link("https://www.youtube.com/watch?v=1BfCnjr_Vjg")[How to Make a
+  Network Scanner in Python]
