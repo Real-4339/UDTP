@@ -41,7 +41,6 @@ class Receiver:
         self.__own_transfer_flag = transfer_flag
 
         self.__acks: set[int] = set()
-        # self.__packets: list[Packet] = []
         self.__packets: set[Packet] = set()
 
         self.__alive = Status.ALIVE
