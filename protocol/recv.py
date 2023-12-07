@@ -42,6 +42,8 @@ class Receiver:
 
         self.__acks: set[int] = set()
         self.__packets: set[Packet] = set()
+        self.__size_of_all_data = 0
+        self.__size_of_all_headers = 0
 
         self.__alive = Status.ALIVE
         self.__last_time = time.time()
@@ -94,6 +96,9 @@ class Receiver:
     def receive(self, packet: Packet) -> None:
         """Receive FILE, MSG, FIN"""
 
+        self.__size_of_all_data += len(packet.data) + 4
+        self.__size_of_all_headers += 4
+
         if packet.flags == Flags.FILE:
             self._process_file(packet)
 
@@ -107,6 +112,9 @@ class Receiver:
 
     def receive_data(self, packet: Packet) -> None:
         """Receive data"""
+
+        self.__size_of_all_data += len(packet.data) + 4
+        self.__size_of_all_headers += 4
 
         if packet not in self.__packets:
             self.__seq_num += 1
@@ -123,6 +131,8 @@ class Receiver:
                 seq_num=packet.seq_num,
             )
             self.__send_func(ack, self.__client)
+            self.__size_of_all_headers += 4
+            self.__size_of_all_data += len(ack)
 
     def _send_sack(self) -> None:
         """Send SACK"""
@@ -135,7 +145,8 @@ class Receiver:
             ),
             self.__client,
         )
-
+        self.__size_of_all_headers += 4
+        self.__size_of_all_data += len(str(self.own_transfer_flag).encode()) + 4
         self.__started = time.time()
 
     def _process_file(self, packet: Packet) -> None:
@@ -173,6 +184,15 @@ class Receiver:
             ),
             self.__client,
         )
+
+        self.__size_of_all_headers += 4
+        self.__size_of_all_data += len(str(self.own_transfer_flag).encode()) + 4
+
+        LOGGER.info(
+            f"In percentage: {(self.__size_of_all_headers / self.__size_of_all_data) * 100}",
+        )
+
+        LOGGER.info(f"{self.__size_of_all_data}, {self.__size_of_all_headers}")
 
         if self.name is not None and self.ext is not None:
             """Create file from packets and save it"""
@@ -214,6 +234,8 @@ class Receiver:
                 seq_num=seq_num,
             )
             self.__send_func(ack, self.__client)
+            self.__size_of_all_headers += 4
+            self.__size_of_all_data += len(str(self.own_transfer_flag).encode())
 
         self.__acks.clear()
 
