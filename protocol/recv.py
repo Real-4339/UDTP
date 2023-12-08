@@ -95,6 +95,8 @@ class Receiver:
     def receive(self, packet: Packet) -> None:
         """Receive FILE, MSG, FIN"""
 
+        self.__last_time = time.time()
+
         if packet.flags == Flags.FILE:
             self._process_file(packet)
 
@@ -109,6 +111,8 @@ class Receiver:
     def receive_data(self, packet: Packet) -> None:
         """Receive data"""
 
+        self.__last_time = time.time()
+
         if packet not in self.__packets:
             # LOGGER.info(f"Received data from {self.__client} : {packet.seq_num}")
             self.__seq_num += 1
@@ -116,8 +120,6 @@ class Receiver:
             self.__acks.add(packet.seq_num)
             self.__packets.add(packet)
             # self.__packets.append(packet)
-
-            self.__last_time = time.time()
 
         else:
             """Resend ack"""
