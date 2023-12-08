@@ -206,16 +206,28 @@ class ConnectionWith:
                 self.__last_time = time.time()
                 return True
 
+        if self.__resend_keep and time.time() - self.__resend_time > Time.RESEND - 1:
+            """Resend (syn | sack) - Keep alive"""
+            sack = Packet.construct(data=b"", flags=(Flags.SYN | Flags.SACK), seq_num=2)
+            LOGGER.info(f"Answer on keep alive to {self.__owner}")
+            self.__send_func(sack, self.__owner)
+            self.__last_time = time.time()
+            self.__resend_time = time.time()
+            self.__resend_keep = False
+
+            return True
+
         if not can_i_do_smth() and self.__connected:
             if not self.time_is_valid():
                 self.__alive = Status.DEAD
-                LOGGER.warning(f"Connection with {self.__owner} is dead")
+                LOGGER.warning(f"Connection with {self.__owner} is dead, keep-alive")
                 return False
 
             """Resend (syn | sack) - Keep alive"""
             sack = Packet.construct(data=b"", flags=(Flags.SYN | Flags.SACK), seq_num=2)
+            LOGGER.info(f"Resending keep alive to {self.__owner}")
             self.__send_func(sack, self.__owner)
-            self.__last_time = time.time()
+            self.__resend_keep = False
             self.__resend_time = time.time()
 
         return True
