@@ -23,6 +23,7 @@ class ConnectionWith:
 
         self.__alive = Status.ALIVE
         self.__connecting = False
+        self.__resend_keep = True
         self.__connected = False
         self.__owner = addr
 
@@ -462,6 +463,7 @@ class ConnectionWith:
         if self.connected:
             """Keep alive"""
             self.__last_time = time.time()
+            self.__resend_keep = True
             return
 
         """ Approved connection """
