@@ -212,6 +212,8 @@ class Sender:
             self.__alive = Status.DEAD
             return Status.FINISHED
 
+        LOGGER.info(f"Got acks: {self.__acks}")
+
         """ Check for acknowledgments and remove acked packets from sent_packets"""
         self.__sent_packets = [
             packet
