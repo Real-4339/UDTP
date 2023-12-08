@@ -216,8 +216,8 @@ class ConnectionWith:
                 return False
 
             """Resend (syn | sack) - Keep alive"""
-            # sack = Packet.construct(data=b"", flags=(Flags.SYN | Flags.SACK), seq_num=2)
-            # self.__send_func(sack, self.__owner)
+            sack = Packet.construct(data=b"", flags=(Flags.SYN | Flags.SACK), seq_num=2)
+            self.__send_func(sack, self.__owner)
             self.__last_time = time.time()
             self.__resend_time = time.time()
 
@@ -459,7 +459,7 @@ class ConnectionWith:
         if self.connected:
             """Keep alive"""
             self.__last_time = time.time()
-            LOGGER.info(f"Got keep alive from {self.__owner}")
+            # LOGGER.info(f"Got keep alive from {self.__owner}")
             return
 
         """ Approved connection """
