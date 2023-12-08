@@ -152,34 +152,34 @@ class Host:
 
         breaker = Size.PPT
 
-        while breaker > 0:
-            for key, _ in self.__selector.select(timeout=0.01):  # BUG: timeout=0
-                data, addr = self.__socket.recvfrom(1472)
+        # while breaker > 0:
+        for key, _ in self.__selector.select(timeout=0.01):  # BUG: timeout=0
+            data, addr = self.__socket.recvfrom(1472)
 
-                """ Ignore spoofed packets """
-                if addr[0] == self.__me.ip:
-                    continue
+            """ Ignore spoofed packets """
+            if addr[0] == self.__me.ip:
+                continue
 
-                """ Check if connection already exists """
+            """ Check if connection already exists """
 
-                connected_with = self.get_connection(AddressInfo(*addr))
+            connected_with = self.get_connection(AddressInfo(*addr))
 
-                if connected_with is None:
-                    # LOGGER.info(f"New connection with {addr}")
-                    connected_with = ConnectionWith(
-                        AddressInfo(*addr), self._send, self.fragment_size
-                    )
+            if connected_with is None:
+                # LOGGER.info(f"New connection with {addr}")
+                connected_with = ConnectionWith(
+                    AddressInfo(*addr), self._send, self.fragment_size
+                )
 
-                    with self.__connections_lock:
-                        self.__connections.append(connected_with)
+                with self.__connections_lock:
+                    self.__connections.append(connected_with)
 
-                    connected_with._add_iterator = self._add_iterator
+                connected_with._add_iterator = self._add_iterator
 
-                    self._add_iterator(connected_with._iterator)
+                self._add_iterator(connected_with._iterator)
 
-                connected_with.vadilate_packet(data)
+            connected_with.vadilate_packet(data)
 
-            breaker -= 1
+            # breaker -= 1
 
         return Status.SLEEPING
 

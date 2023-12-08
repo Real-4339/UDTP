@@ -195,18 +195,20 @@ class Sender:
         if self.__all_packets == [] and self.__sent_packets == []:
             """Send FIN"""
             LOGGER.info(f"sending fin, seq: {self.__seq_num}")
+            fin = Packet.construct(
+                data=f"{self.own_transfer_flag}".encode(),
+                flags=Flags.FIN,
+                seq_num=self.__seq_num,
+            )
             self.__send_func(
-                Packet.construct(
-                    data=f"{self.own_transfer_flag}".encode(),
-                    flags=Flags.FIN,
-                    seq_num=self.__seq_num,
-                ),
+                fin,
                 self.__client,
             )
-            self.extended -= 1
+            # self.extended -= 1
             self.__seq_num += 1
-            if self.extended == 0:
-                self.__alive = Status.DEAD
+            self.__sent_packets.append(fin)
+            # if self.extended == 0:
+            #     self.__alive = Status.DEAD
 
     def _iterator(self):
         """Handle packets"""
