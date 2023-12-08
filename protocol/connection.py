@@ -210,7 +210,7 @@ class ConnectionWith:
         if self.__resend_keep and time.time() - self.__resend_time > Time.RESEND - 1:
             """Resend (syn | sack) - Keep alive"""
             sack = Packet.construct(data=b"", flags=(Flags.SYN | Flags.SACK), seq_num=2)
-            LOGGER.info(f"Answer on keep alive to {self.__owner}")
+            # LOGGER.info(f"Answer on keep alive to {self.__owner}")
             self.__send_func(sack, self.__owner)
             self.__last_time = time.time()
             self.__resend_time = time.time()
@@ -226,7 +226,7 @@ class ConnectionWith:
 
             """Resend (syn | sack) - Keep alive"""
             sack = Packet.construct(data=b"", flags=(Flags.SYN | Flags.SACK), seq_num=2)
-            LOGGER.info(f"Resending keep alive to {self.__owner}")
+            # LOGGER.info(f"Resending keep alive to {self.__owner}")
             self.__send_func(sack, self.__owner)
             self.__resend_keep = False
             self.__resend_time = time.time()
