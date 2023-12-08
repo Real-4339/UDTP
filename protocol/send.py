@@ -195,13 +195,17 @@ class Sender:
         if self.__all_packets == [] and self.__sent_packets == []:
             """Send FIN"""
             LOGGER.info(f"sending fin, seq: {self.__seq_num}")
-            fin = Packet.construct(
-                data=f"{self.own_transfer_flag}".encode(),
+            fin = Packet.construct_packet(
+                data=self.own_transfer_flag,
                 flags=Flags.FIN,
                 seq_num=self.__seq_num,
             )
             self.__send_func(
-                fin,
+                Packet.construct(
+                    data=f"{self.own_transfer_flag}".encode(),
+                    flags=Flags.FIN,
+                    seq_num=self.__seq_num,
+                ),
                 self.__client,
             )
             # self.extended -= 1

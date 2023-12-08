@@ -230,6 +230,7 @@ class Receiver:
         """Iterate over packets"""
 
         if self.__alive == Status.DEAD or not self.time_is_valid():
+            LOGGER.info(f"Receiver is dead - keep alive")
             self.__alive = Status.DEAD
             return Status.FINISHED
 
